@@ -1,7 +1,5 @@
 package com.artcom.y60.http;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
@@ -53,7 +51,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Logger.v(LOG_TAG, "enough waiting, let's get to work");
 
         TestListener listener = new TestListener();
-        URI uri = TestUriHelper.createUri();
+        Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
         helper.get(uri);
 
@@ -79,12 +77,11 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertTrue("content doesn't match", Arrays.equals(fromService, fromHttp));
     }
 
-    public void testRemovingResourceFromCache() throws URISyntaxException, TimeoutException,
-            InterruptedException {
+    public void testRemovingResourceFromCache() throws Exception {
 
         initializeActivity();
         HttpProxyHelper helper = createHelper();
-        URI uri = TestUriHelper.createUri();
+        Uri uri = TestUriHelper.createUri();
 
         TestListener listener = new TestListener();
         helper.addResourceChangeListener(uri, listener);
@@ -112,12 +109,11 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     }
 
-    public void testResourceNotAvailableInCache() throws URISyntaxException, TimeoutException,
-            InterruptedException {
+    public void testResourceNotAvailableInCache() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         TestListener listener = new TestListener();
-        URI uri = TestUriHelper.createUri();
+        Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
 
         byte[] data = helper.get(uri);
@@ -130,13 +126,12 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNotNull(data);
     }
 
-    public void testResourceIsAvailableInCache() throws URISyntaxException, TimeoutException,
-            InterruptedException {
+    public void testResourceIsAvailableInCache() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
 
         TestListener listener = new TestListener();
-        URI uri = TestUriHelper.createUri();
+        Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
 
         byte[] data = helper.get(uri);
@@ -211,7 +206,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         private boolean mWasResourceChangedCalled = false;
         private boolean mWasResourceAvailableCalled = false;
         
-        public void onResourceChanged(URI resourceUri) {
+        public void onResourceChanged(Uri resourceUri) {
 
             mWasResourceChangedCalled = true;
         }
