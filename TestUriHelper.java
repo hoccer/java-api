@@ -1,7 +1,8 @@
 package com.artcom.y60.http;
 
-import java.net.URI;
 import java.net.URISyntaxException;
+
+import android.net.Uri;
 
 public class TestUriHelper {
     
@@ -13,9 +14,9 @@ public class TestUriHelper {
     
     // Static Methods ----------------------------------------------------
 
-    public static URI createUri() throws URISyntaxException {
+    public static Uri createUri() throws URISyntaxException {
         
-        return new URI(BASE_URI+"?timestamp="+System.currentTimeMillis());
+        return Uri.parse(BASE_URI+"?timestamp="+System.currentTimeMillis());
     }
 
 }
