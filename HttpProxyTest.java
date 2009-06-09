@@ -10,6 +10,7 @@ import android.test.ActivityUnitTestCase;
 import com.artcom.y60.BindingListener;
 import com.artcom.y60.HTTPHelper;
 import com.artcom.y60.Logger;
+import com.artcom.y60.TestHelper;
 
 /**
  * Blackbox service testing through HttpProxyHelper (aidl and
@@ -46,28 +47,33 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     public void testResourceIsAsynchronouslyUpdated() throws Exception {
 
         initializeActivity();
-        HttpProxyHelper helper = createHelper();
+        final HttpProxyHelper helper = createHelper();
 
         Logger.v(LOG_TAG, "enough waiting, let's get to work");
 
         TestListener listener = new TestListener();
-        Uri uri = TestUriHelper.createUri();
+        final Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
         helper.get(uri);
 
         long start = System.currentTimeMillis();
-        while (!listener.wasResourceChangeCalled() && System.currentTimeMillis() - start < 2000) {
+        TestHelper.blockUntilTrue("proxy should return the object", 4000,
+                new TestHelper.Condition() {
 
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException ix) {
-                //
-            }
+                    @Override
+                    public boolean isSatisfied() {
+                        return (helper.get(uri) != null);
+                    }
+
+                });
+        while (helper.get(uri) == null) {
+            Thread.sleep(50);
         }
 
         Logger.v(LOG_TAG, "now let's check results");
 
-        assertTrue("update wasn't called", listener.wasResourceChangeCalled());
+        assertTrue("update should have been called", listener.wasResourceChangeCalled());
+        assertNotNull("get should return an object", helper.get(uri));
         // HttpProxyService.logCache();
 
         byte[] fromService = helper.fetchFromCache(uri);
@@ -205,7 +211,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         private boolean mWasResourceChangedCalled = false;
         private boolean mWasResourceAvailableCalled = false;
-        
+
         public void onResourceChanged(Uri resourceUri) {
 
             mWasResourceChangedCalled = true;
