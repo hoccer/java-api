@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.test.ActivityUnitTestCase;
 
 import com.artcom.y60.BindingListener;
-import com.artcom.y60.HTTPHelper;
+import com.artcom.y60.HttpHelper;
 import com.artcom.y60.Logger;
 
 /**
@@ -73,7 +73,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         byte[] fromService = helper.fetchFromCache(uri);
         assertNotNull("content from cache was null", fromService);
 
-        byte[] fromHttp = HTTPHelper.getAsByteArray(Uri.parse(uri.toString()));
+        byte[] fromHttp = HttpHelper.getAsByteArray(Uri.parse(uri.toString()));
         assertTrue("content doesn't match", Arrays.equals(fromService, fromHttp));
     }
 
