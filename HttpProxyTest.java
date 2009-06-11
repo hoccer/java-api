@@ -24,7 +24,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     // Instance Variables ------------------------------------------------
 
-    private Intent mStartIntent;
+    private Intent             mStartIntent;
 
     // Constructors ------------------------------------------------------
 
@@ -66,9 +66,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
                     }
 
                 });
-        while (helper.get(uri) == null) {
-            Thread.sleep(50);
-        }
 
         Logger.v(LOG_TAG, "now let's check results");
 
@@ -209,7 +206,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     class TestListener implements ResourceListener {
 
-        private boolean mWasResourceChangedCalled = false;
+        private boolean mWasResourceChangedCalled   = false;
         private boolean mWasResourceAvailableCalled = false;
 
         public void onResourceChanged(Uri resourceUri) {
