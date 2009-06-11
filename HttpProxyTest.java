@@ -51,12 +51,11 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         Logger.v(LOG_TAG, "enough waiting, let's get to work");
 
-        TestListener listener = new TestListener();
+        final TestListener listener = new TestListener();
         final Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
         helper.get(uri);
 
-        long start = System.currentTimeMillis();
         TestHelper.blockUntilTrue("proxy should return the object", 4000,
                 new TestHelper.Condition() {
 
@@ -66,6 +65,15 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
                     }
 
                 });
+
+        TestHelper.blockUntilTrue("proxy call the listener", 1000, new TestHelper.Condition() {
+
+            @Override
+            public boolean isSatisfied() {
+                return listener.wasResourceChangeCalled();
+            }
+
+        });
 
         Logger.v(LOG_TAG, "now let's check results");
 
