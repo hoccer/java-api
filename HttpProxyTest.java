@@ -6,6 +6,7 @@ import java.util.concurrent.TimeoutException;
 import android.content.Intent;
 import android.net.Uri;
 import android.test.ActivityUnitTestCase;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.artcom.y60.BindingListener;
 import com.artcom.y60.HttpHelper;
@@ -162,6 +163,39 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNotNull(data);
     }
 
+    // the next four test can only be tested if the constructor lines that
+    // create HashMap and LinkedList in Cache.java are commented out
+    @Suppress
+    public void testGetException() {
+        initializeActivity();
+        HttpProxyHelper helper = createHelper();
+        helper.get(Uri.parse("http://bla"));
+    }
+
+    @Suppress
+    public void testRemoveException() {
+        initializeActivity();
+        HttpProxyHelper helper = createHelper();
+        helper.removeFromCache(Uri.parse("http://bla"));
+
+    }
+
+    @Suppress
+    public void testFetchInCacheException() {
+        initializeActivity();
+        HttpProxyHelper helper = createHelper();
+        helper.fetchFromCache(Uri.parse("http://bla"));
+
+    }
+
+    @Suppress
+    public void testIsInCacheException() {
+        initializeActivity();
+        HttpProxyHelper helper = createHelper();
+        helper.isInCache(Uri.parse("http://bla"));
+
+    }
+
     // Protected Instance Methods ----------------------------------------
 
     protected void setUp() throws Exception {
@@ -191,15 +225,17 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     private HttpProxyHelper createHelper() {
 
-        HttpProxyHelper helper = new HttpProxyHelper(getActivity(), new DummyListener());
+        final DummyListener lsner = new DummyListener();
+        HttpProxyHelper helper = new HttpProxyHelper(getActivity(), lsner);
 
-        for (int i = 0; i < 200; i++) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ix) {
-                Logger.v(LOG_TAG, "INTERRUPT!!1!");
+        TestHelper.blockUntilTrue("HTTP helper not bound", 5000, new TestHelper.Condition() {
+
+            @Override
+            public boolean isSatisfied() {
+                return lsner.isBound();
             }
-        }
+
+        });
 
         return helper;
     }
@@ -244,10 +280,19 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     }
 
     class DummyListener implements BindingListener<HttpProxyHelper> {
+        private boolean mBound = false;
+
         public void bound(HttpProxyHelper helper) {
+            mBound = true;
         }
 
         public void unbound(HttpProxyHelper helper) {
+            mBound = false;
+        }
+
+        public boolean isBound() {
+
+            return mBound;
         }
     }
 }
