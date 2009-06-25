@@ -10,7 +10,7 @@ public interface HttpProxyConstants {
 
     public static final String SIZE_TAG = "resourceSize";
 
-    public static final String BYTE_ARRY_TAG = "resourceByteArray";
+    public static final String BYTE_ARRAY_TAG = "resourceByteArray";
 
     public static final int MAX_IN_MEMORY_SIZE = 100000;
 }
