@@ -55,7 +55,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         final TestListener listener = new TestListener();
         final Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
-        helper.get(uri);
+        helper.requestDownload(uri);
 
         TestHelper.blockUntilTrue("proxy should return the object", 4000,
                 new TestHelper.Condition() {
@@ -119,6 +119,28 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         data = helper.get(uri);
         assertNull("content should be null after removing form cache", data);
 
+    }
+
+    public void testRequestingDownload() throws Exception {
+
+        initializeActivity();
+        final HttpProxyHelper helper = createHelper();
+        final Uri uri = TestUriHelper.createUri();
+
+        TestListener listener = new TestListener();
+        helper.addResourceChangeListener(uri, listener);
+        assertFalse(helper.isInCache(uri));
+
+        helper.requestDownload(uri);
+        assertFalse(helper.isInCache(uri));
+
+        TestHelper.blockUntilTrue("cache should load uri into cache", 2000,
+                new TestHelper.Condition() {
+                    @Override
+                    public boolean isSatisfied() {
+                        return helper.isInCache(uri);
+                    }
+                });
     }
 
     public void testResourceNotAvailableInCache() throws Exception {
