@@ -1,13 +1,17 @@
 package com.artcom.y60.http;
 
+import java.io.IOException;
+
 import org.apache.http.HttpResponse;
+
+import com.artcom.y60.HttpHelper;
 
 public abstract class HttpException extends Exception {
 
     // Static Methods ----------------------------------------------------
 
     public static void throwIfError(HttpResponse pResponse) throws HttpServerException,
-                    HttpClientException {
+                    HttpClientException, IOException {
 
         int status = pResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
@@ -29,13 +33,15 @@ public abstract class HttpException extends Exception {
 
     public HttpException(int pStatusCode) {
 
-        super("HTTP failed with status code " + pStatusCode);
+        super("HTTP failed with status code " + pStatusCode + " (response is not available).");
         mStatusCode = pStatusCode;
     }
 
-    public HttpException(HttpResponse pResponse) {
+    public HttpException(HttpResponse pResponse) throws IOException {
 
-        super("HTTP failed with status code " + pResponse.getStatusLine().getStatusCode());
+        super("HTTP failed with status code " + pResponse.getStatusLine().getStatusCode()
+                        + " -- response is: \n"
+                        + HttpHelper.extractBodyAsString(pResponse.getEntity()));
         mStatusCode = pResponse.getStatusLine().getStatusCode();
         mResponse = pResponse;
     }
