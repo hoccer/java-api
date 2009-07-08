@@ -39,9 +39,11 @@ public abstract class HttpException extends Exception {
 
     public HttpException(HttpResponse pResponse) throws IOException {
 
-        super("HTTP failed with status code " + pResponse.getStatusLine().getStatusCode()
+        super("HTTP failed with status code "
+                        + pResponse.getStatusLine().getStatusCode()
                         + " -- response is: \n"
-                        + HttpHelper.extractBodyAsString(pResponse.getEntity()));
+                        + (pResponse.getEntity() == null ? "<empty>" : HttpHelper
+                                        .extractBodyAsString(pResponse.getEntity())));
         mStatusCode = pResponse.getStatusLine().getStatusCode();
         mResponse = pResponse;
     }
