@@ -22,7 +22,10 @@ public abstract class HttpException extends Exception {
 
     private int mStatusCode;
 
-    private HttpResponse mResponse;
+    /**
+     * HttpResponse objects are not serializable, thus the response is transient
+     */
+    private transient HttpResponse mResponse;
 
     public HttpException(int pStatusCode) {
 
@@ -44,6 +47,9 @@ public abstract class HttpException extends Exception {
         return mStatusCode;
     }
 
+    /**
+     * @return the HTTP response, if available -- null otherwise
+     */
     public HttpResponse getHttpResponse() {
 
         return mResponse;
