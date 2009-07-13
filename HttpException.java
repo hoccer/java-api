@@ -10,8 +10,13 @@ public abstract class HttpException extends Exception {
 
     // Static Methods ----------------------------------------------------
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7901299732283491664L;
+
     public static void throwIfError(HttpResponse pResponse) throws HttpServerException,
-                    HttpClientException, IOException {
+            HttpClientException, IOException {
 
         int status = pResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
@@ -24,7 +29,7 @@ public abstract class HttpException extends Exception {
 
     // Instance Variables ------------------------------------------------
 
-    private int mStatusCode;
+    private int                    mStatusCode;
 
     /**
      * HttpResponse objects are not serializable, thus the response is transient
@@ -40,10 +45,10 @@ public abstract class HttpException extends Exception {
     public HttpException(HttpResponse pResponse) throws IOException {
 
         super("HTTP failed with status code "
-                        + pResponse.getStatusLine().getStatusCode()
-                        + " -- response is: \n"
-                        + (pResponse.getEntity() == null ? "<empty>" : HttpHelper
-                                        .extractBodyAsString(pResponse.getEntity())));
+                + pResponse.getStatusLine().getStatusCode()
+                + " -- response is: \n"
+                + (pResponse.getEntity() == null ? "<empty>" : HttpHelper
+                        .extractBodyAsString(pResponse.getEntity())));
         mStatusCode = pResponse.getStatusLine().getStatusCode();
         mResponse = pResponse;
     }
