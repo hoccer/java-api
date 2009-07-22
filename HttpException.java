@@ -15,42 +15,55 @@ public abstract class HttpException extends Exception {
      */
     private static final long serialVersionUID = -7901299732283491664L;
 
-    public static void throwIfError(HttpResponse pResponse) throws HttpServerException,
-            HttpClientException, IOException {
+    public static void throwIfError(String pUrl, HttpResponse pResponse)
+                    throws HttpServerException, HttpClientException, IOException {
 
         int status = pResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
-            throw new HttpClientException(pResponse);
+            throw new HttpClientException(pUrl, pResponse);
         }
         if (status >= 500 && status < 600) {
-            throw new HttpServerException(pResponse);
+            throw new HttpServerException(pUrl, pResponse);
+        }
+    }
+
+    private static String createMessage(HttpResponse pResponse) throws IOException {
+
+        if (pResponse.getEntity() == null) {
+            return "<empty>";
+        } else {
+            String msg = HttpHelper.extractBodyAsString(pResponse.getEntity());
+            return msg.substring(0, Math.min(500, msg.length() - 1));
         }
     }
 
     // Instance Variables ------------------------------------------------
 
-    private int                    mStatusCode;
+    private int mStatusCode;
+
+    private String mUrl;
 
     /**
      * HttpResponse objects are not serializable, thus the response is transient
      */
     private transient HttpResponse mResponse;
 
-    public HttpException(int pStatusCode) {
+    public HttpException(String pUrl, int pStatusCode) {
 
-        super("HTTP failed with status code " + pStatusCode + " (response is not available).");
+        super("HTTP request for '" + pUrl + "'failed with status code " + pStatusCode
+                        + " (response is not available).");
         mStatusCode = pStatusCode;
+        mUrl = pUrl;
     }
 
-    public HttpException(HttpResponse pResponse) throws IOException {
+    public HttpException(String pUrl, HttpResponse pResponse) throws IOException {
 
-        super("HTTP failed with status code "
-                + pResponse.getStatusLine().getStatusCode()
-                + " -- response is: \n"
-                + (pResponse.getEntity() == null ? "<empty>" : HttpHelper
-                        .extractBodyAsString(pResponse.getEntity())));
+        super("HTTP request for '" + pUrl + "' failed with status code "
+                        + pResponse.getStatusLine().getStatusCode() + " -- response is: \n"
+                        + createMessage(pResponse));
         mStatusCode = pResponse.getStatusLine().getStatusCode();
         mResponse = pResponse;
+        mUrl = pUrl;
     }
 
     // Public Instance Methods -------------------------------------------

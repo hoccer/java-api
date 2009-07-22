@@ -6,12 +6,12 @@ import org.apache.http.HttpResponse;
 
 public class HttpServerException extends HttpException {
 
-    public HttpServerException(HttpResponse pResponse) throws IOException {
-        super(pResponse);
+    public HttpServerException(String pUrl, HttpResponse pResponse) throws IOException {
+        super(pUrl, pResponse);
     }
 
-    public HttpServerException(int pStatusCode) {
-        super(pStatusCode);
+    public HttpServerException(String pUrl, int pStatusCode) {
+        super(pUrl, pStatusCode);
     }
 
 }
