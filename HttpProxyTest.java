@@ -25,7 +25,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     // Instance Variables ------------------------------------------------
 
-    private Intent mStartIntent;
+    private Intent             mStartIntent;
 
     // Constructors ------------------------------------------------------
 
@@ -58,14 +58,14 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         helper.requestDownload(uri);
 
         TestHelper.blockUntilTrue("proxy should return the object", 4000,
-                        new TestHelper.Condition() {
+                new TestHelper.Condition() {
 
-                            @Override
-                            public boolean isSatisfied() {
-                                return (helper.get(uri) != null);
-                            }
+                    @Override
+                    public boolean isSatisfied() {
+                        return (helper.get(uri) != null);
+                    }
 
-                        });
+                });
 
         TestHelper.blockUntilTrue("proxy call the listener", 1000, new TestHelper.Condition() {
 
@@ -135,12 +135,12 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertFalse(helper.isInCache(uri));
 
         TestHelper.blockUntilTrue("cache should load uri into cache", 2000,
-                        new TestHelper.Condition() {
-                            @Override
-                            public boolean isSatisfied() {
-                                return helper.isInCache(uri);
-                            }
-                        });
+                new TestHelper.Condition() {
+                    @Override
+                    public boolean isSatisfied() {
+                        return helper.isInCache(uri);
+                    }
+                });
     }
 
     public void testResourceNotAvailableInCache() throws Exception {
@@ -237,7 +237,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     // Private Instance Methods ------------------------------------------
 
     private void blockUntilResourceAvailableWasCalled(TestListener pListener, long pTimeout)
-                    throws TimeoutException, InterruptedException {
+            throws TimeoutException, InterruptedException {
         long start = System.currentTimeMillis();
         while (!pListener.wasResourceAvailableCalled()) {
             if (System.currentTimeMillis() - start > pTimeout) {
@@ -274,7 +274,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     class TestListener implements ResourceListener {
 
-        private boolean mWasResourceChangedCalled = false;
+        private boolean mWasResourceChangedCalled   = false;
         private boolean mWasResourceAvailableCalled = false;
 
         public void onResourceChanged(Uri resourceUri) {
