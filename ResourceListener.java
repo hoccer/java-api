@@ -8,4 +8,6 @@ public interface ResourceListener {
     public void onResourceChanged(Uri pResourceUri);
 
     public void onResourceAvailable(Uri pResourceUri);
+
+    public void onResourceNotAvailable(Uri pResourceUri);
 }
