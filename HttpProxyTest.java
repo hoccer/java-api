@@ -160,6 +160,23 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNotNull(data);
     }
 
+    public void testGettingNonexistentResource() throws Exception {
+        initializeActivity();
+        HttpProxyHelper helper = createHelper();
+        final TestListener listener = new TestListener();
+        Uri uri = Uri.parse("hxxp://x");
+        helper.addResourceChangeListener(uri, listener);
+        helper.requestDownload(uri);
+
+        TestHelper.blockUntilTrue("not available callback should have been called", 5000,
+                new TestHelper.Condition() {
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return listener.wasResourceNotAvailableCalled();
+                    }
+                });
+    }
+
     public void testResourceIsAvailableInCache() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
@@ -274,11 +291,11 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     class TestListener implements ResourceListener {
 
-        private boolean mWasResourceChangedCalled   = false;
-        private boolean mWasResourceAvailableCalled = false;
+        private boolean mWasResourceChangedCalled      = false;
+        private boolean mWasResourceAvailableCalled    = false;
+        private boolean mWasResourceNotAvailableCalled = false;
 
         public void onResourceChanged(Uri resourceUri) {
-
             mWasResourceChangedCalled = true;
         }
 
@@ -288,18 +305,25 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         }
 
         public boolean wasResourceChangeCalled() {
-
             return mWasResourceChangedCalled;
         }
 
         public boolean wasResourceAvailableCalled() {
-
             return mWasResourceAvailableCalled;
+        }
+
+        public boolean wasResourceNotAvailableCalled() {
+            return mWasResourceNotAvailableCalled;
         }
 
         public void reset() {
             mWasResourceChangedCalled = false;
             mWasResourceAvailableCalled = false;
+        }
+
+        @Override
+        public void onResourceNotAvailable(Uri pResourceUri) {
+            mWasResourceNotAvailableCalled = true;
         }
     }
 
@@ -315,7 +339,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         }
 
         public boolean isBound() {
-
             return mBound;
         }
     }
