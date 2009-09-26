@@ -68,17 +68,16 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
                 });
 
         TestHelper.blockUntilTrue("proxy call the listener", 1000, new TestHelper.Condition() {
-
             @Override
             public boolean isSatisfied() {
-                return listener.wasResourceChangeCalled();
+                return listener.wasResourceAvailableCalled();
             }
 
         });
 
         Logger.v(LOG_TAG, "now let's check results");
 
-        assertTrue("update should have been called", listener.wasResourceChangeCalled());
+        assertTrue("update should have been called", listener.wasResourceAvailableCalled());
         assertNotNull("get should return an object", helper.get(uri));
         // HttpProxyService.logCache();
 
@@ -102,7 +101,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNull("uncached content should be null initially", data);
 
         long start = System.currentTimeMillis();
-        while (!listener.wasResourceChangeCalled()) {
+        while (!listener.wasResourceAvailableCalled()) {
 
             if (System.currentTimeMillis() - start > 2000) {
                 throw new TimeoutException("took to long");
@@ -111,7 +110,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
             Thread.sleep(50);
         }
 
-        assertTrue("update wasn't called", listener.wasResourceChangeCalled());
+        assertTrue("update wasn't called", listener.wasResourceAvailableCalled());
         data = helper.fetchFromCache(uri);
         assertNotNull("content from cache was null", data);
 
@@ -191,7 +190,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         blockUntilResourceAvailableWasCalled(listener, 4000);
 
         listener.reset();
-        assertFalse(listener.wasResourceChangeCalled());
         assertFalse(listener.wasResourceAvailableCalled());
         helper.addResourceChangeListener(uri, listener);
 
@@ -291,21 +289,12 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     class TestListener implements ResourceListener {
 
-        private boolean mWasResourceChangedCalled      = false;
         private boolean mWasResourceAvailableCalled    = false;
         private boolean mWasResourceNotAvailableCalled = false;
-
-        public void onResourceChanged(Uri resourceUri) {
-            mWasResourceChangedCalled = true;
-        }
 
         @Override
         public void onResourceAvailable(Uri pResourceUri) {
             mWasResourceAvailableCalled = true;
-        }
-
-        public boolean wasResourceChangeCalled() {
-            return mWasResourceChangedCalled;
         }
 
         public boolean wasResourceAvailableCalled() {
@@ -317,7 +306,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         }
 
         public void reset() {
-            mWasResourceChangedCalled = false;
+            mWasResourceNotAvailableCalled = false;
             mWasResourceAvailableCalled = false;
         }
 
