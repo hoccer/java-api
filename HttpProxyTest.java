@@ -14,8 +14,7 @@ import com.artcom.y60.Logger;
 import com.artcom.y60.TestHelper;
 
 /**
- * Blackbox service testing through HttpProxyHelper (aidl and
- * inter-vm-communication).
+ * Blackbox service testing through HttpProxyHelper (aidl and inter-vm-communication).
  */
 public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
@@ -131,7 +130,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertFalse(helper.isInCache(uri));
 
         helper.requestDownload(uri);
-        assertFalse(helper.isInCache(uri));
+        assertFalse("the uri should not be in cache yet", helper.isInCache(uri));
 
         TestHelper.blockUntilTrue("cache should load uri into cache", 2000,
                 new TestHelper.Condition() {
