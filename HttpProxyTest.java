@@ -41,6 +41,10 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         HttpProxyHelper helper = createHelper();
         byte[] bytes = helper.get(TestUriHelper.createUri());
 
+        if (bytes != null) {
+            for (int i = 0; i < bytes.length; i++)
+                System.out.println(i + ": " + bytes[i]);
+        }
         assertNull("uncached content should be null initially", bytes);
     }
 
@@ -151,7 +155,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         byte[] data = helper.get(uri);
         assertNull(data);
 
-        blockUntilResourceAvailableWasCalled(listener, 4000);
+        blockUntilResourceAvailableWasCalled(listener, 8000);
 
         assertTrue("callback not succsessful", listener.wasResourceAvailableCalled());
         data = helper.get(uri);
