@@ -3,15 +3,15 @@ package com.artcom.y60.http;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.test.ActivityUnitTestCase;
-import android.test.suitebuilder.annotation.Suppress;
-
 import com.artcom.y60.BindingListener;
 import com.artcom.y60.HttpHelper;
 import com.artcom.y60.Logger;
 import com.artcom.y60.TestHelper;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.test.ActivityUnitTestCase;
+import android.test.suitebuilder.annotation.Suppress;
 
 /**
  * Blackbox service testing through HttpProxyHelper (aidl and inter-vm-communication).
@@ -35,19 +35,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
     // Public Instance Methods -------------------------------------------
 
-    public void testGetInitiallyReturnsNull() throws Exception {
-
-        initializeActivity();
-        HttpProxyHelper helper = createHelper();
-        byte[] bytes = helper.get(TestUriHelper.createUri());
-
-        if (bytes != null) {
-            for (int i = 0; i < bytes.length; i++)
-                System.out.println(i + ": " + bytes[i]);
-        }
-        assertNull("uncached content should be null initially", bytes);
-    }
-
     public void testResourceIsAsynchronouslyUpdated() throws Exception {
 
         initializeActivity();
@@ -60,16 +47,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         helper.addResourceChangeListener(uri, listener);
         helper.requestDownload(uri);
 
-        TestHelper.blockUntilTrue("proxy should return the object", 4000,
-                new TestHelper.Condition() {
-
-                    @Override
-                    public boolean isSatisfied() {
-                        return (helper.get(uri) != null);
-                    }
-
-                });
-
         TestHelper.blockUntilTrue("proxy call the listener", 1000, new TestHelper.Condition() {
             @Override
             public boolean isSatisfied() {
@@ -81,8 +58,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Logger.v(LOG_TAG, "now let's check results");
 
         assertTrue("update should have been called", listener.wasResourceAvailableCalled());
-        assertNotNull("get should return an object", helper.get(uri));
-        // HttpProxyService.logCache();
+        assertNotNull("get should return an object", helper.fetchFromCache(uri));
 
         byte[] fromService = helper.fetchFromCache(uri);
         assertNotNull("content from cache was null", fromService);
@@ -100,8 +76,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         TestListener listener = new TestListener();
         helper.addResourceChangeListener(uri, listener);
 
-        byte[] data = helper.get(uri);
-        assertNull("uncached content should be null initially", data);
+        helper.requestResourceWhichIsDeprecated(uri);
 
         long start = System.currentTimeMillis();
         while (!listener.wasResourceAvailableCalled()) {
@@ -114,12 +89,11 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         }
 
         assertTrue("update wasn't called", listener.wasResourceAvailableCalled());
-        data = helper.fetchFromCache(uri);
+        byte[] data = helper.fetchFromCache(uri);
         assertNotNull("content from cache was null", data);
 
         helper.removeFromCache(uri.toString());
-        data = helper.get(uri);
-        assertNull("content should be null after removing form cache", data);
+        assertFalse("uri shouldnt be in cache anymore", helper.isInCache(uri));
 
     }
 
@@ -152,13 +126,12 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
 
-        byte[] data = helper.get(uri);
-        assertNull(data);
+        helper.requestResourceWhichIsDeprecated(uri);
 
         blockUntilResourceAvailableWasCalled(listener, 8000);
 
         assertTrue("callback not succsessful", listener.wasResourceAvailableCalled());
-        data = helper.get(uri);
+        byte[] data = helper.fetchFromCache(uri);
         assertNotNull(data);
     }
 
@@ -187,8 +160,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListener(uri, listener);
 
-        byte[] data = helper.get(uri);
-        assertNull(data);
+        helper.requestResourceWhichIsDeprecated(uri);
 
         blockUntilResourceAvailableWasCalled(listener, 4000);
 
@@ -199,7 +171,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         // this is minimal asynchronous
         blockUntilResourceAvailableWasCalled(listener, 200);
         assertTrue("callback not succsessful", listener.wasResourceAvailableCalled());
-        data = helper.get(uri);
+        byte[] data = helper.fetchFromCache(uri);
         assertNotNull(data);
     }
 
@@ -209,7 +181,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     public void testGetException() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
-        helper.get(Uri.parse("http://bla"));
+        helper.requestResourceWhichIsDeprecated(Uri.parse("http://bla"));
     }
 
     @Suppress
