@@ -8,13 +8,14 @@ public class TestUriHelper {
 
     // Constants ---------------------------------------------------------
 
-    public static final String BASE_URI = "http://www.artcom.de/templates/artcom/css/images/artcom_rgb_screen_193x22.png";
+    public static final String BASE_URI = "http://www.android.com/images/android2-logo.gif";
 
     // Static Methods ----------------------------------------------------
 
     public static Uri createUri() throws URISyntaxException {
 
-        return Uri.parse(BASE_URI + "?timestamp=" + System.currentTimeMillis());
+        return Uri.parse(BASE_URI);
+        // return Uri.parse(BASE_URI + "?timestamp=" + System.currentTimeMillis());
     }
 
 }
