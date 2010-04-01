@@ -25,7 +25,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         
         mHttpPost = new AsyncHttpPost();
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
-        mHttpPost.registerResponseHandler(requestStatus);
+        mHttpPost.registerAsyncResponseHandler(requestStatus);
         mHttpPost.execute(getServer().getUri());
         assertTrue("should be connecting", requestStatus.isConnecting);
         

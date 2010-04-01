@@ -1,8 +1,8 @@
 package com.artcom.y60.http;
 
-import android.test.AndroidTestCase;
+import android.test.InstrumentationTestCase;
 
-public class HttpTestCase extends AndroidTestCase {
+public class HttpTestCase extends InstrumentationTestCase {
     
     private MockHttpServer mServer;
     
