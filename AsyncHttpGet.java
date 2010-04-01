@@ -1,14 +1,14 @@
 package com.artcom.y60.http;
 
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 
-public class AsyncHttpPost extends AsyncHttpRequest {
+public class AsyncHttpGet extends AsyncHttpRequest {
     
     @Override
     protected HttpRequestBase createRequest(String pUrl) {
-        HttpPost request = new HttpPost(pUrl);
-        insertData((HttpPost) request);
+        HttpGet request = new HttpGet(pUrl);
         return request;
     }
+    
 }

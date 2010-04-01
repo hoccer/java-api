@@ -6,13 +6,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
@@ -20,28 +16,24 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.os.AsyncTask;
 
+import com.artcom.y60.HttpHelper;
 import com.artcom.y60.Logger;
 
-public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
+public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
     
-    private static final String LOG_TAG      = "AsyncHttpConnection";
+    private static final String LOG_TAG       = "AsyncHttpConnection";
     
-    public static final int     GET          = 0;
-    public static final int     POST         = 1;
-    public static final int     PUT          = 2;
-    public static final int     DELETE       = 3;
-    
-    private static String       USER_AGENT   = "Y60/1.0 Android";
+    private static String       USER_AGENT    = "Y60/1.0 Android";
     
     private HttpEntity          mData;
-    private int                 mType        = GET;
     
-    private String              mContentType = "application/x-www-form-urlencoded";
-    private final String        mAccept      = "text/html";
+    private String              mContentType  = "application/x-www-form-urlencoded";
+    private final String        mAccept       = "text/html";
     
-    private HttpResponseHandler mCallbackClass;
+    private HttpResponseHandler mCallbackOnUiThread;
+    private HttpResponseHandler mCallbackInBackground;
     
-    private final OutputStream  resultStream = new ByteArrayOutputStream();
+    private final OutputStream  mResultStream = new ByteArrayOutputStream();
     
     private HttpRequestBase     mRequest;
     private HttpResponse        mResponse;
@@ -51,15 +43,15 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
         USER_AGENT = pAgent;
     }
     
-    public void setData(String data) throws UnsupportedEncodingException {
+    private void setData(String data) throws UnsupportedEncodingException {
         mData = new StringEntity(data);
     }
     
-    public void setData(HttpEntity entity) {
+    private void setData(HttpEntity entity) {
         mData = entity;
     }
     
-    public void setData(InputStream iStream, String pContentType) {
+    private void setData(InputStream iStream, String pContentType) {
         mData = new InputStreamEntity(iStream, 1000);
         mContentType = pContentType;
     }
@@ -72,16 +64,12 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
         return mData.toString();
     }
     
-    public void setConnectionType(int type) {
-        mType = type;
+    public void registerUiThreadedResponseHandler(HttpResponseHandler callback) {
+        mCallbackOnUiThread = callback;
     }
     
-    public int getConnectionType() {
-        return mType;
-    }
-    
-    public void registerResponseHandler(HttpResponseHandler callback) {
-        mCallbackClass = callback;
+    public void registerAsyncResponseHandler(HttpResponseHandler callback) {
+        mCallbackInBackground = callback;
     }
     
     @Override
@@ -91,7 +79,6 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
         } catch (IOException e) {
             Logger.e(LOG_TAG, e);
         }
-        
         return null;
     }
     
@@ -107,29 +94,23 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
         mResponse = null;
         DefaultHttpClient httpClient = new DefaultHttpClient();
         mRequest = createRequest(params[0]);
+        mRequest.addHeader("User-Agent", USER_AGENT);
         mResponse = httpClient.execute(mRequest);
         
         int status = mResponse.getStatusLine().getStatusCode();
+        Logger.v(LOG_TAG, "response is ", HttpHelper.extractBodyAsString(mResponse.getEntity()));
         
-        if (status == 200) {
-            publishProgress(new Float(-1));
-            
-            if (resultStream == null) {
-                return mResponse;
-            }
+        if (status == 220) {
+            // publishProgress(new Float(-1));
             
             InputStream is = mResponse.getEntity().getContent();
-            
             long downloaded = 0;
             long size = mResponse.getEntity().getContentLength();
-            
             byte[] buffer = new byte[0xFFFF];
             int len;
-            
             while ((len = is.read(buffer)) != -1) {
-                publishProgress(new Float(downloaded / (float) size));
-                
-                resultStream.write(buffer, 0, len);
+                // publishProgress(new Float(downloaded / (float) size));
+                mResultStream.write(buffer, 0, len);
                 downloaded += len;
             }
         }
@@ -137,31 +118,9 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
         return mResponse;
     }
     
-    private HttpRequestBase createRequest(String pUrl) {
-        
-        HttpRequestBase request = null;
-        
-        switch (getConnectionType()) {
-            case POST:
-                request = new HttpPost(pUrl);
-                insertData((HttpPost) request);
-                break;
-            case PUT:
-                request = new HttpPut(pUrl);
-                insertData((HttpPut) request);
-                break;
-            default:
-                request = new HttpGet(pUrl);
-        }
-        
-        request.addHeader("User-Agent", USER_AGENT);
-        
-        logHeaders(request.getAllHeaders());
-        
-        return request;
-    }
+    abstract protected HttpRequestBase createRequest(String pUrl);
     
-    private void insertData(HttpEntityEnclosingRequestBase post) {
+    protected void insertData(HttpEntityEnclosingRequestBase post) {
         post.setEntity(mData);
         if (mContentType != null)
             post.addHeader("Content-Type", mContentType);
@@ -170,11 +129,13 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
     
     @Override
     protected void onProgressUpdate(Float... progress) {
+        Logger.v("LOG_TAG", "progress ", progress[0]);
+        
         if (progress[0].floatValue() == -1) {
-            mCallbackClass.onSuccess(mResponse);
+            mCallbackOnUiThread.onSuccess(mResponse);
         }
         
-        mCallbackClass.onReceiving(progress[0]);
+        mCallbackOnUiThread.onReceiving(progress[0]);
         
         super.onProgressUpdate(progress);
     }
@@ -183,35 +144,33 @@ public class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
     protected void onPostExecute(HttpResponse pResponse) {
         mHasFinished = true;
         Logger.v(LOG_TAG, "on PostExecute");
-        if (mCallbackClass == null) {
+        
+        if (mCallbackOnUiThread == null) {
             return;
         }
         
         int status = pResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
-            onClientError(pResponse);
+            onClientError(pResponse, mCallbackOnUiThread);
         } else if (status >= 500 && status < 600) {
-            onServerError(pResponse);
+            onServerError(pResponse, mCallbackOnUiThread);
         } else if (pResponse != null) {
-            Logger.v(LOG_TAG, "in onPostExecute");
-            mCallbackClass.onSuccess(pResponse);
+            onSuccess(pResponse, mCallbackOnUiThread);
         }
         
         super.onPostExecute(pResponse);
     }
     
-    protected void onClientError(HttpResponse pResponse) {
-        mCallbackClass.onError(pResponse);
+    protected void onSuccess(HttpResponse pResponse, HttpResponseHandler pCallback) {
+        pCallback.onError(pResponse);
     }
     
-    protected void onServerError(HttpResponse pResponse) {
-        mCallbackClass.onError(pResponse);
+    protected void onClientError(HttpResponse pResponse, HttpResponseHandler pCallback) {
+        pCallback.onError(pResponse);
     }
     
-    private void logHeaders(Header[] headers) {
-        for (Header h : headers) {
-            Logger.v(LOG_TAG, h);
-        }
+    protected void onServerError(HttpResponse pResponse, HttpResponseHandler pCallback) {
+        pCallback.onError(pResponse);
     }
     
     @Override
