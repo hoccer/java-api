@@ -12,7 +12,7 @@ public abstract class ThreadedTask extends Thread {
     }
     
     protected void setProgress(int pProgress) {
-        mProgress = pProgress;
+        mProgress = Math.max(0, Math.min(100, pProgress));
     }
     
 }
