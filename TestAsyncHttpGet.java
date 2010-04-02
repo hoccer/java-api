@@ -1,14 +1,11 @@
 package com.artcom.y60.http;
 
-import android.test.UiThreadTest;
-
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpGet extends HttpTestCase {
     
     AsyncHttpGet mHttpGet;
     
-    @UiThreadTest
     public void testCreating() throws Exception {
         
         mHttpGet = new AsyncHttpGet(getServer().getUri());
