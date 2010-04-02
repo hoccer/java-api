@@ -5,6 +5,10 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 public class AsyncHttpPut extends AsyncHttpRequest {
     
+    public AsyncHttpPut(String pUrl) {
+        super(pUrl);
+    }
+    
     @Override
     protected HttpRequestBase createRequest(String pUrl) {
         HttpPut request = new HttpPut(pUrl);

@@ -179,7 +179,7 @@ public class NanoHTTPD {
             
             public void run() {
                 try {
-                    while (myServerSocket.isBound()) {
+                    while (!myServerSocket.isClosed()) {
                         myHttpSession = new HTTPSession(myServerSocket.accept());
                     }
                 } catch (IOException e) {

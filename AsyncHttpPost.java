@@ -5,10 +5,14 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 public class AsyncHttpPost extends AsyncHttpRequest {
     
+    public AsyncHttpPost(String pUrl) {
+        super(pUrl);
+    }
+    
     @Override
     protected HttpRequestBase createRequest(String pUrl) {
         HttpPost request = new HttpPost(pUrl);
-        insertData((HttpPost) request);
+        insertData(request);
         return request;
     }
 }

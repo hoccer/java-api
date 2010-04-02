@@ -10,16 +10,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.os.AsyncTask;
-
 import com.artcom.y60.HttpHelper;
 import com.artcom.y60.Logger;
+import com.artcom.y60.thread.ThreadedTask;
 
-public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResponse> {
+public abstract class AsyncHttpRequest extends ThreadedTask {
     
     private static final String LOG_TAG       = "AsyncHttpConnection";
     
@@ -30,14 +30,14 @@ public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResp
     private String              mContentType  = "application/x-www-form-urlencoded";
     private final String        mAccept       = "text/html";
     
-    private HttpResponseHandler mCallbackOnUiThread;
-    private HttpResponseHandler mCallbackInBackground;
-    
     private final OutputStream  mResultStream = new ByteArrayOutputStream();
     
-    private HttpRequestBase     mRequest;
-    private HttpResponse        mResponse;
-    private boolean             mHasFinished;
+    private final String        mUrl;
+    private HttpResponse        mResponse     = null;
+    
+    public AsyncHttpRequest(String pUrl) {
+        mUrl = pUrl;
+    }
     
     public static void setUserAgent(String pAgent) {
         USER_AGENT = pAgent;
@@ -64,26 +64,13 @@ public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResp
         return mData.toString();
     }
     
-    public void registerUiThreadedResponseHandler(HttpResponseHandler callback) {
-        mCallbackOnUiThread = callback;
-    }
-    
-    public void registerAsyncResponseHandler(HttpResponseHandler callback) {
-        mCallbackInBackground = callback;
-    }
-    
     @Override
-    protected HttpResponse doInBackground(String... params) {
+    public void doInBackground() {
         try {
-            return connect(params);
+            connect(mUrl);
         } catch (IOException e) {
             Logger.e(LOG_TAG, e);
         }
-        return null;
-    }
-    
-    public boolean hasFinished() {
-        return mHasFinished;
     }
     
     public HttpResponse connect(String... params) throws IOException {
@@ -91,17 +78,16 @@ public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResp
         String url = params[0];
         Logger.v(LOG_TAG, "connecing to ", url);
         
-        mResponse = null;
         DefaultHttpClient httpClient = new DefaultHttpClient();
-        mRequest = createRequest(params[0]);
+        HttpUriRequest mRequest = createRequest(params[0]);
         mRequest.addHeader("User-Agent", USER_AGENT);
         mResponse = httpClient.execute(mRequest);
         
         int status = mResponse.getStatusLine().getStatusCode();
         Logger.v(LOG_TAG, "response is ", HttpHelper.extractBodyAsString(mResponse.getEntity()));
         
-        if (status == 220) {
-            // publishProgress(new Float(-1));
+        if (status == 200) {
+            setProgress(1);
             
             InputStream is = mResponse.getEntity().getContent();
             long downloaded = 0;
@@ -109,7 +95,7 @@ public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResp
             byte[] buffer = new byte[0xFFFF];
             int len;
             while ((len = is.read(buffer)) != -1) {
-                // publishProgress(new Float(downloaded / (float) size));
+                setProgress((int) (downloaded / size));
                 mResultStream.write(buffer, 0, len);
                 downloaded += len;
             }
@@ -128,58 +114,30 @@ public abstract class AsyncHttpRequest extends AsyncTask<String, Float, HttpResp
     }
     
     @Override
-    protected void onProgressUpdate(Float... progress) {
-        Logger.v("LOG_TAG", "progress ", progress[0]);
-        
-        if (progress[0].floatValue() == -1) {
-            mCallbackOnUiThread.onSuccess(mResponse);
-        }
-        
-        mCallbackOnUiThread.onReceiving(progress[0]);
-        
-        super.onProgressUpdate(progress);
-    }
-    
-    @Override
-    protected void onPostExecute(HttpResponse pResponse) {
-        mHasFinished = true;
+    protected void onPostExecute() {
         Logger.v(LOG_TAG, "on PostExecute");
+        super.onPostExecute();
         
-        if (mCallbackOnUiThread == null) {
+        if (mResponse == null) {
             return;
         }
         
-        int status = pResponse.getStatusLine().getStatusCode();
+        int status = mResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
-            onClientError(pResponse, mCallbackOnUiThread);
+            onClientError();
         } else if (status >= 500 && status < 600) {
-            onServerError(pResponse, mCallbackOnUiThread);
-        } else if (pResponse != null) {
-            onSuccess(pResponse, mCallbackOnUiThread);
+            onServerError();
+        } else {
+            onSuccess();
         }
-        
-        super.onPostExecute(pResponse);
     }
     
-    protected void onSuccess(HttpResponse pResponse, HttpResponseHandler pCallback) {
-        pCallback.onError(pResponse);
+    protected void onSuccess() {
     }
     
-    protected void onClientError(HttpResponse pResponse, HttpResponseHandler pCallback) {
-        pCallback.onError(pResponse);
+    protected void onClientError() {
     }
     
-    protected void onServerError(HttpResponse pResponse, HttpResponseHandler pCallback) {
-        pCallback.onError(pResponse);
-    }
-    
-    @Override
-    public void onCancelled() {
-        super.onCancelled();
-        try {
-            mRequest.abort();
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
+    protected void onServerError() {
     }
 }
