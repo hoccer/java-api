@@ -75,6 +75,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     public HttpResponse connect(String... params) throws IOException {
         
+        setProgress(1);
+        
         String url = params[0];
         Logger.v(LOG_TAG, "connecing to ", url);
         
@@ -87,7 +89,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         Logger.v(LOG_TAG, "response is ", HttpHelper.extractBodyAsString(mResponse.getEntity()));
         
         if (status == 200) {
-            setProgress(1);
+            setProgress(2);
             
             InputStream is = mResponse.getEntity().getContent();
             long downloaded = 0;
