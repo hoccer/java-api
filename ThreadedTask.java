@@ -9,7 +9,7 @@ public abstract class ThreadedTask extends Thread {
     @Override
     public void run() {
         doInBackground();
-        mProgress = 100;
+        onPostExecute();
     }
     
     public int getProgress() {
@@ -22,6 +22,10 @@ public abstract class ThreadedTask extends Thread {
     
     public boolean wasSuccessful() {
         return mProgress == 100;
+    }
+    
+    protected void onPostExecute() {
+        mProgress = 100;
     }
     
 }
