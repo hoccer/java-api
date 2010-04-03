@@ -84,12 +84,12 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         HttpUriRequest mRequest = createRequest(params[0]);
         mRequest.addHeader("User-Agent", USER_AGENT);
         mResponse = httpClient.execute(mRequest);
+        setProgress(2);
         
         int status = mResponse.getStatusLine().getStatusCode();
         Logger.v(LOG_TAG, "response is ", HttpHelper.extractBodyAsString(mResponse.getEntity()));
         
         if (status == 200) {
-            setProgress(2);
             
             InputStream is = mResponse.getEntity().getContent();
             long downloaded = 0;

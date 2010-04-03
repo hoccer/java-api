@@ -331,23 +331,26 @@ public class NanoHTTPD {
                 if (method.equalsIgnoreCase("POST")) {
                     long size = 0x7FFFFFFFFFFFFFFFl;
                     String contentLength = header.getProperty("content-length");
+                    Logger.v(LOG_TAG, "content length: ", contentLength);
                     if (contentLength != null) {
                         try {
                             size = Integer.parseInt(contentLength);
                         } catch (NumberFormatException ex) {
                         }
                     }
-                    String postLine = "";
-                    char buf[] = new char[512];
-                    int read = in.read(buf);
-                    while (read >= 0 && size > 0 && !postLine.endsWith("\r\n")) {
-                        size -= read;
-                        postLine += String.valueOf(buf, 0, read);
-                        if (size > 0)
-                            read = in.read(buf);
+                    if (size > 0) {
+                        String postLine = "";
+                        char buf[] = new char[512];
+                        int read = in.read(buf);
+                        while (read >= 0 && size > 0 && !postLine.endsWith("\r\n")) {
+                            size -= read;
+                            postLine += String.valueOf(buf, 0, read);
+                            if (size > 0)
+                                read = in.read(buf);
+                        }
+                        postLine = postLine.trim();
+                        decodeParms(postLine, parms);
                     }
-                    postLine = postLine.trim();
-                    decodeParms(postLine, parms);
                 }
                 
                 // Ok, now do the serve()
