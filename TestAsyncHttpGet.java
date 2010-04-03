@@ -11,13 +11,13 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mHttpGet = new AsyncHttpGet(getServer().getUri());
         mHttpGet.start();
         
-        assertFalse("http get should run asyncrunous", mHttpGet.wasSuccessful());
+        assertFalse("http get should run asyncrunous", mHttpGet.isDone());
         TestHelper.blockUntilTrue("request should have been performed by now", 8000,
                 new TestHelper.Condition() {
                     
                     @Override
                     public boolean isSatisfied() throws Exception {
-                        return mHttpGet.wasSuccessful();
+                        return mHttpGet.isDone();
                     }
                 });
         

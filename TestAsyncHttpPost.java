@@ -30,14 +30,14 @@ public class TestAsyncHttpPost extends HttpTestCase {
                         return mHttpPost.getProgress() > 1;
                     }
                 });
-        //        
-        // TestHelper.blockUntilTrue("request should have been performed by now", 8000,
-        // new TestHelper.Condition() {
-        // @Override
-        // public boolean isSatisfied() throws Exception {
-        // return mHttpPost.wasSuccessful();
-        // }
-        // });
+        
+        TestHelper.blockUntilTrue("request should have been performed by now", 8000,
+                new TestHelper.Condition() {
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return mHttpPost.isDone();
+                    }
+                });
     }
     
     @Suppress
@@ -54,7 +54,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     
                     @Override
                     public boolean isSatisfied() throws Exception {
-                        return mHttpPost.wasSuccessful();
+                        return mHttpPost.isDone();
                     }
                 });
         assertTrue("should be successful", requestStatus.wasSuccessful);
