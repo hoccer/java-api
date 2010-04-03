@@ -31,11 +31,27 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     }
                 });
         
-        TestHelper.blockUntilTrue("request should have been performed by now", 8000,
+        TestHelper.blockUntilTrue("request should have been performed by now", 2000,
                 new TestHelper.Condition() {
                     @Override
                     public boolean isSatisfied() throws Exception {
                         return mHttpPost.isDone();
+                    }
+                });
+    }
+    
+    @UiThreadTest
+    public void testEmptyPost() throws Exception {
+        
+        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        mHttpPost.start();
+        
+        TestHelper.blockUntilEquals("request should have been performed by now", 2000,
+                "no message was given", new TestHelper.Measurement() {
+                    
+                    @Override
+                    public Object getActualValue() throws Exception {
+                        return null;
                     }
                 });
     }
