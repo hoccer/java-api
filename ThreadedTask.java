@@ -20,8 +20,12 @@ public abstract class ThreadedTask extends Thread {
         mProgress = Math.max(0, Math.min(100, pProgress));
     }
     
-    public boolean wasSuccessful() {
+    public boolean isDone() {
         return mProgress == 100;
+    }
+    
+    public boolean isRunning() {
+        return (mProgress < 100 && mProgress > 0);
     }
     
     protected void onPostExecute() {
