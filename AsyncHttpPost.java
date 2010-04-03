@@ -11,7 +11,6 @@ public class AsyncHttpPost extends AsyncHttpRequest {
     
     @Override
     protected HttpRequestBase createRequest(String pUrl) {
-        // HttpGet request = new HttpGet(pUrl);
         HttpPost request = new HttpPost(pUrl);
         // insertData(request);
         return request;
