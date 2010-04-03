@@ -24,7 +24,7 @@ public class MockHttpServer extends NanoHTTPD {
         if (method.equals("GET")) {
             String msg = null;
             if (mPostedResources.containsKey(uri)) {
-                msg = mPostedResources.get(uri).getProperty("message");
+                msg = mPostedResources.get(uri).getProperty("message", "no message was given");
             } else {
                 msg = "I'm a mock server for test purposes";
             }

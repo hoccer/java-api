@@ -2,8 +2,6 @@ package com.artcom.y60.http;
 
 import java.net.SocketException;
 
-import com.artcom.y60.HttpHelper;
-
 public class TestMockedHttpServer extends HttpTestCase {
     
     public void testStartingAndStoppingTheServer() throws Exception {
@@ -18,7 +16,6 @@ public class TestMockedHttpServer extends HttpTestCase {
             wasRefused = true;
         }
         assertTrue("NanoHTTP should not respond", wasRefused);
-        
     }
     
     public void testHttpGet() throws Exception {
@@ -32,7 +29,7 @@ public class TestMockedHttpServer extends HttpTestCase {
     }
     
     public void testEmptyHttpPost() throws Exception {
-        assertEquals("our mock server should respond to an empty POST", "hello mock server",
+        assertEquals("our mock server should respond to an empty POST", "no message was given",
                 HttpHelper.post(getServer().getUri(), "", "", ""));
     }
     
