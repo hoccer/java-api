@@ -1,7 +1,7 @@
 package com.artcom.y60.http;
 
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 
 public class AsyncHttpPost extends AsyncHttpRequest {
     
@@ -10,9 +10,8 @@ public class AsyncHttpPost extends AsyncHttpRequest {
     }
     
     @Override
-    protected HttpRequestBase createRequest(String pUrl) {
+    protected HttpEntityEnclosingRequestBase createRequest(String pUrl) {
         HttpPost request = new HttpPost(pUrl);
-        // insertData(request);
         return request;
     }
 }
