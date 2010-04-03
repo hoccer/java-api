@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -39,19 +40,17 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     @Override
     public void doInBackground() {
-        try {
-            connect();
-        } catch (IOException e) {
-            Logger.e(LOG_TAG, e);
-        }
-    }
-    
-    public HttpResponse connect(String... params) throws IOException {
         
         setProgress(1);
         
         DefaultHttpClient httpClient = new DefaultHttpClient();
-        mResponse = httpClient.execute(mRequest);
+        try {
+            mResponse = httpClient.execute(mRequest);
+        } catch (ClientProtocolException e) {
+            onClientError(e);
+        } catch (IOException e) {
+            onIoError(e);
+        }
         setProgress(2);
         
         int status = mResponse.getStatusLine().getStatusCode();
@@ -59,19 +58,22 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         
         if (status == 200) {
             
-            InputStream is = mResponse.getEntity().getContent();
-            long downloaded = 0;
-            long size = mResponse.getEntity().getContentLength();
-            byte[] buffer = new byte[0xFFFF];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                setProgress((int) (downloaded / size));
-                mResultStream.write(buffer, 0, len);
-                downloaded += len;
+            try {
+                InputStream is = mResponse.getEntity().getContent();
+                long downloaded = 0;
+                long size = mResponse.getEntity().getContentLength();
+                byte[] buffer = new byte[0xFFFF];
+                int len;
+                while ((len = is.read(buffer)) != -1) {
+                    setProgress((int) (downloaded / size));
+                    mResultStream.write(buffer, 0, len);
+                    downloaded += len;
+                }
+            } catch (IOException e) {
+                onIoError(e);
             }
         }
         
-        return mResponse;
     }
     
     abstract protected HttpRequestBase createRequest(String pUrl);
@@ -79,7 +81,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     @Override
     protected void onPostExecute() {
         Logger.v(LOG_TAG, "on PostExecute");
-        super.onPostExecute();
         
         if (mResponse == null) {
             return;
@@ -87,20 +88,32 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         
         int status = mResponse.getStatusLine().getStatusCode();
         if (status >= 400 && status < 500) {
-            onClientError();
+            onClientError(status);
         } else if (status >= 500 && status < 600) {
-            onServerError();
+            onServerError(status);
         } else {
             onSuccess();
         }
+        
+        super.onPostExecute();
+    }
+    
+    protected void onIoError(IOException e) {
+        Logger.e(LOG_TAG, e);
     }
     
     protected void onSuccess() {
     }
     
-    protected void onClientError() {
+    protected void onClientError(Exception e) {
+        Logger.e(LOG_TAG, e);
     }
     
-    protected void onServerError() {
+    protected void onClientError(int pStatusCode) {
+        Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
+    }
+    
+    protected void onServerError(int pStatusCode) {
+        Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
     }
 }
