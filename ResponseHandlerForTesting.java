@@ -1,6 +1,6 @@
 package com.artcom.y60.http;
 
-import org.apache.http.HttpResponse;
+import java.io.OutputStream;
 
 public class ResponseHandlerForTesting implements HttpResponseHandler {
     
@@ -10,7 +10,7 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     boolean      wasSuccessful = false;
     
     double       progress      = -1;
-    HttpResponse response      = null;
+    OutputStream body          = null;
     
     @Override
     public void onConnecting() {
@@ -19,10 +19,10 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     }
     
     @Override
-    public void onError(HttpResponse pResponse) {
+    public void onError(int statusCode, OutputStream body) {
         reset();
         hasError = true;
-        response = pResponse;
+        this.body = body;
     }
     
     @Override
@@ -33,13 +33,14 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     }
     
     @Override
-    public void onSuccess(HttpResponse pResponse) {
+    public void onSuccess(int statusCode, OutputStream body) {
         reset();
         wasSuccessful = true;
-        response = pResponse;
+        this.body = body;
     }
     
     void reset() {
         isConnecting = hasError = isReceiving = wasSuccessful = false;
+        body = null;
     }
 }

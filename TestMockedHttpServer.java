@@ -25,6 +25,17 @@ public class TestMockedHttpServer extends HttpTestCase {
                 "I'm a mock server for test purposes", HttpHelper.getAsString(getServer().getUri()));
     }
     
+    public void test404HttpGet() throws Exception {
+        
+        boolean gotTheError = false;
+        try {
+            HttpHelper.getAsString(getServer().getUri() + "/not-existing");
+        } catch (HttpClientException e) {
+            gotTheError = e.getHttpResponse().getStatusLine().getStatusCode() == 404;
+        }
+        assertTrue("our mock server should respond with 404 'not found'", gotTheError);
+    }
+    
     public void testDelayedHttpGet() throws Exception {
         
         getServer().setResponseDelay(1000);
@@ -38,7 +49,7 @@ public class TestMockedHttpServer extends HttpTestCase {
     
     public void testHttpPost() throws Exception {
         assertEquals("our mock server should respond to POST", "hello mock server", HttpHelper
-                .post(getServer().getUri(), "message=hello mock server", "txt/text", "txt/text"));
+                .post(getServer().getUri(), "message=hello mock server", "text/txt", "text/txt"));
     }
     
     public void testEmptyHttpPost() throws Exception {
@@ -46,4 +57,14 @@ public class TestMockedHttpServer extends HttpTestCase {
                 HttpHelper.post(getServer().getUri(), "", "", ""));
     }
     
+    public void test404HttpPost() throws Exception {
+        boolean gotTheError = false;
+        try {
+            HttpHelper.post(getServer().getUri() + "/not-existing", "message=hello mock server",
+                    "text/txt", "text/txt");
+        } catch (HttpClientException e) {
+            gotTheError = e.getHttpResponse().getStatusLine().getStatusCode() == 404;
+        }
+        assertTrue("our mock server should respond with 404 'not found'", gotTheError);
+    }
 }

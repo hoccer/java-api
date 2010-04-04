@@ -32,6 +32,10 @@ public class MockHttpServer extends NanoHTTPD {
             Logger.e(LOG_TAG, e);
         }
         
+        if (!uri.equals("/") && !mPostedResources.containsKey(uri)) {
+            return new NanoHTTPD.Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "Not Found");
+        }
+        
         if (method.equals("GET")) {
             String msg = null;
             if (mPostedResources.containsKey(uri)) {

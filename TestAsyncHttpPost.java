@@ -1,17 +1,14 @@
 package com.artcom.y60.http;
 
-import android.test.FlakyTest;
-
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
     
     AsyncHttpPost mHttpPost;
     
-    @FlakyTest
     public void testExecution() throws Exception {
         
-        getServer().setResponseDelay(1000);
+        getServer().setResponseDelay(200);
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         mHttpPost.start();
         
@@ -32,8 +29,6 @@ public class TestAsyncHttpPost extends HttpTestCase {
                         return mHttpPost.getProgress() > 1;
                     }
                 });
-        assertTrue("request should be running, but progress is " + mHttpPost.getProgress() + "%",
-                mHttpPost.isRunning());
         
         TestHelper.blockUntilTrue("request should have been performed by now", 4000,
                 new TestHelper.Condition() {
@@ -72,7 +67,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    public void testGettingNoifiedViaResponseHandler() throws Exception {
+    public void testGettingNoifiedAbooutSuccessViaResponseHandler() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
@@ -90,7 +85,29 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     }
                 });
         assertTrue("should be successful", requestStatus.wasSuccessful);
+        assertNotNull("should have an response body", requestStatus.body);
+        assertEquals("response should come from mocked server", "no message was given",
+                requestStatus.body.toString());
+    }
+    
+    public void testGettingNoifiedAbooutFailureViaResponseHandler() throws Exception {
         
+        mHttpPost = new AsyncHttpPost(getServer().getUri() + "/not-a-valid-address");
+        final ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
+        mHttpPost.registerResponseHandler(requestStatus);
+        mHttpPost.start();
+        TestHelper.blockUntilTrue("request should have called onError", 2000,
+                new TestHelper.Condition() {
+                    
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return requestStatus.hasError;
+                    }
+                });
+        assertFalse("should not be successful", requestStatus.wasSuccessful);
+        assertNotNull("should have no response body", requestStatus.body);
+        assertEquals("response from mocked server should describe 404", "Not Found",
+                requestStatus.body.toString());
     }
     
 }
