@@ -13,23 +13,33 @@ public abstract class ThreadedTask extends Thread {
     }
     
     public int getProgress() {
-        return mProgress;
+        synchronized (this) {
+            return mProgress;
+        }
     }
     
     protected void setProgress(int pProgress) {
-        mProgress = Math.max(0, Math.min(100, pProgress));
+        synchronized (this) {
+            mProgress = Math.max(0, Math.min(100, pProgress));
+        }
     }
     
     public boolean isDone() {
-        return mProgress == 100;
+        synchronized (this) {
+            return mProgress == 100;
+        }
     }
     
     public boolean isRunning() {
-        return (mProgress < 100 && mProgress > 0);
+        synchronized (this) {
+            return (mProgress < 100 && mProgress > 0);
+        }
     }
     
     protected void onPostExecute() {
-        mProgress = 100;
+        synchronized (this) {
+            mProgress = 100;
+        }
     }
     
 }
