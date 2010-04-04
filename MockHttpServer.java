@@ -12,14 +12,25 @@ public class MockHttpServer extends NanoHTTPD {
     private static String                     LOG_TAG          = "HttpServerForTesting";
     private static int                        PORT             = 4000;
     private final HashMap<String, Properties> mPostedResources = new HashMap<String, Properties>();
+    private int                               mResponseDelay   = 0;
     
     public MockHttpServer() throws IOException {
         super(PORT);
     }
     
+    public void setResponseDelay(int pMilliseconds) {
+        mResponseDelay = pMilliseconds;
+    }
+    
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms) {
         Logger.v(LOG_TAG, method, " '", uri, "' ");
+        
+        try {
+            Thread.sleep(mResponseDelay);
+        } catch (InterruptedException e) {
+            Logger.e(LOG_TAG, e);
+        }
         
         if (method.equals("GET")) {
             String msg = null;

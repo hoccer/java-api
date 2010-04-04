@@ -1,7 +1,5 @@
 package com.artcom.y60.http;
 
-import android.test.suitebuilder.annotation.Suppress;
-
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
@@ -10,6 +8,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
     
     public void testExecution() throws Exception {
         
+        getServer().setResponseDelay(1000);
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         mHttpPost.start();
         
@@ -20,16 +19,20 @@ public class TestAsyncHttpPost extends HttpTestCase {
                         return mHttpPost.getProgress() > 0;
                     }
                 });
+        assertTrue("request should have started, but progress is " + mHttpPost.getProgress() + "%",
+                mHttpPost.isRunning());
         
-        TestHelper.blockUntilTrue("request should have got the response by now", 1000,
+        TestHelper.blockUntilTrue("request should have got the response by now", 4000,
                 new TestHelper.Condition() {
                     @Override
                     public boolean isSatisfied() throws Exception {
                         return mHttpPost.getProgress() > 1;
                     }
                 });
+        assertTrue("request should be running, but progress is " + mHttpPost.getProgress() + "%",
+                mHttpPost.isRunning());
         
-        TestHelper.blockUntilTrue("request should have been performed by now", 2000,
+        TestHelper.blockUntilTrue("request should have been performed by now", 4000,
                 new TestHelper.Condition() {
                     @Override
                     public boolean isSatisfied() throws Exception {
@@ -66,15 +69,15 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    @Suppress
-    public void testGettingNoified() throws Exception {
+    public void testGettingNoifiedInResponseHandler() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
         // mHttpPost.registerAsyncResponseHandler(requestStatus);
-        mHttpPost.run();
+        mHttpPost.start();
+        Thread.sleep(50);
+        assertTrue("request should have started", mHttpPost.isRunning());
         assertTrue("should be connecting", requestStatus.isConnecting);
-        
         TestHelper.blockUntilTrue("request should have been performed by now", 3000,
                 new TestHelper.Condition() {
                     
