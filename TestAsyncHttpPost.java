@@ -1,11 +1,14 @@
 package com.artcom.y60.http;
 
+import android.test.FlakyTest;
+
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
     
     AsyncHttpPost mHttpPost;
     
+    @FlakyTest
     public void testExecution() throws Exception {
         
         getServer().setResponseDelay(1000);
@@ -69,11 +72,11 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    public void testGettingNoifiedInResponseHandler() throws Exception {
+    public void testGettingNoifiedViaResponseHandler() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
-        // mHttpPost.registerAsyncResponseHandler(requestStatus);
+        mHttpPost.registerResponseHandler(requestStatus);
         mHttpPost.start();
         Thread.sleep(50);
         assertTrue("request should have started", mHttpPost.isRunning());

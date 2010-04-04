@@ -10,11 +10,13 @@ public class HttpTestCase extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mServer = new MockHttpServer();
+        System.gc();
     }
     
     @Override
     protected void tearDown() throws Exception {
         mServer.quit();
+        System.gc();
         super.tearDown();
     }
     
