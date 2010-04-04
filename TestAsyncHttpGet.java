@@ -20,6 +20,20 @@ public class TestAsyncHttpGet extends HttpTestCase {
                         return mHttpGet.isDone();
                     }
                 });
+    }
+    
+    public void testGettingResultFromRequestObject() throws Exception {
         
+        mHttpGet = new AsyncHttpGet(getServer().getUri());
+        mHttpGet.start();
+        
+        TestHelper.blockUntilEquals("request should respond with a text", 2000,
+                "I'm a mock server for test purposes", new TestHelper.Measurement() {
+                    
+                    @Override
+                    public Object getActualValue() throws Exception {
+                        return mHttpGet.getBodyAsString();
+                    }
+                });
     }
 }

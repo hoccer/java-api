@@ -1,6 +1,5 @@
 package com.artcom.y60.http;
 
-import android.test.UiThreadTest;
 import android.test.suitebuilder.annotation.Suppress;
 
 import com.artcom.y60.TestHelper;
@@ -9,7 +8,6 @@ public class TestAsyncHttpPost extends HttpTestCase {
     
     AsyncHttpPost mHttpPost;
     
-    @UiThreadTest
     public void testExecution() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
@@ -40,7 +38,6 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    @UiThreadTest
     public void testEmptyPost() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
@@ -51,7 +48,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     
                     @Override
                     public Object getActualValue() throws Exception {
-                        return null;
+                        return mHttpPost.getBodyAsString();
                     }
                 });
     }
