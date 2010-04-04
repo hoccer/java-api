@@ -66,26 +66,28 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         }
         setProgress(2);
         
+        if (mResponse == null) {
+            onClientError(new NullPointerException("expected http response object is null"));
+            return;
+        }
+        
         int status = mResponse.getStatusLine().getStatusCode();
         Logger.v(LOG_TAG, "response status code is ", status);
         
-        if (status >= 200 && status < 300) {
-            
-            try {
-                InputStream is = mResponse.getEntity().getContent();
-                long downloaded = 0;
-                long size = mResponse.getEntity().getContentLength();
-                byte[] buffer = new byte[0xFFFF];
-                int len;
-                while ((len = is.read(buffer)) != -1) {
-                    setProgress((int) (downloaded / size));
-                    mResultStream.write(buffer, 0, len);
-                    downloaded += len;
-                }
-            } catch (IOException e) {
-                onIoError(e);
-                return;
+        try {
+            InputStream is = mResponse.getEntity().getContent();
+            long downloaded = 0;
+            long size = mResponse.getEntity().getContentLength();
+            byte[] buffer = new byte[0xFFFF];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                setProgress((int) (downloaded / size));
+                mResultStream.write(buffer, 0, len);
+                downloaded += len;
             }
+        } catch (IOException e) {
+            onIoError(e);
+            return;
         }
         
     }
@@ -137,15 +139,21 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     protected void onSuccess(int pStatusCode) {
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onSuccess(mResponse);
+            mResponseHandlerCallback.onSuccess(pStatusCode, mResultStream);
         }
     }
     
     protected void onClientError(int pStatusCode) {
         Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onError(pStatusCode, mResultStream);
+        }
     }
     
     protected void onServerError(int pStatusCode) {
         Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onError(pStatusCode, mResultStream);
+        }
     }
 }
