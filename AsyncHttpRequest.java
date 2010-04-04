@@ -16,15 +16,17 @@ import com.artcom.y60.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
     
-    private static final String   LOG_TAG       = "AsyncHttpConnection";
+    private static final String   LOG_TAG                  = "AsyncHttpConnection";
     
-    private static String         USER_AGENT    = "Y60/1.0 Android";
+    private static String         USER_AGENT               = "Y60/1.0 Android";
     
     private final HttpRequestBase mRequest;
     
-    private final OutputStream    mResultStream = new ByteArrayOutputStream();
+    private final OutputStream    mResultStream            = new ByteArrayOutputStream();
     
-    private HttpResponse          mResponse     = null;
+    private HttpResponse          mResponse                = null;
+    
+    private HttpResponseHandler   mResponseHandlerCallback = null;
     
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
@@ -47,6 +49,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     public void doInBackground() {
         
         setProgress(1);
+        onConnecting();
         
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
@@ -87,6 +90,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         
     }
     
+    public void registerResponseHandler(HttpResponseHandler responseHandler) {
+        mResponseHandlerCallback = responseHandler;
+    }
+    
     abstract protected HttpRequestBase createRequest(String pUrl);
     
     protected HttpRequestBase getRequest() {
@@ -122,7 +129,16 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         Logger.e(LOG_TAG, e);
     }
     
+    protected void onConnecting() {
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onConnecting();
+        }
+    }
+    
     protected void onSuccess(int pStatusCode) {
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onSuccess(mResponse);
+        }
     }
     
     protected void onClientError(int pStatusCode) {
