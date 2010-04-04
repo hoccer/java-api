@@ -53,6 +53,19 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
+    public void testGettingResultWithoutPerformingTheRequest() throws Exception {
+        
+        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        TestHelper.blockUntilEquals("request should give empty body before started", 1000, "",
+                new TestHelper.Measurement() {
+                    
+                    @Override
+                    public Object getActualValue() throws Exception {
+                        return mHttpPost.getBodyAsString();
+                    }
+                });
+    }
+    
     @Suppress
     public void testGettingNoified() throws Exception {
         
