@@ -34,8 +34,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         USER_AGENT = pAgent;
     }
     
-    protected HttpRequestBase getRequest() {
-        return mRequest;
+    public String getBodyAsString() {
+        return mResultStream.toString();
     }
     
     @Override
@@ -78,11 +78,16 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     abstract protected HttpRequestBase createRequest(String pUrl);
     
+    protected HttpRequestBase getRequest() {
+        return mRequest;
+    }
+    
     @Override
     protected void onPostExecute() {
-        Logger.v(LOG_TAG, "on PostExecute");
         
         if (mResponse == null) {
+            onClientError(new NullPointerException("response of request " + mRequest.getURI()
+                    + " was null"));
             return;
         }
         
@@ -92,7 +97,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         } else if (status >= 500 && status < 600) {
             onServerError(status);
         } else {
-            onSuccess();
+            onSuccess(status);
         }
         
         super.onPostExecute();
@@ -102,11 +107,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         Logger.e(LOG_TAG, e);
     }
     
-    protected void onSuccess() {
-    }
-    
     protected void onClientError(Exception e) {
         Logger.e(LOG_TAG, e);
+    }
+    
+    protected void onSuccess(int pStatusCode) {
     }
     
     protected void onClientError(int pStatusCode) {
