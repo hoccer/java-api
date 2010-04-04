@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -38,6 +39,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         return mResultStream.toString();
     }
     
+    public boolean isConnecting() {
+        return getProgress() == 1;
+    }
+    
     @Override
     public void doInBackground() {
         
@@ -48,15 +53,20 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             mResponse = httpClient.execute(mRequest);
         } catch (ClientProtocolException e) {
             onClientError(e);
+            return;
+        } catch (SocketException e) {
+            onClientError(e);
+            return;
         } catch (IOException e) {
             onIoError(e);
+            return;
         }
         setProgress(2);
         
         int status = mResponse.getStatusLine().getStatusCode();
         Logger.v(LOG_TAG, "response status code is ", status);
         
-        if (status == 200) {
+        if (status >= 200 && status < 300) {
             
             try {
                 InputStream is = mResponse.getEntity().getContent();
@@ -71,6 +81,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                 }
             } catch (IOException e) {
                 onIoError(e);
+                return;
             }
         }
         
