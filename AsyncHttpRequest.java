@@ -42,9 +42,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mRequest = createRequest(pUrl);
         mHttpClient = pHttpClient;
         
-        // overwrite user-agent if it's the default one from apache
-        if (mHttpClient.getParams().getParameter("http.useragent").toString().contains(
-                "Apache-HttpClient")) {
+        // overwrite user-agent if it's not already customized
+        Object userAgent = mHttpClient.getParams().getParameter("http.useragent");
+        if (userAgent == null || userAgent.toString().contains("Apache-HttpClient")) {
             mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
         }
     }
@@ -105,6 +105,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     public void registerResponseHandler(HttpResponseHandler responseHandler) {
         mResponseHandlerCallback = responseHandler;
+    }
+    
+    public String getHeader(String pHeaderName) {
+        Logger.v(LOG_TAG, HttpHelper.getHeadersAsString(mResponse.getAllHeaders()));
+        return mResponse.getFirstHeader(pHeaderName).getValue();
     }
     
     abstract protected HttpRequestBase createRequest(String pUrl);
