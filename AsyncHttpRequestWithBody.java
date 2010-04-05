@@ -1,5 +1,6 @@
 package com.artcom.y60.http;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
@@ -8,7 +9,11 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
         super(pUrl);
     }
     
-    private void setData(String pStringData) {
+    public AsyncHttpRequestWithBody(String pUrl, HttpClient pHttpClient) {
+        super(pUrl, pHttpClient);
+    }
+    
+    public void setBody(String pStringData) {
         HttpHelper.insert(pStringData, "text/txt", getRequest());
     }
     

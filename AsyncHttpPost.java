@@ -4,7 +4,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
 
-public class AsyncHttpPost extends AsyncHttpRequest {
+public class AsyncHttpPost extends AsyncHttpRequestWithBody {
     
     public AsyncHttpPost(String pUrl) {
         super(pUrl);
