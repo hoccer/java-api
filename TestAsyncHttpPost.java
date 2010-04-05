@@ -66,7 +66,16 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    public void testGettingResultWithoutPerformingTheRequest() throws Exception {
+    public void testPostWithUrlEncodedParameters() throws Exception {
+        
+        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        mHttpPost.setBody("message=test post");
+        mHttpPost.start();
+        assertRequestIsDone();
+        assertEquals("should receive what was posted", "test post", mHttpPost.getBodyAsString());
+    }
+    
+    public void testGettingBodyWithoutPerformingTheRequest() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         TestHelper.blockUntilEquals("request should give empty body before started", 1000, "",
@@ -85,8 +94,13 @@ public class TestAsyncHttpPost extends HttpTestCase {
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
         mHttpPost.registerResponseHandler(requestStatus);
         mHttpPost.start();
-        Thread.sleep(50);
-        assertTrue("request should have started", mHttpPost.isRunning());
+        TestHelper.blockUntilTrue("request should have started", 1000, new TestHelper.Condition() {
+            
+            @Override
+            public boolean isSatisfied() throws Exception {
+                return mHttpPost.isRunning();
+            }
+        });
         assertTrue("should be connecting", requestStatus.isConnecting);
         assertRequestIsDone();
         assertTrue("should be successful", requestStatus.wasSuccessful);
