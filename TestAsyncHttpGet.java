@@ -95,4 +95,18 @@ public class TestAsyncHttpGet extends HttpTestCase {
                 requestStatus.body.toString());
     }
     
+    public void testDefaultUserAgentStringInRequest() throws Exception {
+        mHttpGet = new AsyncHttpGet(getServer().getUri());
+        mHttpGet.start();
+        TestHelper.blockUntilTrue("request should have been performed by now", 1000,
+                new TestHelper.Condition() {
+                    
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return mHttpGet.isDone();
+                    }
+                });
+        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
+                getServer().getLastRequest().header.getProperty("user-agent"));
+    }
 }
