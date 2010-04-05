@@ -1,5 +1,6 @@
 package com.artcom.y60.http;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.artcom.y60.TestHelper;
@@ -107,6 +108,17 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mHttpGet.start();
         assertRequestIsDone();
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
+                getServer().getLastRequest().header.getProperty("user-agent"));
+    }
+    
+    public void testOwnUserAgentStringInRequestWithCustomHttpClient() throws Exception {
+        HttpClient httpClient = new DefaultHttpClient();
+        httpClient.getParams().setParameter("http.useragent", "Y60/0.1 HTTP Unit Test");
+        
+        mHttpGet = new AsyncHttpGet(getServer().getUri(), httpClient);
+        mHttpGet.start();
+        assertRequestIsDone();
+        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/0.1 HTTP Unit Test",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
 }
