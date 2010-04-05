@@ -1,18 +1,15 @@
 package com.artcom.y60.http;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpGet extends HttpTestCase {
     
     AsyncHttpGet mHttpGet;
     
-    public void testCreating() throws Exception {
-        
-        mHttpGet = new AsyncHttpGet(getServer().getUri());
-        mHttpGet.start();
-        
-        assertFalse("http get should run asyncrunous", mHttpGet.isDone());
-        TestHelper.blockUntilTrue("request should have been performed by now", 8000,
+    private void assertRequestIsDone() throws Exception {
+        TestHelper.blockUntilTrue("request should have been performed by now", 1000,
                 new TestHelper.Condition() {
                     
                     @Override
@@ -20,6 +17,15 @@ public class TestAsyncHttpGet extends HttpTestCase {
                         return mHttpGet.isDone();
                     }
                 });
+    }
+    
+    public void testCreating() throws Exception {
+        
+        mHttpGet = new AsyncHttpGet(getServer().getUri());
+        mHttpGet.start();
+        
+        assertFalse("http get should run asyncrunous", mHttpGet.isDone());
+        assertRequestIsDone();
     }
     
     public void testGettingResultFromRequestObject() throws Exception {
@@ -61,14 +67,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertTrue("request should have started, but is at " + mHttpGet.getProgress() + "%",
                 mHttpGet.isRunning());
         assertTrue("should be connecting", requestStatus.isConnecting);
-        TestHelper.blockUntilTrue("request should have been performed by now", 3000,
-                new TestHelper.Condition() {
-                    
-                    @Override
-                    public boolean isSatisfied() throws Exception {
-                        return mHttpGet.isDone();
-                    }
-                });
+        assertRequestIsDone();
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
         assertEquals("response should come from mocked server",
@@ -98,14 +97,15 @@ public class TestAsyncHttpGet extends HttpTestCase {
     public void testDefaultUserAgentStringInRequest() throws Exception {
         mHttpGet = new AsyncHttpGet(getServer().getUri());
         mHttpGet.start();
-        TestHelper.blockUntilTrue("request should have been performed by now", 1000,
-                new TestHelper.Condition() {
-                    
-                    @Override
-                    public boolean isSatisfied() throws Exception {
-                        return mHttpGet.isDone();
-                    }
-                });
+        assertRequestIsDone();
+        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
+                getServer().getLastRequest().header.getProperty("user-agent"));
+    }
+    
+    public void testDefaultUserAgentStringInRequestWithCustomHttpClient() throws Exception {
+        mHttpGet = new AsyncHttpGet(getServer().getUri(), new DefaultHttpClient());
+        mHttpGet.start();
+        assertRequestIsDone();
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
