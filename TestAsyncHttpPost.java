@@ -1,5 +1,8 @@
 package com.artcom.y60.http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -66,13 +69,25 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    public void testPostWithUrlEncodedParameters() throws Exception {
+    public void testPostWithUrlEncodedParametersAsString() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
         mHttpPost.setBody("message=test post");
         mHttpPost.start();
         assertRequestIsDone();
         assertEquals("should receive what was posted", "test post", mHttpPost.getBodyAsString());
+    }
+    
+    public void testPostWithUrlEncodedParametersAsHashMap() throws Exception {
+        
+        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("message", "test post with hash map");
+        mHttpPost.setBody(params);
+        mHttpPost.start();
+        assertRequestIsDone();
+        assertEquals("should receive what was posted", "test post with hash map", mHttpPost
+                .getBodyAsString());
     }
     
     public void testGettingBodyWithoutPerformingTheRequest() throws Exception {
