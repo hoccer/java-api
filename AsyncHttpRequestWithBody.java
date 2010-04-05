@@ -1,5 +1,7 @@
 package com.artcom.y60.http;
 
+import java.util.Map;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
@@ -15,6 +17,10 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     
     public void setBody(String pStringData) {
         HttpHelper.insert(pStringData, "text/txt", getRequest());
+    }
+    
+    public void setBody(Map<String, String> params) {
+        HttpHelper.insert(HttpHelper.getParametersAsString(params), "text/txt", getRequest());
     }
     
     @Override

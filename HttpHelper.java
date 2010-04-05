@@ -63,14 +63,22 @@ public class HttpHelper {
     public static HttpResponse putUrlEncoded(String pUrl, Map<String, String> pData)
             throws IOException, HttpClientException, HttpServerException {
         
+        HttpPut put = new HttpPut(pUrl);
+        String body = getParametersAsString(pData);
+        insertUrlEncodedAcceptingJson(body, put);
+        
+        return executeHTTPMethod(put, PUT_TIMEOUT);
+    }
+    
+    public static String getParametersAsString(Map<String, String> pParameters) {
         StringBuffer tmp = new StringBuffer();
-        Set<String> keys = pData.keySet();
+        Set<String> keys = pParameters.keySet();
         int idx = 0;
         for (String key : keys) {
             
             tmp.append(URLEncoder.encode(key));
             tmp.append("=");
-            tmp.append(URLEncoder.encode(pData.get(key)));
+            tmp.append(URLEncoder.encode(pParameters.get(key)));
             
             idx += 1;
             
@@ -79,14 +87,7 @@ public class HttpHelper {
                 tmp.append("&");
             }
         }
-        
-        HttpPut put = new HttpPut(pUrl);
-        String body = tmp.toString();
-        
-        // Logger.v(LOG_TAG, "PUT " + pUrl + " with body " + body);
-        
-        insertUrlEncodedAcceptingJson(body, put);
-        return executeHTTPMethod(put, PUT_TIMEOUT);
+        return tmp.toString();
     }
     
     public static String putText(String pUri, String pData) throws IOException,
