@@ -6,6 +6,17 @@ public class TestAsyncHttpPost extends HttpTestCase {
     
     AsyncHttpPost mHttpPost;
     
+    private void assertRequestIsDone() throws Exception {
+        TestHelper.blockUntilTrue("request should have been performed by now", 3000,
+                new TestHelper.Condition() {
+                    
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return mHttpPost.isDone();
+                    }
+                });
+    }
+    
     public void testExecution() throws Exception {
         
         getServer().setResponseDelay(200);
@@ -30,13 +41,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     }
                 });
         
-        TestHelper.blockUntilTrue("request should have been performed by now", 4000,
-                new TestHelper.Condition() {
-                    @Override
-                    public boolean isSatisfied() throws Exception {
-                        return mHttpPost.isDone();
-                    }
-                });
+        assertRequestIsDone();
     }
     
     public void testEmptyPost() throws Exception {
@@ -76,14 +81,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         Thread.sleep(50);
         assertTrue("request should have started", mHttpPost.isRunning());
         assertTrue("should be connecting", requestStatus.isConnecting);
-        TestHelper.blockUntilTrue("request should have been performed by now", 3000,
-                new TestHelper.Condition() {
-                    
-                    @Override
-                    public boolean isSatisfied() throws Exception {
-                        return mHttpPost.isDone();
-                    }
-                });
+        assertRequestIsDone();
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
         assertEquals("response should come from mocked server", "no message was given",
