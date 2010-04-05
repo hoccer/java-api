@@ -2,6 +2,7 @@ package com.artcom.y60.http;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
 
 import com.artcom.y60.TestHelper;
 
@@ -20,6 +21,17 @@ public class TestAsyncHttpGet extends HttpTestCase {
                 });
     }
     
+    private void assertNormalHttpGetResponse() throws Exception {
+        TestHelper.blockUntilEquals("request should respond with a text", 2000,
+                "I'm a mock server for test purposes", new TestHelper.Measurement() {
+                    
+                    @Override
+                    public Object getActualValue() throws Exception {
+                        return mHttpGet.getBodyAsString();
+                    }
+                });
+    }
+    
     public void testCreating() throws Exception {
         
         mHttpGet = new AsyncHttpGet(getServer().getUri());
@@ -33,15 +45,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         
         mHttpGet = new AsyncHttpGet(getServer().getUri());
         mHttpGet.start();
-        
-        TestHelper.blockUntilEquals("request should respond with a text", 2000,
-                "I'm a mock server for test purposes", new TestHelper.Measurement() {
-                    
-                    @Override
-                    public Object getActualValue() throws Exception {
-                        return mHttpGet.getBodyAsString();
-                    }
-                });
+        assertNormalHttpGetResponse();
     }
     
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {
@@ -119,6 +123,15 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mHttpGet.start();
         assertRequestIsDone();
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/0.1 HTTP Unit Test",
+                getServer().getLastRequest().header.getProperty("user-agent"));
+    }
+    
+    public void testCustomHttpClientWithDefaultParams() throws Exception {
+        HttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
+        mHttpGet = new AsyncHttpGet(getServer().getUri(), httpClient);
+        mHttpGet.start();
+        assertNormalHttpGetResponse();
+        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
 }

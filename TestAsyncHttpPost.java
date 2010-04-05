@@ -1,10 +1,17 @@
 package com.artcom.y60.http;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
     
-    AsyncHttpPost mHttpPost;
+    private static final String LOG_TAG = "TestAsyncHttpPost";
+    AsyncHttpPost               mHttpPost;
     
     private void assertRequestIsDone() throws Exception {
         TestHelper.blockUntilTrue("request should have been performed by now", 3000,
@@ -108,4 +115,16 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 requestStatus.body.toString());
     }
     
+    public void testCustomHttpClientToSupressRedirectionAfterPost() throws Exception {
+        HttpParams httpParams = new BasicHttpParams();
+        HttpClientParams.setRedirecting(httpParams, false);
+        HttpClient httpClient = new DefaultHttpClient(httpParams);
+        mHttpPost = new AsyncHttpPost(getServer().getUri(), httpClient);
+        mHttpPost.start();
+        assertRequestIsDone();
+        assertTrue("should have an location header", mHttpPost.getHeader("Location").contains(
+                "http://localhost"));
+        TestHelper.assertIncludes("response from mocked server should describe 303",
+                "see other: http://localhost", mHttpPost.getBodyAsString().toString());
+    }
 }
