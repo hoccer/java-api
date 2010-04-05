@@ -69,27 +69,25 @@ public class NanoHTTPD {
      * <p>
      * (By default, this delegates to serveFile() and allows directory listing.)
      * 
-     * @parm uri Percent-decoded URI without parameters, for example "/index.cgi"
-     * @parm method "GET", "POST" etc.
-     * @parm parms Parsed, percent decoded parameters from URI and, in case of POST, data.
-     * @parm header Header entries, percent decoded
      * @return HTTP response, see class Response for details
      */
-    public Response serve(String uri, String method, Properties header, Properties parms) {
-        System.out.println(method + " '" + uri + "' ");
+    public Response serve(ClientRequest request) {
+        System.out.println(request.method + " '" + request.uri + "' ");
         
-        Enumeration e = header.propertyNames();
+        Enumeration e = request.header.propertyNames();
         while (e.hasMoreElements()) {
             String value = (String) e.nextElement();
-            System.out.println("  HDR: '" + value + "' = '" + header.getProperty(value) + "'");
+            System.out.println("  HDR: '" + value + "' = '" + request.header.getProperty(value)
+                    + "'");
         }
-        e = parms.propertyNames();
+        e = request.parameters.propertyNames();
         while (e.hasMoreElements()) {
             String value = (String) e.nextElement();
-            System.out.println("  PRM: '" + value + "' = '" + parms.getProperty(value) + "'");
+            System.out.println("  PRM: '" + value + "' = '" + request.parameters.getProperty(value)
+                    + "'");
         }
         
-        return serveFile(uri, header, new File("."), true);
+        return serveFile(request.uri, request.header, new File("."), true);
     }
     
     /**
@@ -258,6 +256,31 @@ public class NanoHTTPD {
         ;
     }
     
+    class ClientRequest {
+        public String     uri;
+        public String     method;
+        public Properties header;
+        public Properties parameters;
+        
+        /**
+         * @parm uri Percent-decoded URI without parameters, for example "/index.cgi"
+         * @parm method "GET", "POST" etc.
+         * @parm parms Parsed, percent decoded parameters from URI and, in case of POST, data.
+         * @parm header Header entries, percent decoded
+         */
+        public ClientRequest(String uri, String method, Properties header, Properties parms) {
+            this.uri = uri;
+            this.method = method;
+            this.header = header;
+            this.parameters = parms;
+        }
+        
+        @Override
+        public String toString() {
+            return method + " '" + uri + "' with header " + header + " and params " + parameters;
+        }
+    }
+    
     /**
      * Handles one session, i.e. parses the HTTP request and returns the response.
      */
@@ -354,7 +377,7 @@ public class NanoHTTPD {
                 }
                 
                 // Ok, now do the serve()
-                Response r = serve(uri, method, header, parms);
+                Response r = serve(new ClientRequest(uri, method, header, parms));
                 if (r == null)
                     sendError(HTTP_INTERNALERROR,
                             "SERVER INTERNAL ERROR: Serve() returned a null response.");

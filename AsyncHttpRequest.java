@@ -8,8 +8,11 @@ import java.net.SocketException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 
 import com.artcom.y60.Logger;
 import com.artcom.y60.thread.ThreadedTask;
@@ -18,23 +21,29 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     private static final String   LOG_TAG                  = "AsyncHttpConnection";
     
-    private static String         USER_AGENT               = "Y60/1.0 Android";
-    
+    private final HttpClient      mHttpClient;
     private final HttpRequestBase mRequest;
     
-    private final OutputStream    mResultStream            = new ByteArrayOutputStream();
-    
     private HttpResponse          mResponse                = null;
+    private final OutputStream    mResultStream            = new ByteArrayOutputStream();
     
     private HttpResponseHandler   mResponseHandlerCallback = null;
     
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
-        mRequest.addHeader("User-Agent", USER_AGENT);
+        
+        HttpParams httpParams = new BasicHttpParams();
+        // HttpClientParams.setRedirecting(httpParams, false);
+        mHttpClient = new DefaultHttpClient(httpParams);
+        mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
     }
     
-    public static void setUserAgent(String pAgent) {
-        USER_AGENT = pAgent;
+    public AsyncHttpRequest(String pUrl, HttpClient pHttpClient) {
+        mRequest = createRequest(pUrl);
+        mHttpClient = pHttpClient;
+        if (mHttpClient.getParams().getParameter("http.useragent").equals("")) {
+            mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
+        }
     }
     
     public String getBodyAsString() {
@@ -51,9 +60,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         setProgress(1);
         onConnecting();
         
-        DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
-            mResponse = httpClient.execute(mRequest);
+            mResponse = mHttpClient.execute(mRequest);
         } catch (ClientProtocolException e) {
             onClientError(e);
             return;
