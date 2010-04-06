@@ -7,6 +7,8 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 
 public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     
+    private static final String LOG_TAG = "AsyncHttpRequestWithBody";
+    
     public AsyncHttpRequestWithBody(String pUrl) {
         super(pUrl);
     }
@@ -20,7 +22,8 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     }
     
     public void setBody(Map<String, String> params) {
-        HttpHelper.insert(HttpHelper.getParametersAsString(params), "text/txt", getRequest());
+        HttpHelper.insert(HttpHelper.urlEncodeValues(params), "application/x-www-form-urlencoded",
+                getRequest());
     }
     
     @Override

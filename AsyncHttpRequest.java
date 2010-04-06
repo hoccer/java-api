@@ -33,7 +33,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mRequest = createRequest(pUrl);
         
         HttpParams httpParams = new BasicHttpParams();
-        // HttpClientParams.setRedirecting(httpParams, false);
         mHttpClient = new DefaultHttpClient(httpParams);
         mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
     }
@@ -51,6 +50,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     public String getBodyAsString() {
         return mResultStream.toString();
+    }
+    
+    public void setAcceptedMimeType(String pMimeType) {
+        getRequest().addHeader("Accept", pMimeType);
     }
     
     public boolean isConnecting() {

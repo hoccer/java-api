@@ -64,30 +64,10 @@ public class HttpHelper {
             throws IOException, HttpClientException, HttpServerException {
         
         HttpPut put = new HttpPut(pUrl);
-        String body = getParametersAsString(pData);
+        String body = urlEncodeKeysAndValues(pData);
         insertUrlEncodedAcceptingJson(body, put);
         
         return executeHTTPMethod(put, PUT_TIMEOUT);
-    }
-    
-    public static String getParametersAsString(Map<String, String> pParameters) {
-        StringBuffer tmp = new StringBuffer();
-        Set<String> keys = pParameters.keySet();
-        int idx = 0;
-        for (String key : keys) {
-            
-            tmp.append(URLEncoder.encode(key));
-            tmp.append("=");
-            tmp.append(URLEncoder.encode(pParameters.get(key)));
-            
-            idx += 1;
-            
-            if (idx < keys.size()) {
-                
-                tmp.append("&");
-            }
-        }
-        return tmp.toString();
     }
     
     public static String putText(String pUri, String pData) throws IOException,
@@ -282,7 +262,7 @@ public class HttpHelper {
     public static HttpResponse postUrlEncoded(String pUrl, Map<String, String> pData)
             throws IOException, HttpClientException, HttpServerException {
         
-        String body = urlEncode(pData);
+        String body = urlEncodeKeysAndValues(pData);
         return postUrlEncoded(pUrl, body);
     }
     
@@ -295,21 +275,37 @@ public class HttpHelper {
         return executeHTTPMethod(post);
     }
     
-    public static String urlEncode(Map pData) {
+    public static String urlEncodeKeysAndValues(Map<String, String> pData) {
         
         StringBuffer tmp = new StringBuffer();
         Set keys = pData.keySet();
         int idx = 0;
         for (Object key : keys) {
-            
             tmp.append(URLEncoder.encode(String.valueOf(key)));
             tmp.append("=");
             tmp.append(URLEncoder.encode(String.valueOf(pData.get(key))));
             
             idx += 1;
-            
             if (idx < keys.size()) {
-                
+                tmp.append("&");
+            }
+        }
+        
+        return tmp.toString();
+    }
+    
+    public static String urlEncodeValues(Map<String, String> pData) {
+        
+        StringBuffer tmp = new StringBuffer();
+        Set keys = pData.keySet();
+        int idx = 0;
+        for (Object key : keys) {
+            tmp.append(String.valueOf(key));
+            tmp.append("=");
+            tmp.append(URLEncoder.encode(String.valueOf(pData.get(key))));
+            
+            idx += 1;
+            if (idx < keys.size()) {
                 tmp.append("&");
             }
         }
