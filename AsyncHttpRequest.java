@@ -128,6 +128,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mResponseHandlerCallback = responseHandler;
     }
     
+    /**
+     * @return uri of the request (gets updated when redirected)
+     */
     public String getUri() {
         return mRequest.getURI().toString();
     }
