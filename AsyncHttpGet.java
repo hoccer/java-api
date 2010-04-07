@@ -1,8 +1,8 @@
 package com.artcom.y60.http;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 public class AsyncHttpGet extends AsyncHttpRequest {
     
@@ -10,7 +10,7 @@ public class AsyncHttpGet extends AsyncHttpRequest {
         super(pUrl);
     }
     
-    public AsyncHttpGet(String pUrl, HttpClient pHttpClient) {
+    public AsyncHttpGet(String pUrl, DefaultHttpClient pHttpClient) {
         super(pUrl, pHttpClient);
     }
     

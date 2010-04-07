@@ -1,8 +1,8 @@
 package com.artcom.y60.http;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 public class AsyncHttpPost extends AsyncHttpRequestWithBody {
     
@@ -10,7 +10,7 @@ public class AsyncHttpPost extends AsyncHttpRequestWithBody {
         super(pUrl);
     }
     
-    public AsyncHttpPost(String pUrl, HttpClient pHttpClient) {
+    public AsyncHttpPost(String pUrl, DefaultHttpClient pHttpClient) {
         super(pUrl, pHttpClient);
     }
     

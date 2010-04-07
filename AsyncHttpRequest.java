@@ -5,14 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
+import java.net.URI;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultRedirectHandler;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HttpContext;
 
 import com.artcom.y60.Logger;
 import com.artcom.y60.thread.ThreadedTask;
@@ -21,7 +24,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     private static final String   LOG_TAG                  = "AsyncHttpConnection";
     
-    private final HttpClient      mHttpClient;
+    private DefaultHttpClient     mHttpClient;
     private final HttpRequestBase mRequest;
     
     private HttpResponse          mResponse                = null;
@@ -33,12 +36,16 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mRequest = createRequest(pUrl);
         
         HttpParams httpParams = new BasicHttpParams();
-        mHttpClient = new DefaultHttpClient(httpParams);
-        mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
+        setHttpClient(new DefaultHttpClient(httpParams));
     }
     
-    public AsyncHttpRequest(String pUrl, HttpClient pHttpClient) {
+    public AsyncHttpRequest(String pUrl, DefaultHttpClient pHttpClient) {
         mRequest = createRequest(pUrl);
+        setHttpClient(pHttpClient);
+    }
+    
+    // Only used internally to reuse code for both constructors
+    private void setHttpClient(DefaultHttpClient pHttpClient) {
         mHttpClient = pHttpClient;
         
         // overwrite user-agent if it's not already customized
@@ -46,6 +53,17 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         if (userAgent == null || userAgent.toString().contains("Apache-HttpClient")) {
             mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
         }
+        
+        // remember redirects
+        mHttpClient.setRedirectHandler(new DefaultRedirectHandler() {
+            @Override
+            public URI getLocationURI(HttpResponse response, HttpContext context)
+                    throws ProtocolException {
+                URI uri = super.getLocationURI(response, context);
+                mRequest.setURI(uri);
+                return uri;
+            }
+        });
     }
     
     public String getBodyAsString() {
@@ -110,8 +128,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mResponseHandlerCallback = responseHandler;
     }
     
+    public String getUri() {
+        return mRequest.getURI().toString();
+    }
+    
     public String getHeader(String pHeaderName) {
-        Logger.v(LOG_TAG, HttpHelper.getHeadersAsString(mResponse.getAllHeaders()));
         return mResponse.getFirstHeader(pHeaderName).getValue();
     }
     

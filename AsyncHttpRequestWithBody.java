@@ -2,8 +2,8 @@ package com.artcom.y60.http;
 
 import java.util.Map;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     
@@ -13,7 +13,7 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
         super(pUrl);
     }
     
-    public AsyncHttpRequestWithBody(String pUrl, HttpClient pHttpClient) {
+    public AsyncHttpRequestWithBody(String pUrl, DefaultHttpClient pHttpClient) {
         super(pUrl, pHttpClient);
     }
     
