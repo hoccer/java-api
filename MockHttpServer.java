@@ -14,6 +14,7 @@ public class MockHttpServer extends NanoHTTPD {
     private final HashMap<String, Properties> mPostedResources = new HashMap<String, Properties>();
     private int                               mResponseDelay   = 0;
     private ClientRequest                     mLastRequest;
+    private Response                          mLastResponse;
     
     public MockHttpServer() throws IOException {
         super(PORT);
@@ -27,12 +28,19 @@ public class MockHttpServer extends NanoHTTPD {
         return mLastRequest;
     }
     
+    Response getLastResponse() {
+        return mLastResponse;
+    }
+    
     @Override
     public Response serve(ClientRequest request) {
         Logger.v(LOG_TAG, request);
-        
         mLastRequest = request;
-        
+        mLastResponse = handleRequest(request);
+        return mLastResponse;
+    }
+    
+    private Response handleRequest(ClientRequest request) {
         try {
             Thread.sleep(mResponseDelay);
         } catch (InterruptedException e) {
@@ -56,8 +64,9 @@ public class MockHttpServer extends NanoHTTPD {
             String newResource = "/" + UUID.randomUUID();
             mPostedResources.put(newResource, request.parameters);
             
-            NanoHTTPD.Response response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT,
-                    "see other: " + "http://localhost:" + PORT + newResource);
+            NanoHTTPD.Response response;
+            response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "
+                    + "http://localhost:" + PORT + newResource);
             response.addHeader("Location", "http://localhost:" + PORT + newResource);
             return response;
         }
@@ -66,6 +75,6 @@ public class MockHttpServer extends NanoHTTPD {
     }
     
     public String getUri() {
-        return "http://localhost:" + PORT + "/";
+        return "http://localhost:" + PORT;
     }
 }

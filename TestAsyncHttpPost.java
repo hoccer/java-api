@@ -3,7 +3,6 @@ package com.artcom.y60.http;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -147,7 +146,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
     public void testCustomHttpClientToSupressRedirectionAfterPost() throws Exception {
         HttpParams httpParams = new BasicHttpParams();
         HttpClientParams.setRedirecting(httpParams, false);
-        HttpClient httpClient = new DefaultHttpClient(httpParams);
+        DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
         mHttpPost = new AsyncHttpPost(getServer().getUri(), httpClient);
         mHttpPost.start();
         assertRequestIsDone();
@@ -155,5 +154,26 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 "http://localhost"));
         TestHelper.assertIncludes("response from mocked server should describe 303",
                 "see other: http://localhost", mHttpPost.getBodyAsString().toString());
+    }
+    
+    public void testUriOfSolvableRequest() throws Exception {
+        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        assertEquals("should get uri of creation", getServer().getUri(), mHttpPost.getUri());
+        mHttpPost.start();
+        assertEquals("should get uri of creation", getServer().getUri(), mHttpPost.getUri());
+        assertRequestIsDone();
+        assertEquals(
+                "uri should now point to resource whre the post request got redirected indirectly",
+                getServer().getUri() + getServer().getLastRequest().uri, mHttpPost.getUri());
+    }
+    
+    public void testUriOf404Request() throws Exception {
+        String uri = getServer().getUri() + "/not-existing";
+        mHttpPost = new AsyncHttpPost(uri);
+        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
+        mHttpPost.start();
+        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
+        assertRequestIsDone();
+        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
     }
 }

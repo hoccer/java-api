@@ -1,6 +1,5 @@
 package com.artcom.y60.http;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 
@@ -116,7 +115,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
     }
     
     public void testOwnUserAgentStringInRequestWithCustomHttpClient() throws Exception {
-        HttpClient httpClient = new DefaultHttpClient();
+        DefaultHttpClient httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter("http.useragent", "Y60/0.1 HTTP Unit Test");
         
         mHttpGet = new AsyncHttpGet(getServer().getUri(), httpClient);
@@ -127,11 +126,30 @@ public class TestAsyncHttpGet extends HttpTestCase {
     }
     
     public void testCustomHttpClientWithDefaultParams() throws Exception {
-        HttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
+        DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
         mHttpGet = new AsyncHttpGet(getServer().getUri(), httpClient);
         mHttpGet.start();
         assertNormalHttpGetResponse();
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
+    }
+    
+    public void testUriOfSolvableRequest() throws Exception {
+        mHttpGet = new AsyncHttpGet(getServer().getUri());
+        assertEquals("should get uri of creation", getServer().getUri(), mHttpGet.getUri());
+        mHttpGet.start();
+        assertEquals("should get uri of creation", getServer().getUri(), mHttpGet.getUri());
+        assertRequestIsDone();
+        assertEquals("should get uri of creation", getServer().getUri(), mHttpGet.getUri());
+    }
+    
+    public void testUriOf404Request() throws Exception {
+        String uri = getServer().getUri() + "/not-existing";
+        mHttpGet = new AsyncHttpGet(uri);
+        assertEquals("should get uri of creation", uri, mHttpGet.getUri());
+        mHttpGet.start();
+        assertEquals("should get uri of creation", uri, mHttpGet.getUri());
+        assertRequestIsDone();
+        assertEquals("should get uri of creation", uri, mHttpGet.getUri());
     }
 }
