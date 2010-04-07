@@ -74,6 +74,9 @@ public class MockHttpServer extends NanoHTTPD {
         return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "not implemented");
     }
     
+    /**
+     * @return basic location and port of the server
+     */
     public String getUri() {
         return "http://localhost:" + PORT;
     }
