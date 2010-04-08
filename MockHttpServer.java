@@ -56,25 +56,35 @@ public class MockHttpServer extends NanoHTTPD {
         }
         
         if (request.method.equals("GET")) {
-            String msg = null;
-            if (mSubResources.containsKey(request.uri)) {
-                msg = mSubResources.get(request.uri).getProperty("message", "no message was given");
-            } else {
-                msg = "I'm a mock server for test purposes";
-            }
-            return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, msg);
-        } else if (request.method.equals("POST")) {
-            String newResource = "/" + UUID.randomUUID();
-            mSubResources.put(newResource, request.parameters);
-            
-            NanoHTTPD.Response response;
-            response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "
-                    + "http://localhost:" + PORT + newResource);
-            response.addHeader("Location", "http://localhost:" + PORT + newResource);
-            return response;
+            return handleGetRequest(request);
+        }
+        
+        if (request.method.equals("POST")) {
+            return handlePostRequest(request);
         }
         
         return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "not implemented");
+    }
+    
+    private NanoHTTPD.Response handlePostRequest(ClientRequest request) {
+        String newResource = "/" + UUID.randomUUID();
+        mSubResources.put(newResource, request.parameters);
+        
+        NanoHTTPD.Response response;
+        response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "
+                + "http://localhost:" + PORT + newResource);
+        response.addHeader("Location", "http://localhost:" + PORT + newResource);
+        return response;
+    }
+    
+    private Response handleGetRequest(ClientRequest request) {
+        String msg = null;
+        if (mSubResources.containsKey(request.uri)) {
+            msg = mSubResources.get(request.uri).getProperty("message", "no message was given");
+        } else {
+            msg = "I'm a mock server for test purposes";
+        }
+        return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, msg);
     }
     
     private Response handlePutRequest(ClientRequest request) {
