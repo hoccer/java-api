@@ -67,4 +67,14 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("our mock server should respond with 404 'not found'", gotTheError);
     }
+    
+    public void testHttpPut() throws Exception {
+        String uri = getServer().getUri() + "/test-resource";
+        HttpHelper.putText(uri, "I've been putted");
+        assertEquals("our mock server should receive the PUT request", "PUT", getServer()
+                .getLastRequest().method);
+        assertEquals(
+                "our mock server should store and serve the putted text at the provided location",
+                "I've been putted", HttpHelper.getAsString(uri));
+    }
 }

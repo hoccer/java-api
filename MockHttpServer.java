@@ -9,10 +9,10 @@ import com.artcom.y60.Logger;
 
 public class MockHttpServer extends NanoHTTPD {
     
-    private static String                     LOG_TAG          = "HttpServerForTesting";
-    private static int                        PORT             = 4000;
-    private final HashMap<String, Properties> mPostedResources = new HashMap<String, Properties>();
-    private int                               mResponseDelay   = 0;
+    private static String                     LOG_TAG        = "HttpServerForTesting";
+    private static int                        PORT           = 4000;
+    private final HashMap<String, Properties> mSubResources  = new HashMap<String, Properties>();
+    private int                               mResponseDelay = 0;
     private ClientRequest                     mLastRequest;
     private Response                          mLastResponse;
     
@@ -47,22 +47,25 @@ public class MockHttpServer extends NanoHTTPD {
             Logger.e(LOG_TAG, e);
         }
         
-        if (!request.uri.equals("/") && !mPostedResources.containsKey(request.uri)) {
+        if (request.method.equals("PUT")) {
+            return handlePutRequest(request);
+        }
+        
+        if (!request.uri.equals("/") && !mSubResources.containsKey(request.uri)) {
             return new NanoHTTPD.Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "Not Found");
         }
         
         if (request.method.equals("GET")) {
             String msg = null;
-            if (mPostedResources.containsKey(request.uri)) {
-                msg = mPostedResources.get(request.uri).getProperty("message",
-                        "no message was given");
+            if (mSubResources.containsKey(request.uri)) {
+                msg = mSubResources.get(request.uri).getProperty("message", "no message was given");
             } else {
                 msg = "I'm a mock server for test purposes";
             }
             return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, msg);
         } else if (request.method.equals("POST")) {
             String newResource = "/" + UUID.randomUUID();
-            mPostedResources.put(newResource, request.parameters);
+            mSubResources.put(newResource, request.parameters);
             
             NanoHTTPD.Response response;
             response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "
@@ -72,6 +75,16 @@ public class MockHttpServer extends NanoHTTPD {
         }
         
         return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "not implemented");
+    }
+    
+    private Response handlePutRequest(ClientRequest request) {
+        
+        Logger.v(LOG_TAG, request.parameters);
+        mSubResources.put(request.uri, request.parameters);
+        
+        String body = "created";
+        
+        return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, body);
     }
     
     /**
