@@ -59,7 +59,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         mHttpPost.start();
         
         TestHelper.blockUntilEquals("request should have been performed by now", 2000,
-                "no message was given", new TestHelper.Measurement() {
+                "no data posted", new TestHelper.Measurement() {
                     
                     @Override
                     public Object getActualValue() throws Exception {
@@ -71,7 +71,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
     public void testPostWithUrlEncodedParametersAsString() throws Exception {
         
         mHttpPost = new AsyncHttpPost(getServer().getUri());
-        mHttpPost.setBody("message=test post");
+        mHttpPost.setBody("test post");
         mHttpPost.start();
         assertRequestIsDone();
         assertEquals("should receive what was posted", "test post", mHttpPost.getBodyAsString());
@@ -119,7 +119,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         assertRequestIsDone();
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
-        assertEquals("response should come from mocked server", "no message was given",
+        assertEquals("response should come from mocked server", "no data posted",
                 requestStatus.body.toString());
     }
     
