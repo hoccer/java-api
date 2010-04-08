@@ -78,6 +78,14 @@ public class HttpHelper {
         return statusLine.getStatusCode() + " " + statusLine.getReasonPhrase();
     }
     
+    public static String putAsString(String pUri, String pData) throws IOException,
+            HttpClientException, HttpServerException {
+        HttpPut put = new HttpPut(pUri);
+        insert(pData, "text/plain", "text/plain", put);
+        StatusLine statusLine = executeHTTPMethod(put, PUT_TIMEOUT).getStatusLine();
+        return statusLine.getStatusCode() + " " + statusLine.getReasonPhrase();
+    }
+    
     public static HttpResponse putFile(String pUri, File pFile, String pContentType, String pAccept)
             throws IOException, HttpClientException, HttpServerException {
         HttpPut put = new HttpPut(pUri);

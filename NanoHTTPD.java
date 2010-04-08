@@ -159,7 +159,8 @@ public class NanoHTTPD {
      * Common mime types for dynamic content
      */
     public static final String MIME_PLAINTEXT = "text/plain", MIME_HTML = "text/html",
-            MIME_DEFAULT_BINARY = "application/octet-stream";
+            MIME_DEFAULT_BINARY = "application/octet-stream",
+            MIME_FORM_URLENCODED = "application/x-www-form-urlencoded";
     
     // ==================================================
     // Socket & server code
