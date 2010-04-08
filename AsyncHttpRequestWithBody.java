@@ -18,7 +18,7 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     }
     
     public void setBody(String pStringData) {
-        HttpHelper.insert(pStringData, "text/txt", getRequest());
+        HttpHelper.insert(pStringData, "text/plain", getRequest());
     }
     
     public void setBody(Map<String, String> params) {
@@ -30,14 +30,4 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
     protected HttpEntityEnclosingRequestBase getRequest() {
         return (HttpEntityEnclosingRequestBase) super.getRequest();
     }
-    
-    // private void setData(HttpEntity entity) {
-    // mData = entity;
-    // }
-    //    
-    // private void setData(InputStream iStream, String pContentType) {
-    // mData = new InputStreamEntity(iStream, 1000);
-    // mContentType = pContentType;
-    // }
-    
 }
