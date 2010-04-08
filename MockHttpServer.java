@@ -80,11 +80,10 @@ public class MockHttpServer extends NanoHTTPD {
     private Response handlePutRequest(ClientRequest request) {
         
         Logger.v(LOG_TAG, request.parameters);
-        mSubResources.put(request.uri, request.parameters);
-        
-        String body = "created";
-        
-        return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, body);
+        Properties tmp = new Properties();
+        tmp.put("message", request.body);
+        mSubResources.put(request.uri, tmp);
+        return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, request.body);
     }
     
     /**
