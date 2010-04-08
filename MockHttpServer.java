@@ -2,19 +2,18 @@ package com.artcom.y60.http;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.UUID;
 
 import com.artcom.y60.Logger;
 
 public class MockHttpServer extends NanoHTTPD {
     
-    private static String                     LOG_TAG        = "HttpServerForTesting";
-    private static int                        PORT           = 4000;
-    private final HashMap<String, Properties> mSubResources  = new HashMap<String, Properties>();
-    private int                               mResponseDelay = 0;
-    private ClientRequest                     mLastRequest;
-    private Response                          mLastResponse;
+    private static String                 LOG_TAG        = "HttpServerForTesting";
+    private static int                    PORT           = 4000;
+    private final HashMap<String, String> mSubResources  = new HashMap<String, String>();
+    private int                           mResponseDelay = 0;
+    private ClientRequest                 mLastRequest;
+    private Response                      mLastResponse;
     
     public MockHttpServer() throws IOException {
         super(PORT);
@@ -68,7 +67,8 @@ public class MockHttpServer extends NanoHTTPD {
     
     private NanoHTTPD.Response handlePostRequest(ClientRequest request) {
         String newResource = "/" + UUID.randomUUID();
-        mSubResources.put(newResource, request.parameters);
+        mSubResources.put(newResource, request.parameters.getProperty("message",
+                "no message was given"));
         
         NanoHTTPD.Response response;
         response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "
@@ -80,7 +80,7 @@ public class MockHttpServer extends NanoHTTPD {
     private Response handleGetRequest(ClientRequest request) {
         String msg = null;
         if (mSubResources.containsKey(request.uri)) {
-            msg = mSubResources.get(request.uri).getProperty("message", "no message was given");
+            msg = mSubResources.get(request.uri);
         } else {
             msg = "I'm a mock server for test purposes";
         }
@@ -88,11 +88,7 @@ public class MockHttpServer extends NanoHTTPD {
     }
     
     private Response handlePutRequest(ClientRequest request) {
-        
-        Logger.v(LOG_TAG, request.parameters);
-        Properties tmp = new Properties();
-        tmp.put("message", request.body);
-        mSubResources.put(request.uri, tmp);
+        mSubResources.put(request.uri, request.body);
         return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, request.body);
     }
     
