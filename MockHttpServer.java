@@ -46,6 +46,12 @@ public class MockHttpServer extends NanoHTTPD {
             Logger.e(LOG_TAG, e);
         }
         
+        String acceptedMimeType = request.header.getProperty("accept", NanoHTTPD.MIME_PLAINTEXT);
+        if (!acceptedMimeType.equals(NanoHTTPD.MIME_PLAINTEXT)) {
+            return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "accept mime-type '"
+                    + acceptedMimeType + "' is not implemented ");
+        }
+        
         if (request.method.equals("PUT")) {
             return handlePutRequest(request);
         }
@@ -67,8 +73,19 @@ public class MockHttpServer extends NanoHTTPD {
     
     private NanoHTTPD.Response handlePostRequest(ClientRequest request) {
         String newResource = "/" + UUID.randomUUID();
-        String data = request.parameters.getProperty("message", request.body);
-        mSubResources.put(newResource, data.length() > 0 ? data : "no message was given");
+        String data = "no data posted";
+        String contentType = request.header.getProperty("content-type", "");
+        if (contentType.equals(NanoHTTPD.MIME_FORM_URLENCODED)) {
+            data = request.parameters.getProperty("message",
+                    "no message property given (use http//...?message=<your message>");
+        } else if (contentType.equals(NanoHTTPD.MIME_PLAINTEXT)) {
+            data = request.body;
+        } else if (!contentType.equals("")) {
+            return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "content-type "
+                    + contentType + " is not implemented");
+        }
+        
+        mSubResources.put(newResource, data);
         
         NanoHTTPD.Response response;
         response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "

@@ -50,13 +50,13 @@ public class TestMockedHttpServer extends HttpTestCase {
     public void testHttpPostWithParametersInBody() throws Exception {
         assertEquals("our mock server should respond to POST", "hello mock server", HttpHelper
                 .post(getServer().getUri(), "message=hello mock server",
-                        "application/x-www-form-urlencoded", "text/txt"));
+                        "application/x-www-form-urlencoded", "text/plain"));
     }
     
     public void testHttpPostWithParametersInUrl() throws Exception {
         assertEquals("our mock server should respond to POST", "hello", HttpHelper.post(getServer()
                 .getUri()
-                + "/?message=hello", "", "application/x-www-form-urlencoded", "text/txt"));
+                + "/?message=hello", "", "application/x-www-form-urlencoded", "text/plain"));
     }
     
     public void testHttpPostWithStringDataInBody() throws Exception {
@@ -64,19 +64,19 @@ public class TestMockedHttpServer extends HttpTestCase {
                 "this is plain string data, as said by the content-type header", HttpHelper.post(
                         getServer().getUri(),
                         "this is plain string data, as said by the content-type header",
-                        "text/txt", "text/txt"));
+                        "text/plain", "text/plain"));
     }
     
     public void testEmptyHttpPost() throws Exception {
-        assertEquals("our mock server should respond to an empty POST", "no message was given",
-                HttpHelper.post(getServer().getUri(), "", "", ""));
+        assertEquals("our mock server should respond to an empty POST", "no data posted",
+                HttpHelper.post(getServer().getUri(), "", "", "text/plain"));
     }
     
     public void test404HttpPost() throws Exception {
         boolean gotTheError = false;
         try {
-            HttpHelper.post(getServer().getUri() + "/not-existing", "message=hello mock server",
-                    "text/txt", "text/txt");
+            HttpHelper.post(getServer().getUri() + "/not-existing", "hello mock server",
+                    "text/plain", "text/plain");
         } catch (HttpClientException e) {
             gotTheError = e.getHttpResponse().getStatusLine().getStatusCode() == 404;
         }
@@ -85,7 +85,7 @@ public class TestMockedHttpServer extends HttpTestCase {
     
     public void testHttpPut() throws Exception {
         String uri = getServer().getUri() + "/test-resource";
-        HttpHelper.putText(uri, "I've been putted");
+        HttpHelper.putAsString(uri, "I've been putted");
         assertEquals("our mock server should receive the PUT request", "PUT", getServer()
                 .getLastRequest().method);
         assertEquals(
