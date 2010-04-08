@@ -67,8 +67,8 @@ public class MockHttpServer extends NanoHTTPD {
     
     private NanoHTTPD.Response handlePostRequest(ClientRequest request) {
         String newResource = "/" + UUID.randomUUID();
-        mSubResources.put(newResource, request.parameters.getProperty("message",
-                "no message was given"));
+        String data = request.parameters.getProperty("message", request.body);
+        mSubResources.put(newResource, data.length() > 0 ? data : "no message was given");
         
         NanoHTTPD.Response response;
         response = new NanoHTTPD.Response(HTTP_REDIRECT, MIME_PLAINTEXT, "see other: "

@@ -47,9 +47,24 @@ public class TestMockedHttpServer extends HttpTestCase {
                 - time);
     }
     
-    public void testHttpPost() throws Exception {
+    public void testHttpPostWithParametersInBody() throws Exception {
         assertEquals("our mock server should respond to POST", "hello mock server", HttpHelper
-                .post(getServer().getUri(), "message=hello mock server", "text/txt", "text/txt"));
+                .post(getServer().getUri(), "message=hello mock server",
+                        "application/x-www-form-urlencoded", "text/txt"));
+    }
+    
+    public void testHttpPostWithParametersInUrl() throws Exception {
+        assertEquals("our mock server should respond to POST", "hello", HttpHelper.post(getServer()
+                .getUri()
+                + "/?message=hello", "", "application/x-www-form-urlencoded", "text/txt"));
+    }
+    
+    public void testHttpPostWithStringDataInBody() throws Exception {
+        assertEquals("mock server should store text which was posted in request body",
+                "this is plain string data, as said by the content-type header", HttpHelper.post(
+                        getServer().getUri(),
+                        "this is plain string data, as said by the content-type header",
+                        "text/txt", "text/txt"));
     }
     
     public void testEmptyHttpPost() throws Exception {
