@@ -261,23 +261,28 @@ public class NanoHTTPD {
         public String     method;
         public Properties header;
         public Properties parameters;
+        public String     body;
         
         /**
          * @parm uri Percent-decoded URI without parameters, for example "/index.cgi"
          * @parm method "GET", "POST" etc.
          * @parm parms Parsed, percent decoded parameters from URI and, in case of POST, data.
          * @parm header Header entries, percent decoded
+         * @parm body data of the http request
          */
-        public ClientRequest(String uri, String method, Properties header, Properties parms) {
+        public ClientRequest(String uri, String method, Properties header, Properties parms,
+                String body) {
             this.uri = uri;
             this.method = method;
             this.header = header;
             this.parameters = parms;
+            this.body = body;
         }
         
         @Override
         public String toString() {
-            return method + " '" + uri + "' with header " + header + " and params " + parameters;
+            return method + " '" + uri + "' with header " + header + ", params " + parameters
+                    + " and body " + body;
         }
     }
     
@@ -325,59 +330,19 @@ public class NanoHTTPD {
                 
                 String uri = st.nextToken();
                 
-                // Decode parameters from the URI
                 Properties parms = new Properties();
-                int qmi = uri.indexOf('?');
-                if (qmi >= 0) {
-                    decodeParms(uri.substring(qmi + 1), parms);
-                    uri = decodePercent(uri.substring(0, qmi));
-                } else
-                    uri = decodePercent(uri);
+                uri = decodeParametersFromUri(uri, parms);
                 
-                // If there's another token, it's protocol version,
-                // followed by HTTP headers. Ignore version but parse headers.
-                // NOTE: this now forces header names uppercase since they are
-                // case insensitive and vary by client.
-                Properties header = new Properties();
-                if (st.hasMoreTokens()) {
-                    String line = in.readLine();
-                    while (line.trim().length() > 0) {
-                        int p = line.indexOf(':');
-                        header.put(line.substring(0, p).trim().toLowerCase(), line.substring(p + 1)
-                                .trim());
-                        line = in.readLine();
-                    }
-                }
+                Properties header = extractHeaders(in, st);
                 
-                // If the method is POST, there may be parameters
-                // in data section, too, read it:
+                String body = "";
+                body = readBody(in, getContentSize(header));
                 if (method.equalsIgnoreCase("POST")) {
-                    long size = 0x7FFFFFFFFFFFFFFFl;
-                    String contentLength = header.getProperty("content-length");
-                    Logger.v(LOG_TAG, "content length: ", contentLength);
-                    if (contentLength != null) {
-                        try {
-                            size = Integer.parseInt(contentLength);
-                        } catch (NumberFormatException ex) {
-                        }
-                    }
-                    if (size > 0) {
-                        String postLine = "";
-                        char buf[] = new char[512];
-                        int read = in.read(buf);
-                        while (read >= 0 && size > 0 && !postLine.endsWith("\r\n")) {
-                            size -= read;
-                            postLine += String.valueOf(buf, 0, read);
-                            if (size > 0)
-                                read = in.read(buf);
-                        }
-                        postLine = postLine.trim();
-                        decodeParms(postLine, parms);
-                    }
+                    decodeParms(body, parms);
                 }
                 
                 // Ok, now do the serve()
-                Response r = serve(new ClientRequest(uri, method, header, parms));
+                Response r = serve(new ClientRequest(uri, method, header, parms, body));
                 if (r == null)
                     sendError(HTTP_INTERNALERROR,
                             "SERVER INTERNAL ERROR: Serve() returned a null response.");
@@ -396,6 +361,66 @@ public class NanoHTTPD {
                 Logger.e(LOG_TAG, ie);
                 // Thrown by sendError, ignore and exit the thread.
             }
+        }
+        
+        private String decodeParametersFromUri(String uri, Properties parms)
+                throws InterruptedException {
+            int qmi = uri.indexOf('?');
+            if (qmi >= 0) {
+                decodeParms(uri.substring(qmi + 1), parms);
+                uri = decodePercent(uri.substring(0, qmi));
+            } else
+                uri = decodePercent(uri);
+            return uri;
+        }
+        
+        private Properties extractHeaders(BufferedReader in, StringTokenizer st) throws IOException {
+            // If there's another token, it's protocol version,
+            // followed by HTTP headers. Ignore version but parse headers.
+            // NOTE: this now forces header names uppercase since they are
+            // case insensitive and vary by client.
+            Properties header = new Properties();
+            if (st.hasMoreTokens()) {
+                String line = in.readLine();
+                while (line.trim().length() > 0) {
+                    int p = line.indexOf(':');
+                    header.put(line.substring(0, p).trim().toLowerCase(), line.substring(p + 1)
+                            .trim());
+                    line = in.readLine();
+                }
+            }
+            return header;
+        }
+        
+        private String readBody(BufferedReader in, long size) throws IOException {
+            String body = "";
+            if (size > 0) {
+                char buf[] = new char[512];
+                int read = in.read(buf);
+                while (read >= 0 && size > 0 && !body.endsWith("\r\n")) {
+                    size -= read;
+                    body += String.valueOf(buf, 0, read);
+                    if (size > 0)
+                        read = in.read(buf);
+                }
+                body = body.trim();
+            }
+            return body;
+        }
+        
+        private long getContentSize(Properties header) {
+            long size = 0x7FFFFFFFFFFFFFFFl;
+            String contentLength = header.getProperty("content-length");
+            Logger.v(LOG_TAG, "content length: ", contentLength);
+            if (contentLength != null) {
+                try {
+                    size = Integer.parseInt(contentLength);
+                } catch (NumberFormatException ex) {
+                }
+            } else {
+                size = 0;
+            }
+            return size;
         }
         
         /**
