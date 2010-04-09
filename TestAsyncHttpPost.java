@@ -57,13 +57,25 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 });
     }
     
-    public void testPostWithUrlEncodedParametersAsString() throws Exception {
+    public void testPostWithStringBody() throws Exception {
         
         mRequest = new AsyncHttpPost(getServer().getUri());
         mRequest.setBody("test post");
         mRequest.start();
         assertRequestIsDone(mRequest);
         assertEquals("should receive what was posted", "test post", mRequest.getBodyAsString());
+    }
+    
+    public void testPostWithLongStringBody() throws Exception {
+        
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        String content = "test post which is \nreally really long\n\n.... this is the\nlast line ";
+        mRequest.setBody(content);
+        mRequest.start();
+        assertRequestIsDone(mRequest);
+        assertEquals("mock server should receive posted data", content,
+                getServer().getLastPost().body);
+        assertEquals("should be redirected to what was posted", content, mRequest.getBodyAsString());
     }
     
     public void testPostWithUrlEncodedParametersAsHashMap() throws Exception {

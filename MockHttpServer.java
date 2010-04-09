@@ -13,6 +13,7 @@ public class MockHttpServer extends NanoHTTPD {
     private final HashMap<String, String> mSubResources  = new HashMap<String, String>();
     private int                           mResponseDelay = 0;
     private ClientRequest                 mLastRequest;
+    private ClientRequest                 mLastPost;
     private Response                      mLastResponse;
     
     public MockHttpServer() throws IOException {
@@ -25,6 +26,10 @@ public class MockHttpServer extends NanoHTTPD {
     
     ClientRequest getLastRequest() {
         return mLastRequest;
+    }
+    
+    ClientRequest getLastPost() {
+        return mLastPost;
     }
     
     Response getLastResponse() {
@@ -72,6 +77,9 @@ public class MockHttpServer extends NanoHTTPD {
     }
     
     private NanoHTTPD.Response handlePostRequest(ClientRequest request) {
+        
+        mLastPost = request;
+        
         String newResource = "/" + UUID.randomUUID();
         String data = "no data posted";
         String contentType = request.header.getProperty("content-type", "");
