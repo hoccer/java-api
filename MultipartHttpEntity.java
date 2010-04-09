@@ -8,6 +8,7 @@ import org.apache.http.Header;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.message.BasicHeader;
 
+import com.artcom.y60.data.Streamable;
 import com.artcom.y60.thread.StatusHandler;
 
 public class MultipartHttpEntity extends AbstractHttpEntity {
@@ -17,8 +18,7 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
     
     private byte[]              mPreample       = null;
     private final byte[]        mEnd            = ("\r\n--" + BORDER + "--\r\n").getBytes();
-    private long                mSize;
-    private InputStream         mStream;
+    private Streamable          mStreamable;
     
     private StatusHandler       mStatusCallback = null;
     
@@ -29,16 +29,15 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         mStatusCallback = pStatusCallback;
     }
     
-    public void addPart(String name, String filename, String mime, long pStreamLength,
-            InputStream pStream) throws IOException {
+    public void addPart(String name, String filename, String mime, Streamable pStreamable)
+            throws IOException {
         
         if (mPreample != null) {
             throw new RuntimeException("this multipart can only handle a single part --- sorry");
         }
         
         mPreample = createPreamble(name, filename, mime);
-        mStream = pStream;
-        mSize = mPreample.length + pStreamLength + mEnd.length;
+        mStreamable = pStreamable;
     }
     
     private byte[] createPreamble(String name, String filename, String mime) {
@@ -60,7 +59,7 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
     
     @Override
     public long getContentLength() {
-        return mSize;
+        return mPreample.length + mStreamable.getStreamLength() + mEnd.length;
     }
     
     @Override
@@ -86,11 +85,12 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         
         byte[] buffer = new byte[0xFFFF];
         int len;
-        while ((len = mStream.read(buffer)) != -1) {
+        InputStream stream = mStreamable.getStream();
+        while ((len = stream.read(buffer)) != -1) {
             outstream.write(buffer, 0, len);
             uploaded += len;
             if (mStatusCallback != null) {
-                mStatusCallback.onProgress((int) (uploaded / mSize));
+                mStatusCallback.onProgress((int) (uploaded / mStreamable.getStreamLength()));
             }
         }
         
