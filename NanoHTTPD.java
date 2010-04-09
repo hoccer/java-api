@@ -404,7 +404,6 @@ public class NanoHTTPD {
                     if (size > 0)
                         read = in.read(buf);
                 }
-                body = body.trim();
             }
             return body;
         }
