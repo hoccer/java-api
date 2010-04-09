@@ -1,8 +1,8 @@
 package com.artcom.y60.http;
 
-import java.io.ByteArrayInputStream;
-
 import com.artcom.y60.TestHelper;
+import com.artcom.y60.data.Streamable;
+import com.artcom.y60.data.StreamableString;
 
 public class TestAsyncHttpPut extends HttpTestCase {
     
@@ -50,9 +50,8 @@ public class TestAsyncHttpPut extends HttpTestCase {
     public void testPuttingMultipart() throws Exception {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
-        byte[] bytes = ("test data string as stream").getBytes();
-        multipart.addPart("unit test data", "afilename.txt", "text/plain", bytes.length,
-                new ByteArrayInputStream(bytes));
+        Streamable data = new StreamableString("test data string as stream");
+        multipart.addPart("unit test data", "afilename.txt", "text/plain", data);
         
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
