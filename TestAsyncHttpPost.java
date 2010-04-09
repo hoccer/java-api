@@ -13,110 +13,99 @@ import com.artcom.y60.TestHelper;
 public class TestAsyncHttpPost extends HttpTestCase {
     
     private static final String LOG_TAG = "TestAsyncHttpPost";
-    AsyncHttpPost               mHttpPost;
-    
-    private void assertRequestIsDone() throws Exception {
-        TestHelper.blockUntilTrue("request should have been performed by now", 3000,
-                new TestHelper.Condition() {
-                    
-                    @Override
-                    public boolean isSatisfied() throws Exception {
-                        return mHttpPost.isDone();
-                    }
-                });
-    }
+    AsyncHttpPost               mRequest;
     
     public void testExecution() throws Exception {
         
         getServer().setResponseDelay(200);
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
-        mHttpPost.start();
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        mRequest.start();
         
         TestHelper.blockUntilTrue("request should have started by now", 1000,
                 new TestHelper.Condition() {
                     @Override
                     public boolean isSatisfied() throws Exception {
-                        return mHttpPost.getProgress() > 0;
+                        return mRequest.getProgress() > 0;
                     }
                 });
-        assertTrue("request should have started, but progress is " + mHttpPost.getProgress() + "%",
-                mHttpPost.isRunning());
+        assertTrue("request should have started, but progress is " + mRequest.getProgress() + "%",
+                mRequest.isRunning());
         
         TestHelper.blockUntilTrue("request should have got the response by now", 4000,
                 new TestHelper.Condition() {
                     @Override
                     public boolean isSatisfied() throws Exception {
-                        return mHttpPost.getProgress() > 1;
+                        return mRequest.getProgress() > 1;
                     }
                 });
         
-        assertRequestIsDone();
+        assertRequestIsDone(mRequest);
     }
     
     public void testEmptyPost() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
-        mHttpPost.start();
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        mRequest.start();
         
         TestHelper.blockUntilEquals("request should have been performed by now", 2000,
                 "no data posted", new TestHelper.Measurement() {
                     
                     @Override
                     public Object getActualValue() throws Exception {
-                        return mHttpPost.getBodyAsString();
+                        return mRequest.getBodyAsString();
                     }
                 });
     }
     
     public void testPostWithUrlEncodedParametersAsString() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
-        mHttpPost.setBody("test post");
-        mHttpPost.start();
-        assertRequestIsDone();
-        assertEquals("should receive what was posted", "test post", mHttpPost.getBodyAsString());
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        mRequest.setBody("test post");
+        mRequest.start();
+        assertRequestIsDone(mRequest);
+        assertEquals("should receive what was posted", "test post", mRequest.getBodyAsString());
     }
     
     public void testPostWithUrlEncodedParametersAsHashMap() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        mRequest = new AsyncHttpPost(getServer().getUri());
         Map<String, String> params = new HashMap<String, String>();
         params.put("message", "test post with hash map");
-        mHttpPost.setBody(params);
-        mHttpPost.start();
-        assertRequestIsDone();
-        assertEquals("should receive what was posted", "test post with hash map", mHttpPost
+        mRequest.setBody(params);
+        mRequest.start();
+        assertRequestIsDone(mRequest);
+        assertEquals("should receive what was posted", "test post with hash map", mRequest
                 .getBodyAsString());
     }
     
     public void testGettingBodyWithoutPerformingTheRequest() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
-        TestHelper.blockUntilEquals("request should give empty body before started", 1000, "",
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        TestHelper.blockUntilEquals("request should provide empty body before started", 1000, "",
                 new TestHelper.Measurement() {
                     
                     @Override
                     public Object getActualValue() throws Exception {
-                        return mHttpPost.getBodyAsString();
+                        return mRequest.getBodyAsString();
                     }
                 });
     }
     
     public void testGettingNoifiedAbooutSuccessViaResponseHandler() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
+        mRequest = new AsyncHttpPost(getServer().getUri());
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
-        mHttpPost.registerResponseHandler(requestStatus);
-        mHttpPost.start();
+        mRequest.registerResponseHandler(requestStatus);
+        mRequest.start();
         TestHelper.blockUntilTrue("request should have started", 1000, new TestHelper.Condition() {
             
             @Override
             public boolean isSatisfied() throws Exception {
-                return mHttpPost.isRunning();
+                return mRequest.isRunning();
             }
         });
         assertTrue("should be connecting", requestStatus.isConnecting);
-        assertRequestIsDone();
+        assertRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
         assertEquals("response should come from mocked server", "no data posted",
@@ -125,10 +114,10 @@ public class TestAsyncHttpPost extends HttpTestCase {
     
     public void testGettingNoifiedAbooutFailureViaResponseHandler() throws Exception {
         
-        mHttpPost = new AsyncHttpPost(getServer().getUri() + "/not-a-valid-address");
+        mRequest = new AsyncHttpPost(getServer().getUri() + "/not-a-valid-address");
         final ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
-        mHttpPost.registerResponseHandler(requestStatus);
-        mHttpPost.start();
+        mRequest.registerResponseHandler(requestStatus);
+        mRequest.start();
         TestHelper.blockUntilTrue("request should have called onError", 2000,
                 new TestHelper.Condition() {
                     
@@ -147,33 +136,33 @@ public class TestAsyncHttpPost extends HttpTestCase {
         HttpParams httpParams = new BasicHttpParams();
         HttpClientParams.setRedirecting(httpParams, false);
         DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
-        mHttpPost = new AsyncHttpPost(getServer().getUri(), httpClient);
-        mHttpPost.start();
-        assertRequestIsDone();
-        assertTrue("should have an location header", mHttpPost.getHeader("Location").contains(
+        mRequest = new AsyncHttpPost(getServer().getUri(), httpClient);
+        mRequest.start();
+        assertRequestIsDone(mRequest);
+        assertTrue("should have an location header", mRequest.getHeader("Location").contains(
                 "http://localhost"));
         TestHelper.assertIncludes("response from mocked server should describe 303",
-                "see other: http://localhost", mHttpPost.getBodyAsString().toString());
+                "see other: http://localhost", mRequest.getBodyAsString().toString());
     }
     
     public void testUriOfSolvableRequest() throws Exception {
-        mHttpPost = new AsyncHttpPost(getServer().getUri());
-        assertEquals("should get uri of creation", getServer().getUri(), mHttpPost.getUri());
-        mHttpPost.start();
-        assertEquals("should get uri of creation", getServer().getUri(), mHttpPost.getUri());
-        assertRequestIsDone();
+        mRequest = new AsyncHttpPost(getServer().getUri());
+        assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
+        mRequest.start();
+        assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
+        assertRequestIsDone(mRequest);
         assertEquals(
                 "uri should now point to resource whre the post request got redirected indirectly",
-                getServer().getUri() + getServer().getLastRequest().uri, mHttpPost.getUri());
+                getServer().getUri() + getServer().getLastRequest().uri, mRequest.getUri());
     }
     
     public void testUriOf404Request() throws Exception {
         String uri = getServer().getUri() + "/not-existing";
-        mHttpPost = new AsyncHttpPost(uri);
-        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
-        mHttpPost.start();
-        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
-        assertRequestIsDone();
-        assertEquals("should get uri of creation", uri, mHttpPost.getUri());
+        mRequest = new AsyncHttpPost(uri);
+        assertEquals("should get uri of creation", uri, mRequest.getUri());
+        mRequest.start();
+        assertEquals("should get uri of creation", uri, mRequest.getUri());
+        assertRequestIsDone(mRequest);
+        assertEquals("should get uri of creation", uri, mRequest.getUri());
     }
 }
