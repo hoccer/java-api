@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 
 import com.artcom.y60.TestHelper;
 
-public class TestAsyncPut extends HttpTestCase {
+public class TestAsyncHttpPut extends HttpTestCase {
     
     private AsyncHttpPut mRequest;
     
@@ -63,20 +63,24 @@ public class TestAsyncPut extends HttpTestCase {
                 "the putted data should be somewhere in the returned as answer from the server",
                 "test data string as stream", mRequest.getBodyAsString());
         
-        String dataString = HttpHelper.getAsString(uri);
-        assertTrue("putted data should contain mulitpart border string", dataString
+        String mulitpartString = HttpHelper.getAsString(uri);
+        assertTrue("putted data should contain mulitpart border string", mulitpartString
                 .contains(MultipartHttpEntity.BORDER));
-        assertTrue("putted data should contain content-type informations", dataString
+        assertTrue("putted data should contain content-type informations", mulitpartString
                 .contains("Content-Type: text/plain"));
-        assertTrue("putted data should contain transfer encoding", dataString
+        assertTrue("putted data should contain transfer encoding", mulitpartString
                 .contains("Content-Transfer-Encoding: binary"));
         
-        int posOfEmptyLine = dataString.indexOf("\r\n\r\n");
+        assertMultipartDataEquals("test data string as stream", mulitpartString);
+    }
+    
+    private void assertMultipartDataEquals(String dataString, String pMultipartString) {
+        int posOfEmptyLine = pMultipartString.indexOf("\r\n\r\n");
         assertTrue("should find the empty line in " + posOfEmptyLine, posOfEmptyLine != -1);
-        int posOfMultipartEnd = dataString.indexOf("\r\n--" + MultipartHttpEntity.BORDER + "--");
-        assertTrue("should find the multipart end in " + dataString, posOfMultipartEnd != -1);
-        assertEquals("the putted data should be placed inside the multipart data!",
-                "test data string as stream", dataString.substring(posOfEmptyLine + 4,
-                        posOfMultipartEnd));
+        int posOfMultipartEnd = pMultipartString.indexOf("\r\n--" + MultipartHttpEntity.BORDER
+                + "--");
+        assertTrue("should find the multipart end in " + pMultipartString, posOfMultipartEnd != -1);
+        assertEquals("the putted data should be placed inside the multipart data!", dataString,
+                pMultipartString.substring(posOfEmptyLine + 4, posOfMultipartEnd));
     }
 }
