@@ -3,7 +3,7 @@ package com.artcom.y60.http;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPut;
 
-public class AsyncHttpPut extends AsyncHttpRequest {
+public class AsyncHttpPut extends AsyncHttpRequestWithBody {
     
     public AsyncHttpPut(String pUrl) {
         super(pUrl);
