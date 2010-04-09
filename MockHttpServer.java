@@ -105,6 +105,11 @@ public class MockHttpServer extends NanoHTTPD {
     }
     
     private Response handlePutRequest(ClientRequest request) {
+        if (request.uri.equals("/")) {
+            return new NanoHTTPD.Response(HTTP_FORBIDDEN, MIME_PLAINTEXT,
+                    "to create a resource at '/' you need to use HTTP POST");
+        }
+        
         mSubResources.put(request.uri, request.body);
         return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, request.body);
     }

@@ -92,4 +92,15 @@ public class TestMockedHttpServer extends HttpTestCase {
                 "our mock server should store and serve the putted text at the provided location",
                 "I've been putted", HttpHelper.getAsString(uri));
     }
+    
+    public void testHttpPutToRoot() throws Exception {
+        boolean hadExpectedException = false;
+        try {
+            HttpHelper.putAsString(getServer().getUri(), "I've been putted");
+        } catch (HttpClientException e) {
+            hadExpectedException = true;
+            assertEquals("mock server should response with forbidden", 403, e.getStatusCode());
+        }
+        assertTrue("our mock server should deny creating a resource at /", hadExpectedException);
+    }
 }
