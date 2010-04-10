@@ -18,6 +18,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
                         return mRequest.getBodyAsString();
                     }
                 });
+        assertTrue("request should be sucessful", mRequest.wasSuccessful());
     }
     
     public void testCreating() throws Exception {
@@ -130,6 +131,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
         assertRequestIsDone(mRequest);
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
+        assertTrue("request should be sucessful", mRequest.wasSuccessful());
     }
     
     public void testUriOf404Request() throws Exception {
@@ -140,5 +142,6 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertEquals("should get uri of creation", uri, mRequest.getUri());
         assertRequestIsDone(mRequest);
         assertEquals("should get uri of creation", uri, mRequest.getUri());
+        assertTrue("request should tell about client error", mRequest.hadClientError());
     }
 }
