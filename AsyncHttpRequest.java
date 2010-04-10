@@ -78,6 +78,21 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         return getProgress() == 1;
     }
     
+    public boolean wasSuccessful() {
+        int status = getStatusCode();
+        return status >= 200 && status < 300;
+    }
+    
+    public boolean hadClientError() {
+        int status = getStatusCode();
+        return status >= 400 && status < 500;
+    }
+    
+    public boolean hadServerError() {
+        int status = getStatusCode();
+        return status >= 500 && status < 600;
+    }
+    
     @Override
     public void doInBackground() {
         
@@ -103,8 +118,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             return;
         }
         
-        int status = mResponse.getStatusLine().getStatusCode();
-        Logger.v(LOG_TAG, "response status code is ", status);
+        int status = getStatusCode();
         
         try {
             InputStream is = mResponse.getEntity().getContent();
@@ -122,6 +136,14 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             return;
         }
         
+    }
+    
+    public int getStatusCode() {
+        if (mResponse != null) {
+            return mResponse.getStatusLine().getStatusCode();
+        } else {
+            return -1;
+        }
     }
     
     public void registerResponseHandler(HttpResponseHandler responseHandler) {
@@ -154,13 +176,16 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             return;
         }
         
-        int status = mResponse.getStatusLine().getStatusCode();
-        if (status >= 400 && status < 500) {
+        int status = getStatusCode();
+        if (hadClientError()) {
             onClientError(status);
-        } else if (status >= 500 && status < 600) {
+        } else if (hadServerError()) {
             onServerError(status);
-        } else {
+        } else if (wasSuccessful()) {
             onSuccess(status);
+        } else {
+            onClientError(new Exception("do not know what to do with status code "
+                    + getStatusCode()));
         }
         
         super.onPostExecute();
@@ -194,7 +219,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
     
     protected void onServerError(int pStatusCode) {
-        Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
+        Logger.e(LOG_TAG, "Error response code was ", pStatusCode, " body: ", mResultStream
+                .toString());
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(pStatusCode, mResultStream);
         }
