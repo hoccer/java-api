@@ -1,10 +1,9 @@
 package com.artcom.y60.http;
 
-import java.io.OutputStream;
-
 import org.apache.http.Header;
 
 import com.artcom.y60.Logger;
+import com.artcom.y60.data.StreamableContent;
 
 public class ResponseHandlerForTesting implements HttpResponseHandler {
 
@@ -16,7 +15,7 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     boolean                     wasSuccessful       = false;
 
     double                      progress            = -1;
-    OutputStream                body                = null;
+    StreamableContent           body                = null;
 
     @Override
     public void onHeaderAvailable(Header[] headers) {
@@ -26,7 +25,7 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     }
 
     @Override
-    public void onError(int statusCode, OutputStream body) {
+    public void onError(int statusCode, StreamableContent body) {
         Logger.v(LOG_TAG, "onError called");
         reset();
         hasError = true;
@@ -42,7 +41,7 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     }
 
     @Override
-    public void onSuccess(int statusCode, OutputStream body) {
+    public void onSuccess(int statusCode, StreamableContent body) {
         Logger.v(LOG_TAG, "onSuccess called");
         reset();
         wasSuccessful = true;

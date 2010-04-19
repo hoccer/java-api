@@ -62,13 +62,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertTrue("request should have started, but is at " + mRequest.getProgress() + "%",
                 mRequest.isRunning());
 
-        TestHelper.blockUntilTrue("headers hould be there", 2000, new TestHelper.Condition() {
-
-            @Override
-            public boolean isSatisfied() throws Exception {
-                return requestStatus.areHeadersAvailable;
-            }
-        });
+        assertHeadersAvailable(requestStatus);
 
         assertRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
