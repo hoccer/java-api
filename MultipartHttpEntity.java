@@ -8,7 +8,7 @@ import org.apache.http.Header;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.message.BasicHeader;
 
-import com.artcom.y60.data.Streamable;
+import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.thread.StatusHandler;
 
 public class MultipartHttpEntity extends AbstractHttpEntity {
@@ -18,7 +18,7 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
     
     private byte[]              mPreample       = null;
     private final byte[]        mEnd            = ("\r\n--" + BORDER + "--\r\n").getBytes();
-    private Streamable          mStreamable;
+    private StreamableContent          mStreamable;
     
     private StatusHandler       mStatusCallback = null;
     
@@ -29,7 +29,7 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         mStatusCallback = pStatusCallback;
     }
     
-    public void addPart(String name, String filename, String mime, Streamable pStreamable)
+    public void addPart(String name, String filename, String mime, StreamableContent pStreamable)
             throws IOException {
         
         if (mPreample != null) {

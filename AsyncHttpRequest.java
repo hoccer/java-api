@@ -1,9 +1,7 @@
 package com.artcom.y60.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URI;
 
@@ -19,19 +17,21 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
 import com.artcom.y60.Logger;
+import com.artcom.y60.data.DynamicStreamableContent;
+import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
 
-    private static final String   LOG_TAG                  = "AsyncHttpConnection";
+    private static final String            LOG_TAG                  = "AsyncHttpConnection";
 
-    private DefaultHttpClient     mHttpClient;
-    private final HttpRequestBase mRequest;
+    private DefaultHttpClient              mHttpClient;
+    private final HttpRequestBase          mRequest;
 
-    private HttpResponse          mResponse                = null;
-    private final OutputStream    mResultStream            = new ByteArrayOutputStream();
+    private HttpResponse                   mResponse                = null;
+    private final DynamicStreamableContent mResponseContent         = new DynamicStreamableContent();
 
-    private HttpResponseHandler   mResponseHandlerCallback = null;
+    private HttpResponseHandler            mResponseHandlerCallback = null;
 
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
@@ -68,7 +68,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     public String getBodyAsString() {
-        return mResultStream.toString();
+        return mResponseContent.toString();
+    }
+
+    public StreamableContent getBodyAsStreamableContent() {
+        return mResponseContent;
     }
 
     public void setAcceptedMimeType(String pMimeType) {
@@ -130,7 +134,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             int len;
             while ((len = is.read(buffer)) != -1) {
                 setProgress((int) (downloaded / size));
-                mResultStream.write(buffer, 0, len);
+                mResponseContent.write(buffer, 0, len);
                 downloaded += len;
             }
         } catch (IOException e) {
@@ -202,6 +206,13 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     protected void onHttpHeaderAvailable(Header[] headers) {
+
+        for (int i = 0; i < headers.length; i++) {
+            if (headers[i].getName().equals("Content-Type")) {
+                mResponseContent.setContentType(headers[i].getValue());
+            }
+        }
+
         if (mResponseHandlerCallback != null) {
             Logger.v(LOG_TAG, "calling callbeack: onHeaderAvailable, with: ", headers);
             mResponseHandlerCallback.onHeaderAvailable(headers);
@@ -210,22 +221,22 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
     protected void onSuccess(int pStatusCode) {
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onSuccess(pStatusCode, mResultStream);
+            mResponseHandlerCallback.onSuccess(pStatusCode, mResponseContent);
         }
     }
 
     protected void onClientError(int pStatusCode) {
         Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onError(pStatusCode, mResultStream);
+            mResponseHandlerCallback.onError(pStatusCode, mResponseContent);
         }
     }
 
     protected void onServerError(int pStatusCode) {
-        Logger.e(LOG_TAG, "Error response code was ", pStatusCode, " body: ", mResultStream
+        Logger.e(LOG_TAG, "Error response code was ", pStatusCode, " body: ", mResponseContent
                 .toString());
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onError(pStatusCode, mResultStream);
+            mResponseHandlerCallback.onError(pStatusCode, mResponseContent);
         }
     }
 }
