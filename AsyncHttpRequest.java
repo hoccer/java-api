@@ -117,9 +117,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onClientError(new NullPointerException("expected http response object is null"));
             return;
         }
-        onHttpHeaderAvailable(mResponse.getAllHeaders());
 
-        int status = getStatusCode();
+        Logger.v(LOG_TAG, "before: onHttpHeaderAvailable with: ", mResponse.getAllHeaders());
+        onHttpHeaderAvailable(mResponse.getAllHeaders());
+        Logger.v(LOG_TAG, "after: onHttpHeaderAvailable with: ", mResponse.getAllHeaders());
 
         try {
             InputStream is = mResponse.getEntity().getContent();
@@ -202,6 +203,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
     protected void onHttpHeaderAvailable(Header[] headers) {
         if (mResponseHandlerCallback != null) {
+            Logger.v(LOG_TAG, "calling callbeack: onHeaderAvailable, with: ", headers);
             mResponseHandlerCallback.onHeaderAvailable(headers);
         }
     }
