@@ -116,7 +116,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 return mRequest.isRunning();
             }
         });
-        assertTrue("should be connecting", requestStatus.isConnecting);
+        assertTrue("should be connecting", requestStatus.areHeadersAvailable);
         assertRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
