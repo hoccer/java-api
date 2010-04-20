@@ -64,12 +64,15 @@ public class TestAsyncHttpPut extends HttpTestCase {
         assertRequestIsDone(mRequest);
         assertEquals("the putted data should be returned as answer from the server", "testmango",
                 mRequest.getBodyAsStreamableContent().toString());
+
+        assertEquals("the putted mime type should be passed to the server", "text/xml", getServer()
+                .getLastRequest().header.getProperty("content-type"));
+        assertEquals(
+                "the putted data should be returned with basic mime type by the mocked server",
+                "text/plain", mRequest.getBodyAsStreamableContent().getContentType());
+
         assertEquals("the putted data should be retrievable via http GET", "testmango", HttpHelper
                 .getAsString(uri));
-        assertEquals("the putted mime type should be passed to the server", "text/html",
-                getServer().getLastRequest().header.getProperty("content-type"));
-        assertEquals("the putted data should be returned with correct mime type", "text/html",
-                mRequest.getBodyAsStreamableContent().getContentType());
     }
 
     public void testPuttingMultipart() throws Exception {
