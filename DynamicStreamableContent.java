@@ -1,14 +1,14 @@
 package com.artcom.y60.data;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public class DynamicStreamableContent implements StreamableContent {
 
-    String               mContentType;
-    private OutputStream mResultStream = new ByteArrayOutputStream();
+    String                        mContentType;
+    private ByteArrayOutputStream mResultStream = new ByteArrayOutputStream();
 
     public void setContentType(String pContentType) {
         mContentType = pContentType;
@@ -21,13 +21,12 @@ public class DynamicStreamableContent implements StreamableContent {
 
     @Override
     public InputStream getStream() {
-        return null;
+        return new ByteArrayInputStream(mResultStream.toByteArray());
     }
 
     @Override
     public long getStreamLength() {
-        // TODO Auto-generated method stub
-        return 0;
+        return mResultStream.size();
     }
 
     public void write(byte[] buffer, int offset, int count) throws IOException {
