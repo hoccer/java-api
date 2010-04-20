@@ -26,4 +26,9 @@ public class StreamableString implements StreamableContent {
         return "text/plain";
     }
 
+    @Override
+    public String getFilename() {
+        return "data.txt";
+    }
+
 }

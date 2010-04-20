@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.webkit.MimeTypeMap;
+
 public class DynamicStreamableContent implements StreamableContent {
 
     String                        mContentType;
@@ -35,5 +37,10 @@ public class DynamicStreamableContent implements StreamableContent {
 
     public String toString() {
         return mResultStream.toString();
+    }
+
+    @Override
+    public String getFilename() {
+        return "data." + MimeTypeMap.getSingleton().getExtensionFromMimeType(getContentType());
     }
 }

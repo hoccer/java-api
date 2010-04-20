@@ -10,4 +10,6 @@ public interface StreamableContent {
 
     public String getContentType();
 
+    public String getFilename();
+
 }
