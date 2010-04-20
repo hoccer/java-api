@@ -79,7 +79,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
         StreamableContent data = new StreamableString("test data string as stream");
-        multipart.addPart("unit test data", "afilename.txt", data);
+        multipart.addPart("unit test data", data);
 
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
@@ -114,7 +114,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         byte[] content = "test data string as stream".getBytes();
         data.write(content, 0, content.length);
 
-        multipart.addPart("unit test data", "afilename.txt", data);
+        multipart.addPart("unit test data", data);
 
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
