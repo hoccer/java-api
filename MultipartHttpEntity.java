@@ -29,14 +29,13 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         mStatusCallback = pStatusCallback;
     }
 
-    public void addPart(String name, String filename, StreamableContent pStreamable)
-            throws IOException {
+    public void addPart(String name, StreamableContent pStreamable) throws IOException {
 
         if (mPreample != null) {
             throw new RuntimeException("this multipart can only handle a single part --- sorry");
         }
 
-        mPreample = createPreamble(name, filename, pStreamable.getContentType());
+        mPreample = createPreamble(name, pStreamable.getFilename(), pStreamable.getContentType());
         mStreamable = pStreamable;
     }
 
