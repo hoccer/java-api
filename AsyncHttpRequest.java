@@ -83,6 +83,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         return getProgress() == 1;
     }
 
+    /**
+     * @return true: server reponded with 2xx, payload not neccessarily downloaded
+     */
     public boolean wasSuccessful() {
         int status = getStatusCode();
         return status >= 200 && status < 300;
