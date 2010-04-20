@@ -59,7 +59,8 @@ public class MockHttpServer extends NanoHTTPD {
 
         String contentType = request.header.getProperty("content-type", NanoHTTPD.MIME_PLAINTEXT);
         if (!contentType.equals(NanoHTTPD.MIME_PLAINTEXT)
-                && !contentType.equals(NanoHTTPD.MIME_XML)) {
+                && !contentType.equals(NanoHTTPD.MIME_XML)
+                && !contentType.startsWith(NanoHTTPD.MIME_MULTIPART)) {
             return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "content-type '"
                     + contentType + "' is not implemented ");
         }
