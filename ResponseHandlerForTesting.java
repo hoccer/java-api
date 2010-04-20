@@ -7,21 +7,23 @@ import com.artcom.y60.data.StreamableContent;
 
 public class ResponseHandlerForTesting implements HttpResponseHandler {
 
-    private static final String LOG_TAG             = "ResponseHandlerForTesting";
+    private static final String LOG_TAG                         = "ResponseHandlerForTesting";
 
-    boolean                     areHeadersAvailable = false;
-    boolean                     hasError            = false;
-    boolean                     isReceiving         = false;
-    boolean                     wasSuccessful       = false;
+    boolean                     areHeadersAvailable             = false;
+    boolean                     hasOnHeadersAvailableBeenCalled = false;
+    boolean                     hasError                        = false;
+    boolean                     isReceiving                     = false;
+    boolean                     wasSuccessful                   = false;
 
-    double                      progress            = -1;
-    StreamableContent           body                = null;
+    double                      progress                        = -1;
+    StreamableContent           body                            = null;
 
     @Override
     public void onHeaderAvailable(Header[] headers) {
         Logger.v(LOG_TAG, "onHeaderAvailable called");
         reset();
         areHeadersAvailable = true;
+        hasOnHeadersAvailableBeenCalled = true;
     }
 
     @Override

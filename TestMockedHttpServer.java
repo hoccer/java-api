@@ -70,7 +70,7 @@ public class TestMockedHttpServer extends HttpTestCase {
 
     public void testEmptyHttpPost() throws Exception {
         assertEquals("our mock server should respond to an empty POST", "no data posted",
-                HttpHelper.post(getServer().getUri(), "", "", "text/plain"));
+                HttpHelper.post(getServer().getUri(), "", "text/plain", "text/plain"));
     }
 
     public void test404HttpPost() throws Exception {

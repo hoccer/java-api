@@ -53,7 +53,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
     public void testGettingNoifiedAboutSuccessViaResponseHandler() throws Exception {
 
-        getServer().setResponseDelay(200);
+        getServer().setResponseDelay(100);
         mRequest = new AsyncHttpGet(getServer().getUri());
         final ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
         mRequest.registerResponseHandler(requestStatus);

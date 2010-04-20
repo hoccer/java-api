@@ -60,6 +60,7 @@ public class MockHttpServer extends NanoHTTPD {
         String contentType = request.header.getProperty("content-type", NanoHTTPD.MIME_PLAINTEXT);
         if (!contentType.equals(NanoHTTPD.MIME_PLAINTEXT)
                 && !contentType.equals(NanoHTTPD.MIME_XML)
+                && !contentType.equals(NanoHTTPD.MIME_FORM_URLENCODED)
                 && !contentType.startsWith(NanoHTTPD.MIME_MULTIPART)) {
             return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "content-type '"
                     + contentType + "' is not implemented ");
@@ -89,13 +90,13 @@ public class MockHttpServer extends NanoHTTPD {
         mLastPost = request;
 
         String newResource = "/" + UUID.randomUUID();
-        String data = "no data posted";
+        String data = "this text should not be seen";
         String contentType = request.header.getProperty("content-type", "");
         if (contentType.equals(NanoHTTPD.MIME_FORM_URLENCODED)) {
             data = request.parameters.getProperty("message",
                     "no message property given (use http//...?message=<your message>");
         } else if (contentType.equals(NanoHTTPD.MIME_PLAINTEXT)) {
-            data = request.body;
+            data = request.body.length() == 0 ? "no data posted" : request.body;
         } else if (!contentType.equals("")) {
             return new NanoHTTPD.Response(HTTP_NOTIMPLEMENTED, MIME_PLAINTEXT, "content-type "
                     + contentType + " is not implemented");
