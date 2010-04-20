@@ -3,6 +3,7 @@ package com.artcom.y60.http;
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
@@ -52,6 +53,17 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
             @Override
             public void onSuccess() {
                 // if multipart is uploaded, the whole request is almost finished
+
+                Header[] headers = getRequest().getAllHeaders();
+                Logger.v(LOG_TAG,
+                        "multipart header is: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: ",
+                        getRequest().getEntity().getContentType(), " headers size: ",
+                        headers.length);
+
+                for (int i = 0; i < headers.length; i++) {
+                    Logger.v(LOG_TAG, "multipart header is: ", headers[i]);
+                }
+                Logger.v(LOG_TAG, "multipart header is: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                 setProgress(95);
             }
 
@@ -67,6 +79,7 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
             }
         });
         getRequest().setEntity(pMultipart);
+
     }
 
     public void setBody(Map<String, String> params) {
