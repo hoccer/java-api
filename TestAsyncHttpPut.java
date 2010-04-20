@@ -75,11 +75,46 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 .getAsString(uri));
     }
 
-    public void testPuttingMultipart() throws Exception {
+    public void testPuttingStringAsMultipart() throws Exception {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
         StreamableContent data = new StreamableString("test data string as stream");
-        multipart.addPart("unit test data", "afilename.txt", "text/plain", data);
+        multipart.addPart("unit test data", "afilename.txt", data);
+
+        mRequest = new AsyncHttpPut(uri);
+        mRequest.setBody(multipart);
+        mRequest.start();
+
+        assertRequestIsDone(mRequest);
+        TestHelper.assertIncludes(
+                "the putted data should be somewhere in the returned as answer from the server",
+                "test data string as stream", mRequest.getBodyAsString());
+
+        TestHelper.assertIncludes("the putted mime type should be passed to the server",
+                NanoHTTPD.MIME_MULTIPART, getServer().getLastRequest().header
+                        .getProperty("content-type"));
+
+        String mulitpartString = HttpHelper.getAsString(uri);
+        assertTrue("putted data should contain mulitpart border string", mulitpartString
+                .contains(MultipartHttpEntity.BORDER));
+        assertTrue("putted data should contain content-type informations", mulitpartString
+                .contains("Content-Type: text/plain"));
+        assertTrue("putted data should contain transfer encoding", mulitpartString
+                .contains("Content-Transfer-Encoding: binary"));
+
+        assertMultipartDataEquals("test data string as stream", mulitpartString);
+    }
+
+    public void testPuttingXmlAsMultipart() throws Exception {
+        String uri = getServer().getUri() + "/myMultipart";
+        MultipartHttpEntity multipart = new MultipartHttpEntity();
+
+        DynamicStreamableContent data = new DynamicStreamableContent();
+        data.setContentType("text/xml");
+        byte[] content = "test data string as stream".getBytes();
+        data.write(content, 0, content.length);
+
+        multipart.addPart("unit test data", "afilename.txt", data);
 
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
@@ -94,7 +129,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         assertTrue("putted data should contain mulitpart border string", mulitpartString
                 .contains(MultipartHttpEntity.BORDER));
         assertTrue("putted data should contain content-type informations", mulitpartString
-                .contains("Content-Type: text/plain"));
+                .contains("Content-Type: text/xml"));
         assertTrue("putted data should contain transfer encoding", mulitpartString
                 .contains("Content-Transfer-Encoding: binary"));
 
