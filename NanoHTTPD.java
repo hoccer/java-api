@@ -160,7 +160,8 @@ public class NanoHTTPD {
      */
     public static final String MIME_PLAINTEXT = "text/plain", MIME_HTML = "text/html",
             MIME_DEFAULT_BINARY = "application/octet-stream",
-            MIME_FORM_URLENCODED = "application/x-www-form-urlencoded", MIME_XML = "text/xml";
+            MIME_FORM_URLENCODED = "application/x-www-form-urlencoded", MIME_XML = "text/xml",
+            MIME_MULTIPART = "multipart/form-data";
 
     // ==================================================
     // Socket & server code
