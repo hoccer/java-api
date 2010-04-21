@@ -17,7 +17,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
 import com.artcom.y60.Logger;
-import com.artcom.y60.data.DynamicStreamableContent;
+import com.artcom.y60.data.GenericStreamableContent;
 import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.thread.ThreadedTask;
 
@@ -29,7 +29,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     private final HttpRequestBase mRequest;
 
     private HttpResponse          mResponse                = null;
-    private StreamableContent     mResponseContent         = new DynamicStreamableContent();
+    private StreamableContent     mResponseContent         = new GenericStreamableContent();
 
     private HttpResponseHandler   mResponseHandlerCallback = null;
 
