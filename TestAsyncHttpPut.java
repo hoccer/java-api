@@ -1,7 +1,7 @@
 package com.artcom.y60.http;
 
 import com.artcom.y60.TestHelper;
-import com.artcom.y60.data.DynamicStreamableContent;
+import com.artcom.y60.data.GenericStreamableContent;
 import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.data.StreamableString;
 
@@ -54,7 +54,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         String uri = getServer().getUri() + "/data";
         mRequest = new AsyncHttpPut(uri);
 
-        DynamicStreamableContent data = new DynamicStreamableContent();
+        GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
         byte[] content = "testmango".getBytes();
         data.write(content, 0, content.length);
@@ -109,7 +109,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
 
-        DynamicStreamableContent data = new DynamicStreamableContent();
+        GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
         byte[] content = "test data string as stream".getBytes();
         data.write(content, 0, content.length);
