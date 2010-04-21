@@ -23,15 +23,15 @@ import com.artcom.y60.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
 
-    private static final String            LOG_TAG                  = "AsyncHttpConnection";
+    private static final String   LOG_TAG                  = "AsyncHttpConnection";
 
-    private DefaultHttpClient              mHttpClient;
-    private final HttpRequestBase          mRequest;
+    private DefaultHttpClient     mHttpClient;
+    private final HttpRequestBase mRequest;
 
-    private HttpResponse                   mResponse                = null;
-    private final DynamicStreamableContent mResponseContent         = new DynamicStreamableContent();
+    private HttpResponse          mResponse                = null;
+    private StreamableContent     mResponseContent         = new DynamicStreamableContent();
 
-    private HttpResponseHandler            mResponseHandlerCallback = null;
+    private HttpResponseHandler   mResponseHandlerCallback = null;
 
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
@@ -73,6 +73,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
     public StreamableContent getBodyAsStreamableContent() {
         return mResponseContent;
+    }
+
+    public void setStreamableContent(StreamableContent pStreamableContent) {
+        mResponseContent = pStreamableContent;
     }
 
     public void setAcceptedMimeType(String pMimeType) {
@@ -212,7 +216,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         for (int i = 0; i < headers.length; i++) {
             if (headers[i].getName().equals("Content-Type")) {
-                mResponseContent.setContentType(headers[i].getValue());
+                // mResponseContent.setContentType(headers[i].getValue());
             }
         }
 
@@ -220,6 +224,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             Logger.v(LOG_TAG, "calling callbeack: onHeaderAvailable, with: ", headers);
             mResponseHandlerCallback.onHeaderAvailable(headers);
         }
+
+        // TODO create streamable content if not set by factory
+
     }
 
     protected void onSuccess(int pStatusCode) {
