@@ -10,8 +10,8 @@ import android.provider.MediaStore;
 
 public class AndroidDataContainerFactory extends DataContainerFactory {
 
-    private static final String LOG_TAG = "HoccerContentFactory";
-    private ContentResolver     mContentResolver;
+    private static final String   LOG_TAG = "HoccerContentFactory";
+    private final ContentResolver mContentResolver;
 
     public AndroidDataContainerFactory(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
@@ -31,8 +31,8 @@ public class AndroidDataContainerFactory extends DataContainerFactory {
 
         OutputStream outputStream = mContentResolver.openOutputStream(imageUri);
 
-        AndroidStreamableContent streamableContent = new AndroidStreamableContent(outputStream,
-                imageUri, ContentType);
+        AndroidStreamableContent streamableContent = null;
+        // new AndroidStreamableContent(outputStream, imageUri, ContentType);
 
         return streamableContent;
     }

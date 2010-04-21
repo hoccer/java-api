@@ -1,32 +1,33 @@
 package com.artcom.y60.data;
 
+import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.content.ContentResolver;
 import android.net.Uri;
 
-public class AndroidStreamableContent implements StreamableContent {
+public abstract class AndroidStreamableContent implements StreamableContent {
 
-    String               mContentType;
-    private OutputStream mResultStream;
-    private Uri          mContentResolverUri;
+    ContentResolver mContentResolver;
+    private Uri     mContentResolverUri;
+    String          mContentType;
 
-    public AndroidStreamableContent(OutputStream pOutputStream, Uri pContentResolverUri,
-            String pContentType) {
-        mResultStream = pOutputStream;
-        mContentResolverUri = pContentResolverUri;
-        mContentType = pContentType;
+    public AndroidStreamableContent(ContentResolver pContentResolver) {
+        mContentResolver = pContentResolver;
     }
 
     public Uri getContentResolverUri() {
         return mContentResolverUri;
     }
 
-    @Override
-    public String getContentType() {
-        return mContentType;
+    protected void setCotentResolverUri(Uri dataLocation) {
+        mContentResolverUri = dataLocation;
     }
+
+    abstract public String getContentType();
 
     @Override
     public InputStream getStream() {
@@ -39,16 +40,18 @@ public class AndroidStreamableContent implements StreamableContent {
         return 0;
     }
 
+    public InputStream getInputStream() throws IOException {
+        BufferedInputStream stream = new BufferedInputStream(mContentResolver
+                .openInputStream(getContentResolverUri()));
+        return stream;
+
+    }
+
+    public OutputStream getOutputStream() throws FileNotFoundException {
+        return mContentResolver.openOutputStream(getContentResolverUri());
+    }
+
     public void write(byte[] buffer, int offset, int count) throws IOException {
-        mResultStream.write(buffer, offset, count);
-    }
-
-    public String toString() {
-        return mResultStream.toString();
-    }
-
-    @Override
-    public String getFilename() {
-        return "data";
+        getOutputStream().write(buffer, offset, count);
     }
 }
