@@ -1,6 +1,7 @@
 package com.artcom.y60.data;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class StreamableString implements StreamableContent {
@@ -31,4 +32,8 @@ public class StreamableString implements StreamableContent {
         return "data.txt";
     }
 
+    @Override
+    public void write(byte[] buffer, int offset, int count) throws IOException {
+        // TODO Auto-generated method stub
+    }
 }
