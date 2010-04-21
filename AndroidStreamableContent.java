@@ -1,17 +1,26 @@
 package com.artcom.y60.data;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-public class DynamicStreamableContent implements StreamableContent {
+import android.net.Uri;
 
-    String                        mContentType;
-    private ByteArrayOutputStream mResultStream = new ByteArrayOutputStream();
+public class AndroidStreamableContent implements StreamableContent {
 
-    public void setContentType(String pContentType) {
+    String               mContentType;
+    private OutputStream mResultStream;
+    private Uri          mContentResolverUri;
+
+    public AndroidStreamableContent(OutputStream pOutputStream, Uri pContentResolverUri,
+            String pContentType) {
+        mResultStream = pOutputStream;
+        mContentResolverUri = pContentResolverUri;
         mContentType = pContentType;
+    }
+
+    public Uri getContentResolverUri() {
+        return mContentResolverUri;
     }
 
     @Override
@@ -21,12 +30,13 @@ public class DynamicStreamableContent implements StreamableContent {
 
     @Override
     public InputStream getStream() {
-        return new ByteArrayInputStream(mResultStream.toByteArray());
+        // TODO convert out to inputstream
+        return null;
     }
 
     @Override
     public long getStreamLength() {
-        return mResultStream.size();
+        return 0;
     }
 
     public void write(byte[] buffer, int offset, int count) throws IOException {
