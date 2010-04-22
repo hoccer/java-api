@@ -1,5 +1,8 @@
 package com.artcom.y60.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 
@@ -147,4 +150,16 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertEquals("should get uri of creation", uri, mRequest.getUri());
         assertTrue("request should tell about client error", mRequest.hadClientError());
     }
+
+    public void testGettingImageFromWeb() throws Exception {
+        String uri = "http://artcom.de/templates/artcom/css/images/artcom_rgb_screen_193x22.png";
+        byte[] expectedData = HttpHelper.getAsByteArray(uri);
+        mRequest = new AsyncHttpGet(uri);
+        mRequest.start();
+        assertRequestIsDone(mRequest);
+        InputStream downloadedData = mRequest.getBodyAsStreamableContent().getStream();
+        TestHelper.assertInputStreamEquals("Downloaded should be equal", new ByteArrayInputStream(
+                expectedData), downloadedData);
+    }
+
 }
