@@ -30,12 +30,6 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     abstract public String getContentType();
 
     @Override
-    public InputStream getStream() {
-        // TODO convert out to inputstream
-        return null;
-    }
-
-    @Override
     public long getStreamLength() {
         return 0;
     }
