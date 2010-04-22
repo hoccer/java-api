@@ -34,7 +34,7 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
         ByteArrayInputStream stream = new ByteArrayInputStream("testmango".getBytes());
 
         Logger.v(LOG_TAG, ".....................................stream lenght: ", pStreamableData
-                .getStreamLength(), " stream: ", pStreamableData.getStream());
+                .getStreamLength(), " stream: ", pStreamableData.getInputStream());
 
         InputStreamEntity entity = new InputStreamEntity(stream, 9);
 
