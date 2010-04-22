@@ -13,7 +13,7 @@ public class StreamableString implements StreamableContent {
     }
 
     @Override
-    public InputStream getStream() {
+    public InputStream getInputStream() {
         return new ByteArrayInputStream(mData);
     }
 
