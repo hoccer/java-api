@@ -24,8 +24,11 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return mContentResolverUri;
     }
 
-    protected void setCotentResolverUri(Uri dataLocation) throws FileNotFoundException {
+    protected void setCotentResolverUri(Uri dataLocation) {
         mContentResolverUri = dataLocation;
+    }
+
+    protected void openOutputStream() throws FileNotFoundException {
         mOutputStream = mContentResolver.openOutputStream(getContentResolverUri());
     }
 
