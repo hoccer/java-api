@@ -157,7 +157,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mRequest = new AsyncHttpGet(uri);
         mRequest.start();
         assertRequestIsDone(mRequest);
-        InputStream downloadedData = mRequest.getBodyAsStreamableContent().getInputStream();
+        InputStream downloadedData = mRequest.getBodyAsStreamableContent().getStream();
         TestHelper.assertInputStreamEquals("Downloaded should be equal", new ByteArrayInputStream(
                 expectedData), downloadedData);
     }
