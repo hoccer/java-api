@@ -11,9 +11,10 @@ import android.net.Uri;
 
 public abstract class AndroidStreamableContent implements StreamableContent {
 
-    ContentResolver mContentResolver;
-    private Uri     mContentResolverUri;
-    String          mContentType;
+    ContentResolver      mContentResolver;
+    private Uri          mContentResolverUri;
+    String               mContentType;
+    private OutputStream mOutputStream;
 
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
@@ -25,6 +26,10 @@ public abstract class AndroidStreamableContent implements StreamableContent {
 
     protected void setCotentResolverUri(Uri dataLocation) {
         mContentResolverUri = dataLocation;
+    }
+
+    protected void openOutputStream() throws FileNotFoundException {
+        mOutputStream = mContentResolver.openOutputStream(getContentResolverUri());
     }
 
     abstract public String getContentType();
@@ -42,7 +47,11 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     }
 
     public OutputStream getOutputStream() throws FileNotFoundException {
-        return mContentResolver.openOutputStream(getContentResolverUri());
+        if (mOutputStream == null) {
+            throw new FileNotFoundException(
+                    "Outputstream is null, since content resolver uri is not yet set.");
+        }
+        return mOutputStream;
     }
 
     public void write(byte[] buffer, int offset, int count) throws IOException {
