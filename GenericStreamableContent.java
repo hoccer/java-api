@@ -20,7 +20,7 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     @Override
-    public InputStream getInputStream() {
+    public InputStream getStream() {
         return new ByteArrayInputStream(mResultStream.toByteArray());
     }
 

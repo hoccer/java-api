@@ -7,7 +7,7 @@ public interface StreamableContent {
 
     public long getStreamLength();
 
-    public InputStream getInputStream();
+    public InputStream getStream();
 
     public String getContentType();
 
