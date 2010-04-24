@@ -29,7 +29,9 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
     
-    abstract public String getContentType();
+    public String getContentType() {
+        return mContentResolver.getType(getContentResolverUri());
+    }
     
     @Override
     public long getStreamLength() {
