@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 public interface StreamableContent {
     
-    public long getStreamLength();
+    public long getStreamLength() throws FileNotFoundException;
     
     public InputStream openInputStream() throws FileNotFoundException;
     

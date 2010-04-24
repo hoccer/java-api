@@ -34,8 +34,8 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     }
     
     @Override
-    public long getStreamLength() {
-        return 0;
+    public long getStreamLength() throws FileNotFoundException {
+        return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
     
     public InputStream openInputStream() throws FileNotFoundException {
