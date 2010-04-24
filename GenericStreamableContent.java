@@ -7,6 +7,7 @@ import java.io.OutputStream;
 
 public class GenericStreamableContent implements StreamableContent {
     
+    String                              mFilename     = "filename.unkonwn";
     String                              mContentType;
     private final ByteArrayOutputStream mResultStream = new ByteArrayOutputStream();
     
@@ -17,6 +18,14 @@ public class GenericStreamableContent implements StreamableContent {
     @Override
     public String getContentType() {
         return mContentType;
+    }
+    
+    public String getFilename() {
+        return mFilename;
+    }
+    
+    public void setFilename(String mFilename) {
+        this.mFilename = mFilename;
     }
     
     @Override
@@ -32,11 +41,6 @@ public class GenericStreamableContent implements StreamableContent {
     @Override
     public String toString() {
         return mResultStream.toString();
-    }
-    
-    @Override
-    public String getFilename() {
-        return "data";
     }
     
     @Override
