@@ -8,7 +8,7 @@ public interface StreamableContent {
     
     public long getStreamLength();
     
-    public InputStream openInputStream();
+    public InputStream openInputStream() throws FileNotFoundException;
     
     public String getContentType();
     

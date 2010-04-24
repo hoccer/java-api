@@ -1,8 +1,6 @@
 package com.artcom.y60.data;
 
-import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -38,10 +36,7 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return 0;
     }
     
-    public InputStream getInputStream() throws IOException {
-        BufferedInputStream stream = new BufferedInputStream(mContentResolver
-                .openInputStream(getContentResolverUri()));
-        return stream;
-        
+    public InputStream openInputStream() throws FileNotFoundException {
+        return mContentResolver.openInputStream(getContentResolverUri());
     }
 }
