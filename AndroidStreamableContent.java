@@ -10,51 +10,38 @@ import android.content.ContentResolver;
 import android.net.Uri;
 
 public abstract class AndroidStreamableContent implements StreamableContent {
-
-    ContentResolver      mContentResolver;
-    private Uri          mContentResolverUri;
-    String               mContentType;
-    private OutputStream mOutputStream;
-
+    
+    ContentResolver mContentResolver;
+    private Uri     mContentResolverUri;
+    String          mContentType;
+    
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
     }
-
+    
     public Uri getContentResolverUri() {
         return mContentResolverUri;
     }
-
+    
     protected void setCotentResolverUri(Uri dataLocation) {
         mContentResolverUri = dataLocation;
     }
-
-    protected void openOutputStream() throws FileNotFoundException {
-        mOutputStream = mContentResolver.openOutputStream(getContentResolverUri());
+    
+    public OutputStream openOutputStream() throws FileNotFoundException {
+        return mContentResolver.openOutputStream(getContentResolverUri());
     }
-
+    
     abstract public String getContentType();
-
+    
     @Override
     public long getStreamLength() {
         return 0;
     }
-
+    
     public InputStream getInputStream() throws IOException {
         BufferedInputStream stream = new BufferedInputStream(mContentResolver
                 .openInputStream(getContentResolverUri()));
         return stream;
-
-    }
-
-    public OutputStream getOutputStream() throws FileNotFoundException {
-        if (mOutputStream == null) {
-            throw new FileNotFoundException(
-                    "Outputstream is null, since content resolver uri is not yet set.");
-        }
-        return mOutputStream;
-    }
-
-    public void write(byte[] buffer, int offset, int count) throws IOException {
-        getOutputStream().write(buffer, offset, count);
+        
     }
 }

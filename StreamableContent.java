@@ -1,18 +1,18 @@
 package com.artcom.y60.data;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public interface StreamableContent {
-
+    
     public long getStreamLength();
-
-    public InputStream getStream();
-
+    
+    public InputStream openInputStream();
+    
     public String getContentType();
-
+    
     public String getFilename();
-
-    public void write(byte[] buffer, int offset, int count) throws IOException;
-
+    
+    public OutputStream openOutputStream() throws FileNotFoundException;
 }

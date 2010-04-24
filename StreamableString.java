@@ -1,39 +1,41 @@
 package com.artcom.y60.data;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class StreamableString implements StreamableContent {
-
-    byte[] mData;
-
-    public StreamableString(String text) {
-        mData = text.getBytes();
+    
+    ByteArrayOutputStream mData = new ByteArrayOutputStream();
+    
+    public StreamableString(String text) throws IOException {
+        mData.write(text.getBytes());
     }
-
+    
     @Override
-    public InputStream getStream() {
-        return new ByteArrayInputStream(mData);
+    public InputStream openInputStream() {
+        return new ByteArrayInputStream(mData.toByteArray());
     }
-
+    
     @Override
     public long getStreamLength() {
-        return mData.length;
+        return mData.size();
     }
-
+    
     @Override
     public String getContentType() {
         return "text/plain";
     }
-
+    
     @Override
     public String getFilename() {
         return "data.txt";
     }
-
+    
     @Override
-    public void write(byte[] buffer, int offset, int count) throws IOException {
-        // TODO Auto-generated method stub
+    public OutputStream openOutputStream() {
+        return mData;
     }
 }
