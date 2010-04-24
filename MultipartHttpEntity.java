@@ -84,7 +84,7 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
 
         byte[] buffer = new byte[0xFFFF];
         int len;
-        InputStream stream = mStreamable.getStream();
+        InputStream stream = mStreamable.openInputStream();
         while ((len = stream.read(buffer)) != -1) {
             outstream.write(buffer, 0, len);
             uploaded += len;
