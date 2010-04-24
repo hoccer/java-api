@@ -6,15 +6,15 @@ import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.data.StreamableString;
 
 public class TestAsyncHttpPut extends HttpTestCase {
-
+    
     private AsyncHttpPut mRequest;
-
+    
     public void testExecution() throws Exception {
-
+        
         getServer().setResponseDelay(200);
         mRequest = new AsyncHttpPut(getServer().getUri());
         mRequest.start();
-
+        
         TestHelper.blockUntilTrue("request should have started by now", 1000,
                 new TestHelper.Condition() {
                     @Override
@@ -24,7 +24,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 });
         assertTrue("request should have started, but progress is " + mRequest.getProgress() + "%",
                 mRequest.isRunning());
-
+        
         TestHelper.blockUntilTrue("request should have got the response by now", 4000,
                 new TestHelper.Condition() {
                     @Override
@@ -32,10 +32,10 @@ public class TestAsyncHttpPut extends HttpTestCase {
                         return mRequest.getProgress() > 1;
                     }
                 });
-
+        
         assertRequestIsDone(mRequest);
     }
-
+    
     public void testPuttingStringData() throws Exception {
         String uri = getServer().getUri() + "/data";
         mRequest = new AsyncHttpPut(uri);
@@ -49,51 +49,52 @@ public class TestAsyncHttpPut extends HttpTestCase {
         assertEquals("the putted data should be getrievable via http GET", "my data string",
                 HttpHelper.getAsString(uri));
     }
-
+    
     public void testPuttingStreamableContent() throws Exception {
         String uri = getServer().getUri() + "/data";
         mRequest = new AsyncHttpPut(uri);
-
+        
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
         byte[] content = "testmango".getBytes();
-        data.write(content, 0, content.length);
-
+        
+        data.openOutputStream().write(content, 0, content.length);
+        
         mRequest.setBody(data);
         mRequest.start();
         assertRequestIsDone(mRequest);
         assertEquals("the putted data should be returned as answer from the server", "testmango",
                 mRequest.getBodyAsStreamableContent().toString());
-
+        
         assertEquals("the putted mime type should be passed to the server", "text/xml", getServer()
                 .getLastRequest().header.getProperty("content-type"));
         assertEquals(
                 "the putted data should be returned with basic mime type by the mocked server",
                 "text/plain", mRequest.getBodyAsStreamableContent().getContentType());
-
+        
         assertEquals("the putted data should be retrievable via http GET", "testmango", HttpHelper
                 .getAsString(uri));
     }
-
+    
     public void testPuttingStringAsMultipart() throws Exception {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
         StreamableContent data = new StreamableString("test data string as stream");
         multipart.addPart("unit test data", data);
-
+        
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
         mRequest.start();
-
+        
         assertRequestIsDone(mRequest);
         TestHelper.assertIncludes(
                 "the putted data should be somewhere in the returned as answer from the server",
                 "test data string as stream", mRequest.getBodyAsString());
-
+        
         TestHelper.assertIncludes("the putted mime type should be passed to the server",
                 NanoHTTPD.MIME_MULTIPART, getServer().getLastRequest().header
                         .getProperty("content-type"));
-
+        
         String mulitpartString = HttpHelper.getAsString(uri);
         assertTrue("putted data should contain mulitpart border string", mulitpartString
                 .contains(MultipartHttpEntity.BORDER));
@@ -101,30 +102,30 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 .contains("Content-Type: text/plain"));
         assertTrue("putted data should contain transfer encoding", mulitpartString
                 .contains("Content-Transfer-Encoding: binary"));
-
+        
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
-
+    
     public void testPuttingXmlAsMultipart() throws Exception {
         String uri = getServer().getUri() + "/myMultipart";
         MultipartHttpEntity multipart = new MultipartHttpEntity();
-
+        
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
         byte[] content = "test data string as stream".getBytes();
-        data.write(content, 0, content.length);
-
+        data.openOutputStream().write(content, 0, content.length);
+        
         multipart.addPart("unit test data", data);
-
+        
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody(multipart);
         mRequest.start();
-
+        
         assertRequestIsDone(mRequest);
         TestHelper.assertIncludes(
                 "the putted data should be somewhere in the returned as answer from the server",
                 "test data string as stream", mRequest.getBodyAsString());
-
+        
         String mulitpartString = HttpHelper.getAsString(uri);
         assertTrue("putted data should contain mulitpart border string", mulitpartString
                 .contains(MultipartHttpEntity.BORDER));
@@ -132,10 +133,10 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 .contains("Content-Type: text/xml"));
         assertTrue("putted data should contain transfer encoding", mulitpartString
                 .contains("Content-Transfer-Encoding: binary"));
-
+        
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
-
+    
     private void assertMultipartDataEquals(String dataString, String pMultipartString) {
         int posOfEmptyLine = pMultipartString.indexOf("\r\n\r\n");
         assertTrue("should find the empty line in " + posOfEmptyLine, posOfEmptyLine != -1);
