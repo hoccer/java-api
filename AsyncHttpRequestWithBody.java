@@ -1,14 +1,13 @@
 package com.artcom.y60.http;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.artcom.y60.Logger;
 import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.thread.StatusHandler;
 
@@ -28,7 +27,7 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
         HttpHelper.insert(pStringData, "text/plain", getRequest());
     }
     
-    public void setBody(StreamableContent pStreamableData) {
+    public void setBody(StreamableContent pStreamableData) throws FileNotFoundException {
         
         InputStreamEntity entity = new InputStreamEntity(pStreamableData.openInputStream(),
                 pStreamableData.getStreamLength());
@@ -48,17 +47,6 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
             @Override
             public void onSuccess() {
                 // if multipart is uploaded, the whole request is almost finished
-                
-                Header[] headers = getRequest().getAllHeaders();
-                Logger.v(LOG_TAG,
-                        "multipart header is: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: ",
-                        getRequest().getEntity().getContentType(), " headers size: ",
-                        headers.length);
-                
-                for (int i = 0; i < headers.length; i++) {
-                    Logger.v(LOG_TAG, "multipart header is: ", headers[i]);
-                }
-                Logger.v(LOG_TAG, "multipart header is: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                 setProgress(95);
             }
             
