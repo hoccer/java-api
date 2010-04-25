@@ -55,4 +55,9 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
         body = null;
     }
     
+    @Override
+    public void onError(Exception e) {
+        hasError = true;
+    }
+    
 }
