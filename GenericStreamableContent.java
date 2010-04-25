@@ -39,12 +39,16 @@ public class GenericStreamableContent implements StreamableContent {
     }
     
     @Override
-    public String toString() {
-        return mResultStream.toString();
+    public OutputStream openOutputStream() {
+        return mResultStream;
     }
     
     @Override
-    public OutputStream openOutputStream() {
-        return mResultStream;
+    public String toString() {
+        if (mContentType.contains("text") || mContentType.contains("json")) {
+            return mResultStream.toString();
+        }
+        
+        return mFilename + " (" + mContentType + ")";
     }
 }
