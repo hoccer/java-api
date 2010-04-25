@@ -13,4 +13,6 @@ public interface HttpResponseHandler {
     public void onError(int statusCode, StreamableContent body);
     
     public void onReceiving(double progress);
+    
+    public void onError(Exception e);
 }

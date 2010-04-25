@@ -210,10 +210,12 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     protected void onIoError(IOException e) {
         Logger.e(LOG_TAG, e);
+        mResponseHandlerCallback.onError(e);
     }
     
     protected void onClientError(Exception e) {
         Logger.e(LOG_TAG, e);
+        mResponseHandlerCallback.onError(e);
     }
     
     protected void onHttpHeaderAvailable(Header[] pHeaders) {
