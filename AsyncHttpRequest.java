@@ -188,7 +188,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     protected void onPostExecute() {
         
         if (mResponse == null) {
-            onClientError(new NullPointerException("response of request " + mRequest.getURI()
+            Logger.e(LOG_TAG, new NullPointerException("response of request " + mRequest.getURI()
                     + " was null"));
             return;
         }
