@@ -218,7 +218,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     
     protected void onHttpHeaderAvailable(Header[] pHeaders) {
         
-        // Logger.v(LOG_TAG, "headers: ", HttpHelper.getHeadersAsString(pHeaders));
+        Logger.v(LOG_TAG, "headers of ", getUri(), ": ", HttpHelper.getHeadersAsString(pHeaders));
         
         HashMap<String, String> headers = new HashMap<String, String>();
         for (int i = 0; i < pHeaders.length; i++) {
