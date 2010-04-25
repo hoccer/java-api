@@ -29,6 +29,10 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
     
+    public InputStream openInputStream() throws FileNotFoundException {
+        return mContentResolver.openInputStream(getContentResolverUri());
+    }
+    
     public String getContentType() {
         return mContentResolver.getType(getContentResolverUri());
     }
@@ -38,7 +42,4 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
     
-    public InputStream openInputStream() throws FileNotFoundException {
-        return mContentResolver.openInputStream(getContentResolverUri());
-    }
 }
