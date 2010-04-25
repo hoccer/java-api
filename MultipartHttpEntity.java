@@ -33,7 +33,8 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
     public void addPart(String name, StreamableContent pStreamable) throws IOException {
         
         if (mPreample != null) {
-            throw new RuntimeException("this multipart can only handle a single part --- sorry");
+            throw new RuntimeException(
+                    "this multipart implementation can only handle a single part --- sorry");
         }
         
         mPreample = createPreamble(name, pStreamable.getFilename(), pStreamable.getContentType());
@@ -99,5 +100,10 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         if (mStatusCallback != null) {
             mStatusCallback.onSuccess();
         }
+    }
+    
+    @Override
+    public String toString() {
+        return new String(mPreample);
     }
 }
