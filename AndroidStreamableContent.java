@@ -8,38 +8,38 @@ import android.content.ContentResolver;
 import android.net.Uri;
 
 public abstract class AndroidStreamableContent implements StreamableContent {
-    
+
     ContentResolver mContentResolver;
     private Uri     mContentResolverUri;
     String          mContentType;
-    
+
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
     }
-    
+
     public Uri getContentResolverUri() {
         return mContentResolverUri;
     }
-    
-    protected void setCotentResolverUri(Uri dataLocation) {
+
+    protected void setContentResolverUri(Uri dataLocation) {
         mContentResolverUri = dataLocation;
     }
-    
+
     public OutputStream openOutputStream() throws FileNotFoundException {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
-    
+
     public InputStream openInputStream() throws FileNotFoundException {
         return mContentResolver.openInputStream(getContentResolverUri());
     }
-    
+
     public String getContentType() {
         return mContentResolver.getType(getContentResolverUri());
     }
-    
+
     @Override
     public long getStreamLength() throws FileNotFoundException {
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
-    
+
 }
