@@ -7,33 +7,33 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamableString implements StreamableContent {
-    
-    ByteArrayOutputStream mData = new ByteArrayOutputStream();
-    
+
+    protected ByteArrayOutputStream mData = new ByteArrayOutputStream();
+
     public StreamableString(String text) throws IOException {
         mData.write(text.getBytes());
     }
-    
+
     @Override
     public InputStream openInputStream() {
         return new ByteArrayInputStream(mData.toByteArray());
     }
-    
+
     @Override
     public long getStreamLength() {
         return mData.size();
     }
-    
+
     @Override
     public String getContentType() {
         return "text/plain";
     }
-    
+
     @Override
     public String getFilename() {
         return "data.txt";
     }
-    
+
     @Override
     public OutputStream openOutputStream() {
         return mData;
