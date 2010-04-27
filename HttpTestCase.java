@@ -32,7 +32,7 @@ public class HttpTestCase extends InstrumentationTestCase {
 
                     @Override
                     public boolean isSatisfied() throws Exception {
-                        return pRequest.isDone();
+                        return pRequest.isTaskCompleted();
                     }
                 });
     }

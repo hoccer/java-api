@@ -30,7 +30,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mRequest = new AsyncHttpGet(getServer().getUri());
         mRequest.start();
 
-        assertFalse("http get should run asyncrunous", mRequest.isDone());
+        assertFalse("http get should run asyncrunous", mRequest.isTaskCompleted());
         assertRequestIsDone(mRequest);
     }
 
