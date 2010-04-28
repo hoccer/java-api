@@ -25,7 +25,7 @@ import com.artcom.y60.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
 
-    private static final String   LOG_TAG                  = "AsyncHttpConnection";
+    private static final String   LOG_TAG                  = "AsyncHttpRequest";
 
     private DefaultHttpClient     mHttpClient;
     private final HttpRequestBase mRequest;
@@ -150,7 +150,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             byte[] buffer = new byte[0xFFFF];
             int len;
             while ((len = is.read(buffer)) != -1) {
-                setProgress((int) (downloaded / size));
+                setProgress((int) ((downloaded / (double) size) * 100));
+                Logger.v(LOG_TAG, "http progress ", getProgress(), " down: ", downloaded, " size ",
+                        size);
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
             }
@@ -262,6 +264,14 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                 .toString());
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(pStatusCode, mResponseContent);
+        }
+    }
+
+    @Override
+    protected void setProgress(int pProgress) {
+        super.setProgress(pProgress);
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onReceiving(getProgress());
         }
     }
 }
