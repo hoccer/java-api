@@ -151,8 +151,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             int len;
             while ((len = is.read(buffer)) != -1) {
                 setProgress((int) ((downloaded / (double) size) * 100));
-                Logger.v(LOG_TAG, "http progress ", getProgress(), " down: ", downloaded, " size ",
-                        size);
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
             }
