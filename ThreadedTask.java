@@ -1,8 +1,11 @@
 package com.artcom.y60.thread;
 
+import com.artcom.y60.Logger;
+
 public abstract class ThreadedTask extends Thread {
 
-    private int mProgress = 0;
+    private static String LOG_TAG   = "ThreadedTask";
+    private int           mProgress = 0;
 
     public abstract void doInBackground();
 
@@ -21,6 +24,7 @@ public abstract class ThreadedTask extends Thread {
     protected void setProgress(int pProgress) {
         synchronized (this) {
             mProgress = Math.max(0, Math.min(100, pProgress));
+            Logger.v(LOG_TAG, "threaded progress ", mProgress);
         }
     }
 
