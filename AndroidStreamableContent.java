@@ -1,6 +1,6 @@
 package com.artcom.y60.data;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -25,11 +25,11 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         mContentResolverUri = dataLocation;
     }
 
-    public OutputStream openOutputStream() throws FileNotFoundException {
+    public OutputStream openOutputStream() throws IOException {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
 
-    public InputStream openInputStream() throws FileNotFoundException {
+    public InputStream openInputStream() throws IOException {
         return mContentResolver.openInputStream(getContentResolverUri());
     }
 
@@ -38,7 +38,7 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     }
 
     @Override
-    public long getStreamLength() throws FileNotFoundException {
+    public long getStreamLength() throws IOException {
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
 
