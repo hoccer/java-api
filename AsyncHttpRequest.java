@@ -272,4 +272,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             mResponseHandlerCallback.onReceiving(getProgress());
         }
     }
+
+    public void removeResponseHandler() {
+        mResponseHandlerCallback = null;
+    }
 }
