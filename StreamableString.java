@@ -20,6 +20,11 @@ public class StreamableString implements StreamableContent {
     }
 
     @Override
+    public OutputStream openOutputStream() {
+        return mData;
+    }
+
+    @Override
     public long getStreamLength() {
         return mData.size();
     }
@@ -34,8 +39,4 @@ public class StreamableString implements StreamableContent {
         return "data.txt";
     }
 
-    @Override
-    public OutputStream openOutputStream() {
-        return mData;
-    }
 }

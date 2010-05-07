@@ -41,5 +41,4 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     public long getStreamLength() throws IOException {
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
-
 }
