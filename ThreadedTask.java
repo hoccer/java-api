@@ -1,6 +1,5 @@
 package com.artcom.y60.thread;
 
-
 public abstract class ThreadedTask extends Thread {
 
     private static String LOG_TAG   = "ThreadedTask";
