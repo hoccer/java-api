@@ -150,6 +150,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             byte[] buffer = new byte[0xFFFF];
             int len;
             while ((len = is.read(buffer)) != -1) {
+                if (Thread.interrupted()) {
+                    onClientError(new InterruptedException("download is interruped"));
+                    return;
+                }
                 setProgress((int) ((downloaded / (double) size) * 100));
                 storageStream.write(buffer, 0, len);
                 downloaded += len;

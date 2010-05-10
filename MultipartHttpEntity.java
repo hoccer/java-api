@@ -8,7 +8,6 @@ import org.apache.http.Header;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.message.BasicHeader;
 
-import com.artcom.y60.Logger;
 import com.artcom.y60.data.StreamableContent;
 import com.artcom.y60.thread.StatusHandler;
 
@@ -94,8 +93,6 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
             uploaded += len;
             if (mStatusCallback != null) {
                 double ratio = uploaded / (double) mStreamable.getStreamLength();
-                Logger.v(LOG_TAG, "uploaded: ", uploaded, " length: ", mStreamable
-                        .getStreamLength(), " ratio: ", ratio, " ", (int) ratio * 100);
                 mStatusCallback.onProgress((int) (ratio * 100));
             }
         }
