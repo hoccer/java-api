@@ -112,10 +112,18 @@ public class HttpHelper {
         return extractBodyAsString(result.getEntity());
     }
 
-    public static HttpResponse getPostXMLResponse(String uri, String body) throws IOException,
+    public static String postString(String uri, String body) throws IOException,
             HttpClientException, HttpServerException {
         HttpPost post = new HttpPost(uri);
         insertXML(body, post);
+        HttpResponse result = executeHTTPMethod(post, POST_TIMEOUT);
+        return extractBodyAsString(result.getEntity());
+    }
+
+    public static HttpResponse getPostXMLResponse(String uri, String body) throws IOException,
+            HttpClientException, HttpServerException {
+        HttpPost post = new HttpPost(uri);
+        insert(body, "text/plain", "text/plain", post);
         return executeHTTPMethod(post, POST_TIMEOUT, false);
     }
 
