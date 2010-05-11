@@ -10,6 +10,9 @@ public abstract class ThreadedTask extends Thread {
     @Override
     public void run() {
         doInBackground();
+        if (isInterrupted()) {
+            return;
+        }
         onPostExecute();
     }
 
