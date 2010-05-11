@@ -117,11 +117,28 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     @Override
+    public void interrupt() {
+        Logger.v(LOG_TAG, "interrupt called");
+        if (!mRequest.isAborted()) {
+            Logger.v(LOG_TAG, "request not aborted yet -  ABORTING");
+            mRequest.abort();
+        }
+        super.interrupt();
+    }
+
+    @Override
     public void doInBackground() {
+
+        // if (isInterrupted()) {
+        // Logger.v(LOG_TAG, "INTERRUPT");
+        // onClientError(new InterruptedException("download is interruped"));
+        // return;
+        // }
 
         setProgress(1);
 
         try {
+            Logger.v(LOG_TAG, this.getClass(), " before executing request");
             mResponse = mHttpClient.execute(mRequest);
         } catch (ClientProtocolException e) {
             onClientError(e);
@@ -130,6 +147,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onClientError(e);
             return;
         } catch (IOException e) {
+            Logger.v(LOG_TAG, this.getClass(), " io exception");
             onIoError(e);
             return;
         }
@@ -150,10 +168,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             byte[] buffer = new byte[0xFFFF];
             int len;
             while ((len = is.read(buffer)) != -1) {
-                if (Thread.interrupted()) {
-                    onClientError(new InterruptedException("download is interruped"));
-                    return;
-                }
+                Logger.v(LOG_TAG, "downloading request response");
                 setProgress((int) ((downloaded / (double) size) * 100));
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
