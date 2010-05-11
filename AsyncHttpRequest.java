@@ -129,12 +129,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     @Override
     public void doInBackground() {
 
-        // if (isInterrupted()) {
-        // Logger.v(LOG_TAG, "INTERRUPT");
-        // onClientError(new InterruptedException("download is interruped"));
-        // return;
-        // }
-
         setProgress(1);
 
         try {
@@ -169,6 +163,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             int len;
             while ((len = is.read(buffer)) != -1) {
                 Logger.v(LOG_TAG, "downloading request response");
+                if (isInterrupted()) {
+                    Logger.v(LOG_TAG, "INTERRUPT");
+                    onClientError(new InterruptedException("download is interruped"));
+                    return;
+                }
                 setProgress((int) ((downloaded / (double) size) * 100));
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
