@@ -162,7 +162,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             byte[] buffer = new byte[0xFFFF];
             int len;
             while ((len = is.read(buffer)) != -1) {
-                Logger.v(LOG_TAG, "downloading request response");
                 if (isInterrupted()) {
                     Logger.v(LOG_TAG, "INTERRUPT");
                     onClientError(new InterruptedException("download is interruped"));
