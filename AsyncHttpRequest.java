@@ -37,6 +37,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
     private boolean               mIsRequestCompleted      = false;
 
+    private long                  mRtt                     = 0;
+    private long                  mRttStart;
+
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
 
@@ -133,7 +136,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         try {
             Logger.v(LOG_TAG, this.getClass(), " before executing request");
+            long rttStart = System.currentTimeMillis();
             mResponse = mHttpClient.execute(mRequest);
+            mRtt = System.currentTimeMillis() - rttStart;
         } catch (ClientProtocolException e) {
             onClientError(e);
             return;
@@ -291,4 +296,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     public void removeResponseHandler() {
         mResponseHandlerCallback = null;
     }
+
+    public long getRtt() {
+        return mRtt;
+    }
+
 }
