@@ -13,7 +13,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
     private static final String LOG_TAG = "TestAsyncHttpGet";
     AsyncHttpGet                mRequest;
 
-    private void assertNormalHttpGetResponse() throws Exception {
+    private void blockUntilNormalHttpGetResponse() throws Exception {
         TestHelper.blockUntilEquals("request should respond with a text", 2000,
                 "I'm a mock server for test purposes", new TestHelper.Measurement() {
 
@@ -38,7 +38,21 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
         mRequest = new AsyncHttpGet(getServer().getUri());
         mRequest.start();
-        assertNormalHttpGetResponse();
+        blockUntilNormalHttpGetResponse();
+    }
+
+    public void testGettingRoundTripTime() throws Exception {
+
+        mRequest = new AsyncHttpGet(getServer().getUri());
+        assertEquals("RTT should be 0", 0, mRequest.getRtt());
+
+        final ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
+        mRequest.registerResponseHandler(requestStatus);
+        mRequest.start();
+        blockUntilHeadersAvailable(requestStatus);
+
+        assertTrue("RTT should not be 0", mRequest.getRtt() > 0);
+        assertEquals("RTT should be 0", 0, mRequest.getRtt());
     }
 
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {
@@ -65,7 +79,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertTrue("request should have started, but is at " + mRequest.getProgress() + "%",
                 mRequest.isRunning());
 
-        assertHeadersAvailable(requestStatus);
+        blockUntilHeadersAvailable(requestStatus);
 
         assertRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
@@ -125,7 +139,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
         mRequest = new AsyncHttpGet(getServer().getUri(), httpClient);
         mRequest.start();
-        assertNormalHttpGetResponse();
+        blockUntilNormalHttpGetResponse();
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }

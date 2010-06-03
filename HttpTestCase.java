@@ -37,7 +37,7 @@ public class HttpTestCase extends InstrumentationTestCase {
                 });
     }
 
-    protected void assertHeadersAvailable(final ResponseHandlerForTesting requestStatus)
+    protected void blockUntilHeadersAvailable(final ResponseHandlerForTesting requestStatus)
             throws Exception {
         TestHelper.blockUntilTrue("headers hould be there", 2000, new TestHelper.Condition() {
 

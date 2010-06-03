@@ -117,7 +117,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
             }
         });
 
-        assertHeadersAvailable(requestStatus);
+        blockUntilHeadersAvailable(requestStatus);
         assertRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
