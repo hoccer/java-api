@@ -36,7 +36,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     private HttpResponseHandler   mResponseHandlerCallback = null;
 
     private boolean               mIsRequestCompleted      = false;
-
     private long                  mRtt                     = 0;
 
     public AsyncHttpRequest(String pUrl) {
