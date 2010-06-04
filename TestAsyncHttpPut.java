@@ -33,7 +33,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
                     }
                 });
         
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
     }
     
     public void testPuttingStringData() throws Exception {
@@ -41,7 +41,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         mRequest = new AsyncHttpPut(uri);
         mRequest.setBody("my data string");
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("the putted data should be returned as answer from the server",
                 "my data string", mRequest.getBodyAsString());
         assertEquals("the putted mime type should be passed to the server", "text/plain",
@@ -62,7 +62,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         
         mRequest.setBody(data);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("the putted data should be returned as answer from the server", "testmango",
                 mRequest.getBodyAsStreamableContent().toString());
         
@@ -86,7 +86,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         mRequest.setBody(multipart);
         mRequest.start();
         
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         TestHelper.assertIncludes(
                 "the putted data should be somewhere in the returned as answer from the server",
                 "test data string as stream", mRequest.getBodyAsString());
@@ -121,7 +121,7 @@ public class TestAsyncHttpPut extends HttpTestCase {
         mRequest.setBody(multipart);
         mRequest.start();
         
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         TestHelper.assertIncludes(
                 "the putted data should be somewhere in the returned as answer from the server",
                 "test data string as stream", mRequest.getBodyAsString());

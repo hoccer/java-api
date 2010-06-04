@@ -31,7 +31,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         mRequest.start();
 
         assertFalse("http get should run asyncrunous", mRequest.isTaskCompleted());
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
     }
 
     public void testGettingResultFromRequestObject() throws Exception {
@@ -52,7 +52,6 @@ public class TestAsyncHttpGet extends HttpTestCase {
         blockUntilHeadersAvailable(requestStatus);
 
         assertTrue("RTT should not be 0", mRequest.getRtt() > 0);
-        assertEquals("RTT should be 0", 0, mRequest.getRtt());
     }
 
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {
@@ -81,7 +80,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
         blockUntilHeadersAvailable(requestStatus);
 
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
         assertEquals("response should come from mocked server",
@@ -111,7 +110,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
     public void testDefaultUserAgentStringInRequest() throws Exception {
         mRequest = new AsyncHttpGet(getServer().getUri());
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
@@ -119,7 +118,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
     public void testDefaultUserAgentStringInRequestWithCustomHttpClient() throws Exception {
         mRequest = new AsyncHttpGet(getServer().getUri(), new DefaultHttpClient());
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
@@ -130,7 +129,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
         mRequest = new AsyncHttpGet(getServer().getUri(), httpClient);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/0.1 HTTP Unit Test",
                 getServer().getLastRequest().header.getProperty("user-agent"));
     }
@@ -149,7 +148,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
         mRequest.start();
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
         assertTrue("request should be sucessful", mRequest.wasSuccessful());
     }
@@ -160,7 +159,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         assertEquals("should get uri of creation", uri, mRequest.getUri());
         mRequest.start();
         assertEquals("should get uri of creation", uri, mRequest.getUri());
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("should get uri of creation", uri, mRequest.getUri());
         assertTrue("request should tell about client error", mRequest.hadClientError());
     }
@@ -170,7 +169,7 @@ public class TestAsyncHttpGet extends HttpTestCase {
         byte[] expectedData = HttpHelper.getAsByteArray(uri);
         mRequest = new AsyncHttpGet(uri);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         InputStream downloadedData = mRequest.getBodyAsStreamableContent().openInputStream();
         TestHelper.assertInputStreamEquals("Downloaded should be equal", new ByteArrayInputStream(
                 expectedData), downloadedData);

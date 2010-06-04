@@ -8,6 +8,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
+import android.test.suitebuilder.annotation.Suppress;
+
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
@@ -39,7 +41,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
                     }
                 });
 
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
     }
 
     public void testEmptyPost() throws Exception {
@@ -62,7 +64,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         mRequest = new AsyncHttpPost(getServer().getUri());
         mRequest.setBody("test post");
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("should receive what was posted", "test post", mRequest.getBodyAsString());
     }
 
@@ -72,7 +74,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         String content = "test post which is \nreally really long\n\n.... this is the\nlast line ";
         mRequest.setBody(content);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("mock server should receive posted data", content,
                 getServer().getLastPost().body);
         assertEquals("should be redirected to what was posted", content, mRequest.getBodyAsString());
@@ -85,7 +87,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         params.put("message", "test post with hash map");
         mRequest.setBody(params);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("should receive what was posted", "test post with hash map", mRequest
                 .getBodyAsString());
     }
@@ -118,7 +120,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         });
 
         blockUntilHeadersAvailable(requestStatus);
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertTrue("should be successful", requestStatus.wasSuccessful);
         assertNotNull("should have an response body", requestStatus.body);
         assertEquals("response should come from mocked server", "no data posted",
@@ -145,13 +147,14 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 requestStatus.body.toString());
     }
 
+    @Suppress
     public void testCustomHttpClientToSupressRedirectionAfterPost() throws Exception {
         HttpParams httpParams = new BasicHttpParams();
         HttpClientParams.setRedirecting(httpParams, false);
         DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
         mRequest = new AsyncHttpPost(getServer().getUri(), httpClient);
         mRequest.start();
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertTrue("should have an location header", mRequest.getHeader("Location").contains(
                 "http://localhost"));
         TestHelper.assertIncludes("response from mocked server should describe 303",
@@ -163,7 +166,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
         mRequest.start();
         assertEquals("should get uri of creation", getServer().getUri(), mRequest.getUri());
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals(
                 "uri should now point to resource whre the post request got redirected indirectly",
                 getServer().getUri() + getServer().getLastRequest().uri, mRequest.getUri());
@@ -175,7 +178,7 @@ public class TestAsyncHttpPost extends HttpTestCase {
         assertEquals("should get uri of creation", uri, mRequest.getUri());
         mRequest.start();
         assertEquals("should get uri of creation", uri, mRequest.getUri());
-        assertRequestIsDone(mRequest);
+        blockUntilRequestIsDone(mRequest);
         assertEquals("should get uri of creation", uri, mRequest.getUri());
     }
 }

@@ -26,7 +26,7 @@ public class HttpTestCase extends InstrumentationTestCase {
         return mServer;
     }
 
-    protected void assertRequestIsDone(final AsyncHttpRequest pRequest) throws Exception {
+    protected void blockUntilRequestIsDone(final AsyncHttpRequest pRequest) throws Exception {
         TestHelper.blockUntilTrue("request should have been performed by now", 3000,
                 new TestHelper.Condition() {
 
