@@ -212,6 +212,15 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         return mRequest;
     }
 
+    public HashMap<String, String> getRequestHeaders() {
+        HashMap<String, String> headers = new HashMap<String, String>();
+        Header[] headersArray = mRequest.getAllHeaders();
+        for (int i = 0; i < headersArray.length; i++) {
+            headers.put(headersArray[i].getName(), headersArray[i].getValue());
+        }
+        return headers;
+    }
+
     @Override
     protected void onPostExecute() {
 
@@ -301,4 +310,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         return mRtt;
     }
 
+    public void addAdditionalHeaderParam(String key, String value) {
+        mRequest.addHeader(key, value);
+        // mHttpClient.se getParams().setParameter(key, value);
+    }
 }
