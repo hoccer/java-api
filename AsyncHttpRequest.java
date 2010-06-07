@@ -56,7 +56,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         // overwrite user-agent if it's not already customized
         Object userAgent = mHttpClient.getParams().getParameter("http.useragent");
-        Logger.v(LOG_TAG, "¤ user agent: ", userAgent);
         if (userAgent == null || userAgent.toString().contains("Apache-HttpClient")) {
             mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
         }
