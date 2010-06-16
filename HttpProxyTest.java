@@ -43,7 +43,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         final TestListener listener = new TestListener();
         final Uri uri = TestUriHelper.createUri();
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
         helper.requestDownload(uri);
 
         TestHelper.blockUntilTrue("proxy call the listener", 1000, new TestHelper.Condition() {
@@ -73,7 +73,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Uri uri = TestUriHelper.createUri();
 
         TestListener listener = new TestListener();
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
 
         helper.requestResourceWhichIsDeprecated(uri);
 
@@ -103,7 +103,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         final Uri uri = TestUriHelper.createUri();
 
         TestListener listener = new TestListener();
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
         assertFalse(helper.isInCache(uri.toString()));
 
         helper.requestDownload(uri);
@@ -123,7 +123,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         HttpProxyHelper helper = createHelper();
         TestListener listener = new TestListener();
         Uri uri = TestUriHelper.createUri();
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
 
         helper.requestResourceWhichIsDeprecated(uri);
 
@@ -139,7 +139,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         HttpProxyHelper helper = createHelper();
         final TestListener listener = new TestListener();
         Uri uri = Uri.parse("hxxp://x");
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
         helper.requestDownload(uri);
 
         TestHelper.blockUntilTrue("not available callback should have been called", 5000,
@@ -157,7 +157,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         TestListener listener = new TestListener();
         Uri uri = TestUriHelper.createUri();
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
 
         helper.requestResourceWhichIsDeprecated(uri);
 
@@ -165,7 +165,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         listener.reset();
         assertFalse(listener.wasResourceAvailableCalled());
-        helper.addResourceChangeListener(uri, listener);
+        helper.addResourceChangeListenerAndReport(uri, listener);
 
         // this is minimal asynchronous
         blockUntilResourceAvailableWasCalled(listener, 200);
