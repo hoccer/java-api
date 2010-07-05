@@ -42,8 +42,8 @@ public abstract class ThreadedTask extends Thread {
 
     protected void onPostExecute() {
         synchronized (this) {
-            mProgress = 100;
+            // mProgress = 100;
+            setProgress(100);
         }
     }
-
 }
