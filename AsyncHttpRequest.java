@@ -155,8 +155,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             return;
         }
 
+        long start = System.currentTimeMillis();
         onHttpHeaderAvailable(mResponse.getAllHeaders());
+        Logger.v(LOG_TAG, "headres available took: ", System.currentTimeMillis() - start);
 
+        start = System.currentTimeMillis();
         try {
             InputStream is = mResponse.getEntity().getContent();
             OutputStream storageStream = mResponseContent.openOutputStream();
@@ -178,6 +181,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onIoError(e);
             return;
         }
+        Logger.v(LOG_TAG, "downloading available took: ", System.currentTimeMillis() - start);
         mIsRequestCompleted = true;
     }
 
