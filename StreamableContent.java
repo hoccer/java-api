@@ -10,9 +10,10 @@ public interface StreamableContent {
 
     public InputStream openInputStream() throws IOException;
 
+    public OutputStream openOutputStream() throws IOException;
+
     public String getContentType();
 
     public String getFilename();
 
-    public OutputStream openOutputStream() throws IOException;
 }

@@ -29,14 +29,17 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         mContentResolverUri = dataLocation;
     }
 
+    @Override
     public OutputStream openOutputStream() throws IOException {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
 
+    @Override
     public InputStream openInputStream() throws IOException {
         return mContentResolver.openInputStream(getContentResolverUri());
     }
 
+    @Override
     public String getContentType() {
         return mContentResolver.getType(getContentResolverUri());
     }
