@@ -29,11 +29,13 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         mContentResolverUri = dataLocation;
     }
 
+    // override this in subclass, if you dont set a contentresolver uri
     @Override
     public OutputStream openOutputStream() throws IOException {
         return mContentResolver.openOutputStream(getContentResolverUri());
     }
 
+    // override this in subclass, if you dont set a contentresolver uri
     @Override
     public InputStream openInputStream() throws IOException {
         return mContentResolver.openInputStream(getContentResolverUri());
@@ -42,14 +44,17 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     @Override
     public String getContentType() {
 
-        String contentType = mContentResolver.getType(getContentResolverUri());
-        if (contentType != null) {
-            return contentType;
+        if (getContentResolverUri() != null) {
+            String contentType = mContentResolver.getType(getContentResolverUri());
+            if (contentType != null) {
+                return contentType;
+            }
         }
-        return mContentType;
 
+        return mContentType;
     }
 
+    // override this in subclass, if you dont set a contentresolver uri
     @Override
     public long getStreamLength() throws IOException {
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
