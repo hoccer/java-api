@@ -9,9 +9,9 @@ import android.net.Uri;
 
 public abstract class AndroidStreamableContent implements StreamableContent {
 
-    ContentResolver mContentResolver;
-    private Uri     mContentResolverUri;
-    String          mContentType;
+    ContentResolver  mContentResolver;
+    private Uri      mContentResolverUri;
+    protected String mContentType;
 
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
@@ -41,7 +41,13 @@ public abstract class AndroidStreamableContent implements StreamableContent {
 
     @Override
     public String getContentType() {
-        return mContentResolver.getType(getContentResolverUri());
+
+        String contentType = mContentResolver.getType(getContentResolverUri());
+        if (contentType != null) {
+            return contentType;
+        }
+        return mContentType;
+
     }
 
     @Override
