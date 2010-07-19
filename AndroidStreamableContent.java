@@ -7,11 +7,14 @@ import java.io.OutputStream;
 import android.content.ContentResolver;
 import android.net.Uri;
 
+import com.artcom.y60.Logger;
+
 public abstract class AndroidStreamableContent implements StreamableContent {
 
-    ContentResolver  mContentResolver;
-    private Uri      mContentResolverUri;
-    protected String mContentType;
+    private static final String LOG_TAG = "AndroidStreamableContent";
+    ContentResolver             mContentResolver;
+    private Uri                 mContentResolverUri;
+    protected String            mContentType;
 
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
@@ -57,6 +60,11 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     // override this in subclass, if you dont set a contentresolver uri
     @Override
     public long getStreamLength() throws IOException {
+        if (mContentResolverUri == null) {
+            Logger.e(LOG_TAG, "no valid content resolver uri!");
+            // throw new BadContentResolverUriException();
+        }
+
         return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
     }
 }
