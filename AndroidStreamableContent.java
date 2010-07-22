@@ -68,7 +68,7 @@ public abstract class AndroidStreamableContent implements StreamableContent {
         return mContentResolver.openAssetFileDescriptor(getDataUri(), "r").getLength();
     }
 
-    private boolean isFileSchemeUri() {
+    protected boolean isFileSchemeUri() {
         return "file".equals(mDataUri.getScheme());
     }
 }
