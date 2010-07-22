@@ -6,12 +6,10 @@ public class GenericAndroidStreamableContent extends AndroidStreamableContent {
 
     public GenericAndroidStreamableContent(ContentResolver pContentResolver) {
         super(pContentResolver);
-        // TODO Auto-generated constructor stub
     }
 
     @Override
     public String getFilename() {
-        // TODO Auto-generated method stub
         return null;
     }
 
