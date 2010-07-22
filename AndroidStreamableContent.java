@@ -13,42 +13,42 @@ public abstract class AndroidStreamableContent implements StreamableContent {
 
     private static final String LOG_TAG = "AndroidStreamableContent";
     ContentResolver             mContentResolver;
-    private Uri                 mContentResolverUri;
+    private Uri                 mDataUri;
     protected String            mContentType;
 
     public AndroidStreamableContent(ContentResolver pContentResolver) {
         mContentResolver = pContentResolver;
     }
 
-    public Uri getContentResolverUri() {
-        return mContentResolverUri;
+    public Uri getDataUri() {
+        return mDataUri;
     }
 
-    protected void setContentResolverUri(Uri dataLocation) throws BadContentResolverUriException {
+    protected void setDataUri(Uri dataLocation) throws BadContentResolverUriException {
         if (dataLocation == null) {
             throw new BadContentResolverUriException();
         }
 
-        mContentResolverUri = dataLocation;
+        mDataUri = dataLocation;
     }
 
     // override this in subclass, if you dont set a contentresolver uri
     @Override
     public OutputStream openOutputStream() throws IOException {
-        return mContentResolver.openOutputStream(getContentResolverUri());
+        return mContentResolver.openOutputStream(getDataUri());
     }
 
     // override this in subclass, if you dont set a contentresolver uri
     @Override
     public InputStream openInputStream() throws IOException {
-        return mContentResolver.openInputStream(getContentResolverUri());
+        return mContentResolver.openInputStream(getDataUri());
     }
 
     @Override
     public String getContentType() {
 
-        if (getContentResolverUri() != null) {
-            String contentType = mContentResolver.getType(getContentResolverUri());
+        if (getDataUri() != null) {
+            String contentType = mContentResolver.getType(getDataUri());
             if (contentType != null) {
                 return contentType;
             }
@@ -60,11 +60,15 @@ public abstract class AndroidStreamableContent implements StreamableContent {
     // override this in subclass, if you dont set a contentresolver uri
     @Override
     public long getStreamLength() throws IOException {
-        if (mContentResolverUri == null) {
+        if (mDataUri == null) {
             Logger.e(LOG_TAG, "no valid content resolver uri!");
             // throw new BadContentResolverUriException();
         }
 
-        return mContentResolver.openAssetFileDescriptor(getContentResolverUri(), "r").getLength();
+        return mContentResolver.openAssetFileDescriptor(getDataUri(), "r").getLength();
+    }
+
+    private boolean isFileSchemeUri() {
+        return "file".equals(mDataUri.getScheme());
     }
 }
