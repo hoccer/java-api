@@ -143,6 +143,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         } catch (SocketException e) {
             onClientError(e);
             return;
+        } catch (SecurityException e) {
+            onClientError(e);
+            return;
         } catch (IOException e) {
             Logger.v(LOG_TAG, this.getClass(), " io exception");
             onIoError(e);
