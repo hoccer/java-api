@@ -22,7 +22,7 @@ public interface ProblemDescriptor {
         public static final String HOCCABILITY_3                     = "hoccability_3";
 
         public static final String NETWORK_OFF_SUGGESTION            = "network_off_suggestion";
-        public static final String NO_LATLONG_SUGGESTION             = "no_latlong_suggestion";
+        public static final String NO_HOC_LOCATION_SUGGESTION        = "no_hoc_location_suggestion";
 
     }
 
