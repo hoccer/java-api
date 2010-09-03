@@ -26,7 +26,7 @@ public abstract class AndroidStreamableContent implements StreamableContent {
 
     protected void setDataUri(Uri dataLocation) throws BadContentResolverUriException {
         if (dataLocation == null) {
-            throw new BadContentResolverUriException();
+            throw new BadContentResolverUriException("Could not retrieve content");
         }
 
         mDataUri = dataLocation;
