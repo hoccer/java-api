@@ -270,12 +270,15 @@ public class HttpHelper {
     }
 
     public static int getStatusCode(String url) throws IOException {
+        return getStatusCode(url, GET_TIMEOUT);
+    }
 
-        // Logger.v(LOG_TAG, "getStatusCode for ", url);
+    public static int getStatusCode(String url, int timeout) throws IOException {
+
         HttpHead head = new HttpHead(url);
         try {
 
-            HttpResponse response = executeHTTPMethod(head);
+            HttpResponse response = executeHTTPMethod(head, timeout);
             return response.getStatusLine().getStatusCode();
 
         } catch (HttpException ex) {
