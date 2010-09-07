@@ -7,6 +7,7 @@ public interface ProblemDescriptor {
         public static final String HOCCABILITY_OK   = "hoccability_ok";
         public static final String HOCCABILITY_GOOD = "hoccability_good";
         public static final String NETWORK_OFF      = "network_off";
+        public static final String NETWORK_BAD      = "network_bad";
         public static final String SDCARD_MISSING   = "sdcard_missing";
     }
 
@@ -23,6 +24,7 @@ public interface ProblemDescriptor {
         public static final String HOCCABILITY_3                     = "hoccability_3";
 
         public static final String NETWORK_OFF_SUGGESTION            = "network_off_suggestion";
+        public static final String NETWORK_BAD_SUGGESTION            = "network_bad_suggestion";
         public static final String NO_HOC_LOCATION_SUGGESTION        = "no_hoc_location_suggestion";
         public static final String SDCARD_MISSING_SUGGESTION         = "sdcard_missing_suggestion";
 
