@@ -36,7 +36,8 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     private HttpResponseHandler   mResponseHandlerCallback = null;
 
     private boolean               mIsRequestCompleted      = false;
-    private long                  mRtt                     = 0;
+    private long                  mUploadTime              = 0;
+    private long                  mDownloadTime            = 0;
 
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
@@ -134,9 +135,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         try {
             Logger.v(LOG_TAG, this.getClass(), " before executing request");
-            long rttStart = System.currentTimeMillis();
+            long uploadStart = System.currentTimeMillis();
             mResponse = mHttpClient.execute(mRequest);
-            mRtt = System.currentTimeMillis() - rttStart;
+            mUploadTime = System.currentTimeMillis() - uploadStart;
         } catch (ClientProtocolException e) {
             onClientError(e);
             return;
@@ -167,6 +168,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             long size = mResponse.getEntity().getContentLength();
             byte[] buffer = new byte[0xFFFF];
             int len;
+            long downloadStart = System.currentTimeMillis();
             while ((len = is.read(buffer)) != -1) {
                 if (isInterrupted()) {
                     Logger.v(LOG_TAG, "INTERRUPT");
@@ -177,6 +179,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
             }
+            mDownloadTime = System.currentTimeMillis() - downloadStart;
         } catch (IOException e) {
             onIoError(e);
             return;
@@ -307,8 +310,12 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mResponseHandlerCallback = null;
     }
 
-    public long getRtt() {
-        return mRtt;
+    public long getUploadTime() {
+        return mUploadTime;
+    }
+
+    public long getDownloadTime() {
+        return mDownloadTime;
     }
 
     public void addAdditionalHeaderParam(String key, String value) {
