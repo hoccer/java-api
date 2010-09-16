@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 
+import com.artcom.y60.Logger;
 import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpGet extends HttpTestCase {
@@ -44,14 +45,28 @@ public class TestAsyncHttpGet extends HttpTestCase {
     public void testGettingRoundTripTime() throws Exception {
 
         mRequest = new AsyncHttpGet(getServer().getUri());
-        assertEquals("RTT should be 0", 0, mRequest.getRtt());
+        assertEquals("RTT should be 0", 0, mRequest.getUploadTime());
 
         final ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
         mRequest.registerResponseHandler(requestStatus);
         mRequest.start();
         blockUntilHeadersAvailable(requestStatus);
 
-        assertTrue("RTT should not be 0", mRequest.getRtt() > 0);
+        assertTrue("RTT should not be 0", mRequest.getUploadTime() > 0);
+    }
+
+    public void testComputingDownloadSpeed() throws Exception {
+
+        // mRequest = new AsyncHttpGet(getServer().getUri());
+        mRequest = new AsyncHttpGet("http://hoccer.com/wp-content/themes/hoccer/images/logo.jpg");
+        mRequest.start();
+        blockUntilRequestIsDone(mRequest);
+
+        long time = mRequest.getDownloadTime();
+        long size = mRequest.getBodyAsStreamableContent().getStreamLength();
+        Logger.v(LOG_TAG, "time: ", time, "ms and size: ", size, " bytes ==> ", (size / 1000.0)
+                / (time / 1000.0), "kb/s");
+
     }
 
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {
