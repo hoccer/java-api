@@ -39,7 +39,7 @@ public class HttpTestCase extends InstrumentationTestCase {
 
     protected void blockUntilHeadersAvailable(final ResponseHandlerForTesting requestStatus)
             throws Exception {
-        TestHelper.blockUntilTrue("headers hould be there", 2000, new TestHelper.Condition() {
+        TestHelper.blockUntilTrue("headers should be there", 2000, new TestHelper.Condition() {
 
             @Override
             public boolean isSatisfied() throws Exception {
@@ -48,4 +48,13 @@ public class HttpTestCase extends InstrumentationTestCase {
         });
     }
 
+    protected void blockUntilHeadersAvailable(final AsyncHttpRequest request) throws Exception {
+        TestHelper.blockUntilTrue("headers should be there", 2000, new TestHelper.Condition() {
+
+            @Override
+            public boolean isSatisfied() throws Exception {
+                return request.wasSuccessful();
+            }
+        });
+    }
 }

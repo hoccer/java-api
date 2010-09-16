@@ -57,7 +57,6 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
     public void testComputingDownloadSpeed() throws Exception {
 
-        // mRequest = new AsyncHttpGet(getServer().getUri());
         mRequest = new AsyncHttpGet("http://hoccer.com/wp-content/themes/hoccer/images/logo.jpg");
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
