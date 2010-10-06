@@ -28,6 +28,36 @@
  */
 package com.hoccer.api;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+
 public class HoccerClient {
+
+    HttpClient mHttpClient;
+
+    public HoccerClient(ClientDescription description) {
+        BasicHttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
+        ConnManagerParams.setMaxTotalConnections(httpParams, 100);
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+        ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
+        mHttpClient = new DefaultHttpClient(cm, httpParams);
+        mHttpClient.getParams().setParameter("http.useragent", description.getApplicationName());
+    }
+
+    public String getId() {
+        return "nothing";
+    }
 
 }
