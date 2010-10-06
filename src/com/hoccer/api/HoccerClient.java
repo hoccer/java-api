@@ -47,31 +47,29 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
-
-import com.google.gson.Gson;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class HoccerClient {
 
-    private DefaultHttpClient      mHttpClient;
-    private final ClientConfig     mConfig;
-    private final RemoteClientData mRemoteClientData;
+    private DefaultHttpClient  mHttpClient;
+    private final ClientConfig mConfig;
+    private final String       mClientUri;
 
-    public HoccerClient(ClientConfig config) throws ClientProtocolException, IOException {
+    public HoccerClient(ClientConfig config) throws ClientProtocolException, IOException,
+            ParseException, JSONException {
         mConfig = config;
         setupHttpClient();
 
-        Gson gson = new Gson();
-
         HttpPost clientCreationRequest = new HttpPost("http://linker.beta.hoccer.com/clients");
-        clientCreationRequest
-                .setEntity(new StringEntity(gson.toJson(new RemoteClientData(mConfig))));
+        clientCreationRequest.setEntity(new StringEntity("{ application : "
+                + mConfig.getApplicationName() + " }"));
 
-        mRemoteClientData = gson.fromJson(convert(mHttpClient.execute(clientCreationRequest)),
-                RemoteClientData.class);
+        mClientUri = convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
     }
 
     public String getId() {
-        return mRemoteClientData.uri.substring(9);
+        return mClientUri.substring(9);
     }
 
     private void setupHttpClient() {
@@ -86,7 +84,8 @@ public class HoccerClient {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
-    private String convert(HttpResponse response) throws ParseException, IOException {
+    private JSONObject convert(HttpResponse response) throws ParseException, IOException,
+            JSONException {
         HttpEntity entity = response.getEntity();
         if (entity == null) {
             throw new ParseException("http body was empty");
@@ -99,7 +98,7 @@ public class HoccerClient {
         }
 
         String body = EntityUtils.toString(entity);
-        return body;
+        return new JSONObject(body);
     }
 
     // remote representation of the clients state
