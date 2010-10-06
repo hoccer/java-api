@@ -93,13 +93,16 @@ public class HoccerClient {
         }
         long len = entity.getContentLength();
         if (len > 2048) {
-            throw new ParseException("http body is to big and must be streamed");
+            throw new ParseException(
+                    "http body is to big and must be streamed (max is 2048, but was " + len
+                            + " byte)");
         }
 
         String body = EntityUtils.toString(entity);
         return body;
     }
 
+    // remote representation of the clients state
     static class RemoteClientData {
         public String uri;
         public String application;
