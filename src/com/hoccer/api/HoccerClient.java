@@ -28,23 +28,46 @@
  */
 package com.hoccer.api;
 
-import org.apache.http.client.HttpClient;
+import java.io.IOException;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.util.EntityUtils;
 
 public class HoccerClient {
 
-    HttpClient mHttpClient;
+    private DefaultHttpClient       mHttpClient;
+    private final ClientDescription mDescription;
+    private final String            mId;
 
-    public HoccerClient(ClientDescription description) {
+    public HoccerClient(ClientDescription description) throws ClientProtocolException, IOException {
+        mDescription = description;
+        setupHttpClient();
+
+        HttpPost clientCreationRequest = new HttpPost("http://linker.beta.hoccer.com/clients");
+        clientCreationRequest.setEntity(new StringEntity("{ device : java}"));
+        mId = convert(mHttpClient.execute(clientCreationRequest)).substring(17, 22);
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    private void setupHttpClient() {
         BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 100);
@@ -53,11 +76,18 @@ public class HoccerClient {
         schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
         ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
         mHttpClient = new DefaultHttpClient(cm, httpParams);
-        mHttpClient.getParams().setParameter("http.useragent", description.getApplicationName());
+        mHttpClient.getParams().setParameter("http.useragent", mDescription.getApplicationName());
     }
 
-    public String getId() {
-        return "nothing";
+    private String convert(HttpResponse response) throws ParseException, IOException {
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            throw new ParseException("http body was empty");
+        }
+        long len = entity.getContentLength();
+        if (len > 2048) {
+            throw new ParseException("http body is to big and must be streamed");
+        }
+        return EntityUtils.toString(entity);
     }
-
 }

@@ -30,14 +30,12 @@ package com.hoccer.api;
 
 import junit.framework.TestCase;
 
-import com.hoccer.api.ClientDescription;
-import com.hoccer.api.HoccerClient;
-
 public class TestClientRegistration extends TestCase {
 
-    public void testCreatingNewClient() {
+    public void testCreatingNewClient() throws Exception {
         ClientDescription description = new ClientDescription("java-api unit test");
         HoccerClient client = new HoccerClient(description);
+        assertEquals("BODY", client.getId());
         assertEquals("client id should have a sh1 key length", 30, client.getId().length());
     }
 
