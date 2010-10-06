@@ -28,11 +28,11 @@
  */
 package com.hoccer.api;
 
-public class ClientDescription {
+public class ClientConfig {
 
     private final String mApplicationName;
 
-    public ClientDescription(String applicatioName) {
+    public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
     }
 

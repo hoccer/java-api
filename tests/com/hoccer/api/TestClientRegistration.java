@@ -33,10 +33,10 @@ import junit.framework.TestCase;
 public class TestClientRegistration extends TestCase {
 
     public void testCreatingNewClient() throws Exception {
-        ClientDescription description = new ClientDescription("java-api unit test");
+        ClientConfig description = new ClientConfig("java-api unit test");
         HoccerClient client = new HoccerClient(description);
-        assertEquals("BODY", client.getId());
-        assertEquals("client id should have a sh1 key length", 30, client.getId().length());
+        assertEquals("client id " + client.getId() + " should have a sh1 key length", 32, client
+                .getId().length());
     }
 
 }

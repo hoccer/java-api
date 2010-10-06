@@ -48,23 +48,30 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 
+import com.google.gson.Gson;
+
 public class HoccerClient {
 
-    private DefaultHttpClient       mHttpClient;
-    private final ClientDescription mDescription;
-    private final String            mId;
+    private DefaultHttpClient      mHttpClient;
+    private final ClientConfig     mConfig;
+    private final RemoteClientData mRemoteClientData;
 
-    public HoccerClient(ClientDescription description) throws ClientProtocolException, IOException {
-        mDescription = description;
+    public HoccerClient(ClientConfig config) throws ClientProtocolException, IOException {
+        mConfig = config;
         setupHttpClient();
 
+        Gson gson = new Gson();
+
         HttpPost clientCreationRequest = new HttpPost("http://linker.beta.hoccer.com/clients");
-        clientCreationRequest.setEntity(new StringEntity("{ device : java}"));
-        mId = convert(mHttpClient.execute(clientCreationRequest)).substring(17, 22);
+        clientCreationRequest
+                .setEntity(new StringEntity(gson.toJson(new RemoteClientData(mConfig))));
+
+        mRemoteClientData = gson.fromJson(convert(mHttpClient.execute(clientCreationRequest)),
+                RemoteClientData.class);
     }
 
     public String getId() {
-        return mId;
+        return mRemoteClientData.uri.substring(9);
     }
 
     private void setupHttpClient() {
@@ -76,7 +83,7 @@ public class HoccerClient {
         schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
         ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
         mHttpClient = new DefaultHttpClient(cm, httpParams);
-        mHttpClient.getParams().setParameter("http.useragent", mDescription.getApplicationName());
+        mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
     private String convert(HttpResponse response) throws ParseException, IOException {
@@ -88,6 +95,20 @@ public class HoccerClient {
         if (len > 2048) {
             throw new ParseException("http body is to big and must be streamed");
         }
-        return EntityUtils.toString(entity);
+
+        String body = EntityUtils.toString(entity);
+        return body;
+    }
+
+    static class RemoteClientData {
+        public String uri;
+        public String application;
+
+        RemoteClientData() {
+        }
+
+        RemoteClientData(ClientConfig configuration) {
+            application = configuration.getApplicationName();
+        }
     }
 }
