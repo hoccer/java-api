@@ -54,22 +54,22 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class HoccerClient {
+public class Linccer {
 
     private DefaultHttpClient  mHttpClient;
-    private final ClientConfig mConfig;
+    private final ClientDescription mConfig;
     private final String       mClientUri;
 
-    public HoccerClient(ClientConfig config) throws ClientProtocolException, IOException,
+    public Linccer(ClientDescription config) throws ClientProtocolException, IOException,
             ParseException, JSONException, UpdateException {
         mConfig = config;
         setupHttpClient();
 
-        HttpPost clientCreationRequest = new HttpPost(ClientConfig.getRemoteServer() + "/clients");
+        HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer() + "/clients");
         clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
-        mClientUri = ClientConfig.getRemoteServer()
-                + convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
+        mClientUri = ClientDescription.getRemoteServer()
+                + convertResponseToJson(mHttpClient.execute(clientCreationRequest)).getString("uri");
     }
 
     public void onGpsMeasurement(double latitude, double longitude, int accuracy)
@@ -98,6 +98,7 @@ public class HoccerClient {
 
     public boolean share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException {
+        
         mode = mapMode(mode);
 
         try {
@@ -138,7 +139,7 @@ public class HoccerClient {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
-    private JSONObject convert(HttpResponse response) throws ParseException, IOException,
+    private JSONObject convertResponseToJson(HttpResponse response) throws ParseException, IOException,
             JSONException, UpdateException {
 
         if (response.getStatusLine().getStatusCode() != 200) {

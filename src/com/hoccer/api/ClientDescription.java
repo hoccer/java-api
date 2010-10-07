@@ -31,12 +31,12 @@ package com.hoccer.api;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ClientConfig {
+public class ClientDescription {
 
     static String        mRemoteServer = "http://linker.beta.hoccer.com";
     private final String mApplicationName;
 
-    public ClientConfig(String applicatioName) {
+    public ClientDescription(String applicatioName) {
         mApplicationName = applicatioName;
     }
 
