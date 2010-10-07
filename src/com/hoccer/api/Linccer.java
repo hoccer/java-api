@@ -28,63 +28,54 @@
  */
 package com.hoccer.api;
 
-import java.io.IOException;
-import java.io.InvalidObjectException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apache.http.*;
+import org.apache.http.client.methods.*;
+import org.apache.http.conn.*;
+import org.apache.http.conn.params.*;
+import org.apache.http.conn.scheme.*;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.entity.*;
+import org.apache.http.impl.client.*;
+import org.apache.http.impl.conn.tsccm.*;
+import org.apache.http.params.*;
+import org.apache.http.util.*;
+import org.json.*;
 
 public class Linccer {
 
     private DefaultHttpClient       mHttpClient;
     private final ClientDescription mConfig;
     private final String            mClientUri;
+    private Environment             mEnvironment = new Environment();
 
-    public Linccer(ClientDescription config) throws ClientProtocolException, IOException,
-            ParseException, JSONException, UpdateException {
+    public Linccer(ClientDescription config) throws ClientCreationException {
         mConfig = config;
         setupHttpClient();
 
         HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer()
                 + "/clients");
-        clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
+        try {
+            clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
-        mClientUri = ClientDescription.getRemoteServer()
-                + convertResponseToJson(mHttpClient.execute(clientCreationRequest))
-                        .getString("uri");
+            mClientUri = ClientDescription.getRemoteServer()
+                    + convertResponseToJson(mHttpClient.execute(clientCreationRequest)).getString(
+                            "uri");
+        } catch (Exception e) {
+            throw new ClientCreationException("could not create linccer client because of " + e);
+        }
     }
 
-    public void onGpsMeasurement(double latitude, double longitude, int accuracy)
-            throws UpdateException {
+    private void onEnvironmentChanged(Environment environment) throws UpdateException {
+        mEnvironment = environment;
+
         HttpResponse response;
         try {
-            HttpPut request = new HttpPut(mClientUri + "/environment/gps");
-            JSONObject gps = new JSONObject();
-            gps.put("latitude", latitude);
-            gps.put("longitude", longitude);
-            gps.put("accuracy", accuracy);
-            request.setEntity(new StringEntity(gps.toString()));
+            HttpPut request = new HttpPut(mClientUri + "/environment");
+            request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
             response = mHttpClient.execute(request);
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for " + mClientUri
@@ -92,11 +83,17 @@ public class Linccer {
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new UpdateException("could not update gps measurement for " + mClientUri
-                    + " because server responded with status "
-                    + response.getStatusLine().getStatusCode());
+            throw new UpdateException(
+                    "could not update environment because server responded with status "
+                            + response.getStatusLine().getStatusCode());
         }
+    }
 
+    public void onGpsChanged(double latitude, double longitude, int accuracy)
+            throws UpdateException {
+
+        mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, new Date());
+        onEnvironmentChanged(mEnvironment);
     }
 
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
@@ -105,9 +102,8 @@ public class Linccer {
         mode = mapMode(mode);
         int statusCode;
         try {
-            HttpPut request = new HttpPut(mClientUri + "/action/" + mode);
+            HttpPost request = new HttpPost(mClientUri + "/action/" + mode);
             request.setEntity(new StringEntity(payload.toString()));
-
             HttpResponse response = mHttpClient.execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
@@ -130,8 +126,7 @@ public class Linccer {
 
     }
 
-    public JSONObject receive(String mode, JSONObject payload) throws BadModeException,
-            ClientActionException {
+    public JSONObject receive(String mode) throws BadModeException, ClientActionException {
 
         mode = mapMode(mode);
         int statusCode;
@@ -151,12 +146,11 @@ public class Linccer {
             }
 
         } catch (Exception e) {
-            throw new ClientActionException("could not share payload " + payload.toString()
-                    + " because of " + e);
+            throw new ClientActionException("could not receive payload because of " + e);
         }
 
-        throw new ClientActionException("could not share payload " + payload.toString()
-                + " because server responded with status code " + statusCode);
+        throw new ClientActionException(
+                "could not receive payload because server responded with status code " + statusCode);
     }
 
     public String getId() throws InvalidObjectException {

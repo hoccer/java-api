@@ -28,26 +28,32 @@
  */
 package com.hoccer.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
-import org.json.JSONObject;
+import org.json.*;
 import org.junit.Test;
 
 public class TestHoccerClient {
     private final ClientDescription description = new ClientDescription("java-api unit test");
 
     @Test
-    public void CreatingNewClient() throws Exception {
+    public void creatingNewLinccer() throws Exception {
         Linccer client = new Linccer(description);
         assertEquals("client id " + client.getId() + " should have a sh1 key length", 32, client
                 .getId().length());
     }
 
     @Test
+    public void creatingMultipleLinccers() throws Exception {
+        Linccer a = new Linccer(description);
+        Linccer b = new Linccer(description);
+        assertNotSame("two linccers should have different id's", a.getId(), b.getId());
+    }
+
+    @Test
     public void sendingGpsData() throws Exception {
-        Linccer client = new Linccer(description);
-        client.onGpsMeasurement(22.011, 102.113, 130);
+        Linccer linccer = new Linccer(description);
+        linccer.onGpsChanged(22.011, 102.113, 130);
     }
 
     @Test
@@ -69,9 +75,6 @@ public class TestHoccerClient {
     @Test
     public void receivingWithoutEnvironment() throws Exception {
         Linccer linccer = new Linccer(description);
-        JSONObject payload = new JSONObject();
-        payload.put("demo_key", "demo_value");
-        assertNull("should not succsess with transfer", linccer.receive("1:1", payload));
+        assertNull("should not succsess with transfer", linccer.receive("1:1"));
     }
-
 }

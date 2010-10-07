@@ -19,7 +19,7 @@ public class TestRESTfulApi {
                 + "/c278d820-d1f0-11df-bd3b-0800200c9a66");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
-        assertEquals("should get 'precondition failed' error for nonexisten client uri", 412,
+        assertEquals("should get 'precondition failed' error for nonexisten client uri", 404,
                 response.getStatusLine().getStatusCode());
     }
 }
