@@ -29,7 +29,7 @@
 package com.hoccer.api;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -55,7 +55,7 @@ public class TestHoccerClient {
         Linccer client = new Linccer(description);
         JSONObject payload = new JSONObject();
         payload.put("demo_key", "demo_value");
-        assertFalse("should not succsess with transfer", client.share("1:1", payload));
+        assertNull("should not succsess with transfer", client.share("1:1", payload));
     }
 
     @Test(expected = BadModeException.class)
@@ -65,4 +65,13 @@ public class TestHoccerClient {
         payload.put("demo_key", "demo_value");
         client.share("no:mode", payload);
     }
+
+    @Test
+    public void receivingWithoutEnvironment() throws Exception {
+        Linccer linccer = new Linccer(description);
+        JSONObject payload = new JSONObject();
+        payload.put("demo_key", "demo_value");
+        assertNull("should not succsess with transfer", linccer.receive("1:1", payload));
+    }
+
 }

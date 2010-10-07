@@ -37,6 +37,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ClientConnectionManager;
@@ -98,32 +99,64 @@ public class Linccer {
 
     }
 
-    public boolean share(String mode, JSONObject payload) throws BadModeException,
+    public JSONObject share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException {
 
         mode = mapMode(mode);
-
+        int statusCode;
         try {
             HttpPut request = new HttpPut(mClientUri + "/action/" + mode);
             request.setEntity(new StringEntity(payload.toString()));
 
             HttpResponse response = mHttpClient.execute(request);
 
-            int statusCode = response.getStatusLine().getStatusCode();
+            statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
                 case 412:
-                    return false;
+                    return null;
                 case 200:
-                    return true;
+                    return convertResponseToJson(response);
                 default:
-                    throw new ClientActionException("could not share payload " + payload.toString()
-                            + " because server responded with status code " + statusCode);
+                    // handled at the end of the method
             }
 
         } catch (Exception e) {
             throw new ClientActionException("could not share payload " + payload.toString()
                     + " because of " + e);
         }
+
+        throw new ClientActionException("could not share payload " + payload.toString()
+                + " because server responded with status code " + statusCode);
+
+    }
+
+    public JSONObject receive(String mode, JSONObject payload) throws BadModeException,
+            ClientActionException {
+
+        mode = mapMode(mode);
+        int statusCode;
+
+        try {
+            HttpGet request = new HttpGet(mClientUri + "/action/" + mode);
+            HttpResponse response = mHttpClient.execute(request);
+
+            statusCode = response.getStatusLine().getStatusCode();
+            switch (statusCode) {
+                case 412:
+                    return null;
+                case 200:
+                    return convertResponseToJson(response);
+                default:
+                    // handled at the end of the method
+            }
+
+        } catch (Exception e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        }
+
+        throw new ClientActionException("could not share payload " + payload.toString()
+                + " because server responded with status code " + statusCode);
     }
 
     public String getId() throws InvalidObjectException {
