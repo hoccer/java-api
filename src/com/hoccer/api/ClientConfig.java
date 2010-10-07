@@ -33,15 +33,19 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    static String        mRemoteUri = "http://linker.beta.hoccer.com/clients";
+    static String        mRemoteServer = "http://linker.beta.hoccer.com";
     private final String mApplicationName;
 
     public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
     }
 
-    public void setRemoteServer(String remoteServer) {
-        mRemoteUri = remoteServer + "/clients";
+    static void setRemoteServer(String remoteServer) {
+        mRemoteServer = remoteServer;
+    }
+
+    public static String getRemoteServer() {
+        return mRemoteServer;
     }
 
     public String getApplicationName() {
@@ -53,4 +57,5 @@ public class ClientConfig {
         json.put("application", getApplicationName());
         return json;
     }
+
 }

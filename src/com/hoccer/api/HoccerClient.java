@@ -29,12 +29,16 @@
 package com.hoccer.api;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -57,22 +61,47 @@ public class HoccerClient {
     private final String       mClientUri;
 
     public HoccerClient(ClientConfig config) throws ClientProtocolException, IOException,
-            ParseException, JSONException {
+            ParseException, JSONException, UpdateException {
         mConfig = config;
         setupHttpClient();
 
-        HttpPost clientCreationRequest = new HttpPost("http://linker.beta.hoccer.com/clients");
+        HttpPost clientCreationRequest = new HttpPost(ClientConfig.getRemoteServer() + "/clients");
         clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
-        mClientUri = convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
+        mClientUri = ClientConfig.getRemoteServer()
+                + convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
     }
 
-    public void onNewGpsMeasurement(double latitude, double longitude, int accuracy) {
+    public void onNewGpsMeasurement(double latitude, double longitude, int accuracy)
+            throws UpdateException {
+        try {
+            HttpPut request = new HttpPut(mClientUri + "/environment/gps");
+            JSONObject gps = new JSONObject();
+            gps.put("latitude", latitude);
+            gps.put("longitude", longitude);
+            gps.put("accuracy", accuracy);
+            request.setEntity(new StringEntity(gps.toString()));
 
+            HttpResponse response = mHttpClient.execute(request);
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new UpdateException("could not update gps measurement for " + mClientUri
+                        + " because server responded with status "
+                        + response.getStatusLine().getStatusCode());
+            }
+
+        } catch (Exception e) {
+            throw new UpdateException("could not update gps measurement for " + mClientUri
+                    + " because of " + e);
+        }
     }
 
-    public String getId() {
-        return mClientUri.substring(9);
+    public String getId() throws InvalidObjectException {
+        try {
+            return new URI(mClientUri).getPath().substring(9);
+        } catch (URISyntaxException e) {
+            throw new InvalidObjectException("the client was not correctly initalized");
+        }
     }
 
     private void setupHttpClient() {
@@ -88,7 +117,13 @@ public class HoccerClient {
     }
 
     private JSONObject convert(HttpResponse response) throws ParseException, IOException,
-            JSONException {
+            JSONException, UpdateException {
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new UpdateException("server respond with status code "
+                    + response.getStatusLine().getStatusCode());
+        }
+
         HttpEntity entity = response.getEntity();
         if (entity == null) {
             throw new ParseException("http body was empty");

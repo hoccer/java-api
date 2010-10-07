@@ -24,7 +24,7 @@ public class TestRESTfulAPI extends TestCase {
 
     public void testReadingNonexistentClientId() throws Exception {
 
-        HttpPost request = new HttpPost(ClientConfig.mRemoteUri
+        HttpPost request = new HttpPost(ClientConfig.mRemoteServer
                 + "/c278d820-d1f0-11df-bd3b-0800200c9a66");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
