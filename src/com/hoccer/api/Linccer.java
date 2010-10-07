@@ -62,8 +62,8 @@ public class Linccer {
             clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
             mClientUri = ClientDescription.getRemoteServer()
-                    + convertResponseToJson(mHttpClient.execute(clientCreationRequest)).getString(
-                            "uri");
+                    + convertResponseToJsonObject(mHttpClient.execute(clientCreationRequest))
+                            .getString("uri");
         } catch (Exception e) {
             throw new ClientCreationException("could not create linccer client because of " + e);
         }
@@ -111,7 +111,7 @@ public class Linccer {
                 case 204:
                     return null;
                 case 200:
-                    return convertResponseToJson(response);
+                    return convertResponseToJsonObject(response);
                 default:
                     // handled at the end of the method
             }
@@ -126,7 +126,7 @@ public class Linccer {
 
     }
 
-    public JSONObject receive(String mode) throws BadModeException, ClientActionException {
+    public JSONArray receive(String mode) throws BadModeException, ClientActionException {
 
         mode = mapMode(mode);
         int statusCode;
@@ -140,7 +140,7 @@ public class Linccer {
                 case 204:
                     return null;
                 case 200:
-                    return convertResponseToJson(response);
+                    return convertResponseToJsonArray(response);
                 default:
                     // handled at the end of the method
             }
@@ -173,9 +173,20 @@ public class Linccer {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
-    private JSONObject convertResponseToJson(HttpResponse response) throws ParseException,
+    private JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
+        String body = convertResponseToString(response);
+        return new JSONObject(body);
+    }
 
+    private JSONArray convertResponseToJsonArray(HttpResponse response) throws ParseException,
+            IOException, JSONException, UpdateException {
+        String body = convertResponseToString(response);
+        return new JSONArray(body);
+    }
+
+    private String convertResponseToString(HttpResponse response) throws UpdateException,
+            IOException {
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new UpdateException("server respond with status code "
                     + response.getStatusLine().getStatusCode());
@@ -193,7 +204,7 @@ public class Linccer {
         }
 
         String body = EntityUtils.toString(entity);
-        return new JSONObject(body);
+        return body;
     }
 
     private String mapMode(String mode) throws BadModeException {
