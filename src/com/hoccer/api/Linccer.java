@@ -112,7 +112,7 @@ public class Linccer {
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
-                case 412:
+                case 204:
                     return null;
                 case 200:
                     return convertResponseToJson(response);
@@ -142,7 +142,7 @@ public class Linccer {
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
-                case 412:
+                case 204:
                     return null;
                 case 200:
                     return convertResponseToJson(response);
