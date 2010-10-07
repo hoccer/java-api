@@ -28,15 +28,29 @@
  */
 package com.hoccer.api;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ClientConfig {
 
+    static String        mRemoteUri = "http://linker.beta.hoccer.com/clients";
     private final String mApplicationName;
 
     public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
     }
 
+    public void setRemoteServer(String remoteServer) {
+        mRemoteUri = remoteServer + "/clients";
+    }
+
     public String getApplicationName() {
         return mApplicationName;
+    }
+
+    public JSONObject toJson() throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("application", getApplicationName());
+        return json;
     }
 }

@@ -62,10 +62,13 @@ public class HoccerClient {
         setupHttpClient();
 
         HttpPost clientCreationRequest = new HttpPost("http://linker.beta.hoccer.com/clients");
-        clientCreationRequest.setEntity(new StringEntity("{ application : "
-                + mConfig.getApplicationName() + " }"));
+        clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
         mClientUri = convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
+    }
+
+    public void onNewGpsMeasurement(double latitude, double longitude, int accuracy) {
+
     }
 
     public String getId() {
@@ -101,16 +104,4 @@ public class HoccerClient {
         return new JSONObject(body);
     }
 
-    // remote representation of the clients state
-    static class RemoteClientData {
-        public String uri;
-        public String application;
-
-        RemoteClientData() {
-        }
-
-        RemoteClientData(ClientConfig configuration) {
-            application = configuration.getApplicationName();
-        }
-    }
 }

@@ -30,13 +30,17 @@ package com.hoccer.api;
 
 import junit.framework.TestCase;
 
-public class TestClientRegistration extends TestCase {
+public class TestHoccerClient extends TestCase {
+    private final ClientConfig description = new ClientConfig("java-api unit test");
 
     public void testCreatingNewClient() throws Exception {
-        ClientConfig description = new ClientConfig("java-api unit test");
         HoccerClient client = new HoccerClient(description);
         assertEquals("client id " + client.getId() + " should have a sh1 key length", 32, client
                 .getId().length());
     }
 
+    public void testSendingGpsData() throws Exception {
+        HoccerClient client = new HoccerClient(description);
+        client.onNewGpsMeasurement(22.011, 102.113, 130);
+    }
 }
