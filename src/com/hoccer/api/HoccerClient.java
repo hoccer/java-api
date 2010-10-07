@@ -72,8 +72,9 @@ public class HoccerClient {
                 + convert(mHttpClient.execute(clientCreationRequest)).getString("uri");
     }
 
-    public void onNewGpsMeasurement(double latitude, double longitude, int accuracy)
+    public void onGpsMeasurement(double latitude, double longitude, int accuracy)
             throws UpdateException {
+        HttpResponse response;
         try {
             HttpPut request = new HttpPut(mClientUri + "/environment/gps");
             JSONObject gps = new JSONObject();
@@ -81,19 +82,40 @@ public class HoccerClient {
             gps.put("longitude", longitude);
             gps.put("accuracy", accuracy);
             request.setEntity(new StringEntity(gps.toString()));
-
-            HttpResponse response = mHttpClient.execute(request);
-
-            if (response.getStatusLine().getStatusCode() != 200) {
-                throw new UpdateException("could not update gps measurement for " + mClientUri
-                        + " because server responded with status "
-                        + response.getStatusLine().getStatusCode());
-            }
-
+            response = mHttpClient.execute(request);
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for " + mClientUri
                     + " because of " + e);
         }
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new UpdateException("could not update gps measurement for " + mClientUri
+                    + " because server responded with status "
+                    + response.getStatusLine().getStatusCode());
+        }
+
+    }
+
+    public boolean share(String mode, JSONObject payload) throws BadModeException,
+            ClientActionException {
+        mode = mapMode(mode);
+
+        try {
+            HttpPut request = new HttpPut(mClientUri + "/action/" + mode);
+            request.setEntity(new StringEntity(payload.toString()));
+
+            HttpResponse response = mHttpClient.execute(request);
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+                return false;
+            }
+
+        } catch (Exception e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        }
+
+        return true;
     }
 
     public String getId() throws InvalidObjectException {
@@ -137,6 +159,18 @@ public class HoccerClient {
 
         String body = EntityUtils.toString(entity);
         return new JSONObject(body);
+    }
+
+    private String mapMode(String mode) throws BadModeException {
+        if (mode.equals("1:1")) {
+            return "pass";
+        } else if (mode.equals("1:n")) {
+            return "distribute";
+        } else if (mode.equals("n:n")) {
+            return "exchange";
+        }
+
+        throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
     }
 
 }

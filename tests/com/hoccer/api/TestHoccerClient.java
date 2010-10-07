@@ -30,6 +30,8 @@ package com.hoccer.api;
 
 import junit.framework.TestCase;
 
+import org.json.JSONObject;
+
 public class TestHoccerClient extends TestCase {
     private final ClientConfig description = new ClientConfig("java-api unit test");
 
@@ -41,6 +43,13 @@ public class TestHoccerClient extends TestCase {
 
     public void testSendingGpsData() throws Exception {
         HoccerClient client = new HoccerClient(description);
-        client.onNewGpsMeasurement(22.011, 102.113, 130);
+        client.onGpsMeasurement(22.011, 102.113, 130);
+    }
+
+    public void testSharingWithoutEnvironment() throws Exception {
+        HoccerClient client = new HoccerClient(description);
+        JSONObject payload = new JSONObject();
+        payload.put("demo_key", "demo_value");
+        assertFalse("should not succsess with transfer", client.share("1:1", payload));
     }
 }
