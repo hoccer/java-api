@@ -28,39 +28,40 @@
  */
 package com.hoccer.api;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.json.JSONObject;
 import org.junit.Test;
 
-public class TestHoccerClient extends TestCase {
-    private final ClientDescription description =new ClientDescription("java-api unit test");
+public class TestHoccerClient {
+    private final ClientDescription description = new ClientDescription("java-api unit test");
 
     @Test
-    public void testCreatingNewClient() throws Exception {
-        Linccer client=new Linccer(description);
+    public void CreatingNewClient() throws Exception {
+        Linccer client = new Linccer(description);
         assertEquals("client id " + client.getId() + " should have a sh1 key length", 32, client
                 .getId().length());
     }
 
     @Test
     public void sendingGpsData() throws Exception {
-        Linccer client=new Linccer(description);
+        Linccer client = new Linccer(description);
         client.onGpsMeasurement(22.011, 102.113, 130);
     }
 
     @Test
     public void sharingWithoutEnvironment() throws Exception {
-        Linccer client=new Linccer(description);
-        JSONObject payload=new JSONObject();
+        Linccer client = new Linccer(description);
+        JSONObject payload = new JSONObject();
         payload.put("demo_key", "demo_value");
         assertFalse("should not succsess with transfer", client.share("1:1", payload));
     }
 
-    @Test(expected=BadModeException.class)
+    @Test(expected = BadModeException.class)
     public void sharingWithUnmappableMode() throws Exception {
-        Linccer client=new Linccer(description);
-        JSONObject payload=new JSONObject();
+        Linccer client = new Linccer(description);
+        JSONObject payload = new JSONObject();
         payload.put("demo_key", "demo_value");
         client.share("no:mode", payload);
     }

@@ -1,27 +1,18 @@
 package com.hoccer.api;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.Test;
 
-public class TestRESTfulApi extends TestCase {
+public class TestRESTfulApi {
 
-    DefaultHttpClient mHttpClient;
+    DefaultHttpClient mHttpClient = new DefaultHttpClient();
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mHttpClient = new DefaultHttpClient();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testReadingNonexistentClientId() throws Exception {
 
         HttpPost request = new HttpPost(ClientDescription.mRemoteServer

@@ -56,20 +56,22 @@ import org.json.JSONObject;
 
 public class Linccer {
 
-    private DefaultHttpClient  mHttpClient;
+    private DefaultHttpClient       mHttpClient;
     private final ClientDescription mConfig;
-    private final String       mClientUri;
+    private final String            mClientUri;
 
     public Linccer(ClientDescription config) throws ClientProtocolException, IOException,
             ParseException, JSONException, UpdateException {
         mConfig = config;
         setupHttpClient();
 
-        HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer() + "/clients");
+        HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer()
+                + "/clients");
         clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
         mClientUri = ClientDescription.getRemoteServer()
-                + convertResponseToJson(mHttpClient.execute(clientCreationRequest)).getString("uri");
+                + convertResponseToJson(mHttpClient.execute(clientCreationRequest))
+                        .getString("uri");
     }
 
     public void onGpsMeasurement(double latitude, double longitude, int accuracy)
@@ -98,7 +100,7 @@ public class Linccer {
 
     public boolean share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException {
-        
+
         mode = mapMode(mode);
 
         try {
@@ -107,16 +109,21 @@ public class Linccer {
 
             HttpResponse response = mHttpClient.execute(request);
 
-            if (response.getStatusLine().getStatusCode() != 200) {
-                return false;
+            int statusCode = response.getStatusLine().getStatusCode();
+            switch (statusCode) {
+                case 412:
+                    return false;
+                case 200:
+                    return true;
+                default:
+                    throw new ClientActionException("could not share payload " + payload.toString()
+                            + " because server responded with status code " + statusCode);
             }
 
         } catch (Exception e) {
             throw new ClientActionException("could not share payload " + payload.toString()
                     + " because of " + e);
         }
-
-        return true;
     }
 
     public String getId() throws InvalidObjectException {
@@ -139,8 +146,8 @@ public class Linccer {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
-    private JSONObject convertResponseToJson(HttpResponse response) throws ParseException, IOException,
-            JSONException, UpdateException {
+    private JSONObject convertResponseToJson(HttpResponse response) throws ParseException,
+            IOException, JSONException, UpdateException {
 
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new UpdateException("server respond with status code "
