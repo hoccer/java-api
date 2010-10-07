@@ -17,24 +17,45 @@ public class TestLinccing {
         linccerA.onGpsChanged(22.012, 102.113, 130);
         linccerB.onGpsChanged(22.011, 102.11, 1030);
 
-        new Thread() {
+        LinccerThread sharingThread = new LinccerThread() {
+            JSONObject shareStatus;
+
             @Override
             public void run() {
                 try {
                     JSONObject payload = new JSONObject();
                     payload.put("message", "hello world");
-                    JSONObject shareStatus = linccerA.share("1:1", payload);
-                    assertNotNull("should have shared the message", shareStatus);
-                    assertEquals("unknown sate", shareStatus.toString());
+                    shareStatus = linccerA.share("1:1", payload);
                 } catch (Exception e) {
-                    fail(e.toString());
+                    exception = e;
                 }
             };
-        }.start();
 
-        JSONObject receivedPayload = linccerB.receive("1:1").getJSONObject(0);
+            @Override
+            public void checkAssertions() throws Exception {
+                super.checkAssertions();
+                assertNotNull("should have shared the message", shareStatus);
+                assertEquals("should have one receiver", 1, shareStatus.get("receiver"));
+            }
+        };
+        sharingThread.start();
+
+        JSONObject receivedPayload = linccerB.receive("1:1");
         assertNotNull("should have received something", receivedPayload);
         assertTrue("should have received a message", receivedPayload.has("message"));
         assertEquals("hello world", receivedPayload.get("message"));
+
+        sharingThread.join();
+        sharingThread.checkAssertions();
+    }
+
+    class LinccerThread extends Thread {
+        protected Exception exception;
+
+        public void checkAssertions() throws Exception {
+            if (exception != null) {
+                throw exception;
+            }
+        }
     }
 }

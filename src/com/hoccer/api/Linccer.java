@@ -126,7 +126,7 @@ public class Linccer {
 
     }
 
-    public JSONArray receive(String mode) throws BadModeException, ClientActionException {
+    public JSONObject receive(String mode) throws BadModeException, ClientActionException {
 
         mode = mapMode(mode);
         int statusCode;
@@ -140,7 +140,7 @@ public class Linccer {
                 case 204:
                     return null;
                 case 200:
-                    return convertResponseToJsonArray(response);
+                    return convertResponseToJsonArray(response).getJSONObject(0);
                 default:
                     // handled at the end of the method
             }
