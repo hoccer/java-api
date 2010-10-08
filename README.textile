@@ -28,5 +28,4 @@ h2. INSTALL AND TRY OUT
 h2. DEPLOYMENT
 
 * obtain and use an dedicated API Key from http://hoccer.com/developer
-
-p. A larger example can be found in the sample folder.
+* ... nothing more right now
