@@ -28,18 +28,25 @@
  */
 package com.hoccer.api;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.json.*;
+import org.junit.*;
 import org.junit.Test;
 
-public class TestHoccerClient {
-    private final ClientDescription description = new ClientDescription("java-api unit test");
+public class TestLinccer {
+    private ClientDescription description;
+
+    @Before
+    public void setUp() {
+        description = new ClientDescription("java-api unit test");
+    }
 
     @Test
     public void creatingNewLinccer() throws Exception {
-        Linccer client = new Linccer(description);
-        assertEquals("client id " + client.getId() + " should have a sh1 key length", 32, client
+        Linccer linccer = new Linccer(description);
+        assertEquals("client id " + linccer.getId() + " should have a sh1 key length", 32, linccer
                 .getId().length());
     }
 
@@ -47,7 +54,23 @@ public class TestHoccerClient {
     public void creatingMultipleLinccers() throws Exception {
         Linccer a = new Linccer(description);
         Linccer b = new Linccer(description);
-        assertNotSame("two linccers should have different id's", a.getId(), b.getId());
+        assertThat("two linccers should have different id's", a.getId(), not(equalTo(b.getId())));
+    }
+
+    @Test
+    public void usingKnownLinccer() throws Exception {
+        Linccer linccer = new Linccer(description);
+        description.setClientId(linccer.getId());
+        Linccer reusedLinccer = new Linccer(description);
+
+        assertThat("reused linker should have same id", reusedLinccer.getId(), is(equalTo(linccer
+                .getId())));
+    }
+
+    @Test(expected = ClientCreationException.class)
+    public void usingWronglyKnownLinccer() throws Exception {
+        description.setClientId("2f341030-d2bc-11df-bd3b-0800200c9a66");
+        Linccer linccer = new Linccer(description);
     }
 
     @Test

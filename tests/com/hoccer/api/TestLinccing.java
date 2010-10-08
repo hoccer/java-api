@@ -9,7 +9,7 @@ public class TestLinccing {
 
     private final ClientDescription description = new ClientDescription("java-api unit test");
 
-    @Test
+    @Test(timeout = 1000)
     public void oneToOneSuccsess() throws Exception {
         final Linccer linccerA = new Linccer(description);
         Linccer linccerB = new Linccer(description);
@@ -31,7 +31,7 @@ public class TestLinccing {
         assertEquals("should have one receiver", 1, threadedShare.getResult().get("receiver"));
     }
 
-    @Test
+    @Test(timeout = 1000)
     public void oneToOneCollision() throws Exception {
         final Linccer linccerA = new Linccer(description);
         final Linccer linccerB = new Linccer(description);

@@ -28,13 +28,13 @@
  */
 package com.hoccer.api;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
 public class ClientDescription {
 
     static String        mRemoteServer = "http://linker.beta.hoccer.com";
     private final String mApplicationName;
+    private String       mClientId;
 
     public ClientDescription(String applicatioName) {
         mApplicationName = applicatioName;
@@ -50,6 +50,14 @@ public class ClientDescription {
 
     public String getApplicationName() {
         return mApplicationName;
+    }
+
+    public void setClientId(String id) {
+        mClientId = id;
+    }
+
+    public String getClientId() {
+        return mClientId;
     }
 
     public JSONObject toJson() throws JSONException {

@@ -49,13 +49,43 @@ public class Linccer {
 
     private DefaultHttpClient       mHttpClient;
     private final ClientDescription mConfig;
-    private final String            mClientUri;
+    private String                  mClientUri;
     private Environment             mEnvironment = new Environment();
 
     public Linccer(ClientDescription config) throws ClientCreationException {
         mConfig = config;
         setupHttpClient();
 
+        if (mConfig.getClientId() == null) {
+            createNewClient();
+        } else {
+            reuseExistingClient();
+        }
+    }
+
+    private void reuseExistingClient() throws ClientCreationException {
+        mClientUri = ClientDescription.getRemoteServer() + "/clients/" + mConfig.getClientId();
+        HttpGet request = new HttpGet(mClientUri);
+        HttpResponse response = null;
+        try {
+            response = mHttpClient.execute(request);
+        } catch (Exception e) {
+            throw new ClientCreationException("could not access linccer client at "
+                    + mClientUri + " because of " + e);
+        }
+
+        if (response == null) {
+            throw new ClientCreationException("could not access linccer client at "
+                    + mClientUri + " because server response was empty");
+        }
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new ClientCreationException("could not access linccer client at "
+                    + mClientUri + " because server respond with status code "
+                    + response.getStatusLine().getStatusCode());
+        }
+    }
+
+    private void createNewClient() throws ClientCreationException {
         HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer()
                 + "/clients");
         try {
