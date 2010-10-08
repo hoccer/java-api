@@ -10,52 +10,111 @@ public class TestLinccing {
     private final ClientDescription description = new ClientDescription("java-api unit test");
 
     @Test
-    public void oneToOne() throws Exception {
+    public void oneToOneSuccsess() throws Exception {
         final Linccer linccerA = new Linccer(description);
         Linccer linccerB = new Linccer(description);
 
         linccerA.onGpsChanged(22.012, 102.113, 130);
         linccerB.onGpsChanged(22.011, 102.11, 1030);
 
-        LinccerThread sharingThread = new LinccerThread() {
-            JSONObject shareStatus;
-
-            @Override
-            public void run() {
-                try {
-                    JSONObject payload = new JSONObject();
-                    payload.put("message", "hello world");
-                    shareStatus = linccerA.share("1:1", payload);
-                } catch (Exception e) {
-                    exception = e;
-                }
-            };
-
-            @Override
-            public void checkAssertions() throws Exception {
-                super.checkAssertions();
-                assertNotNull("should have shared the message", shareStatus);
-                assertEquals("should have one receiver", 1, shareStatus.get("receiver"));
-            }
-        };
-        sharingThread.start();
+        ThreadedShare threadedShare = new ThreadedShare(linccerA);
+        threadedShare.start();
 
         JSONObject receivedPayload = linccerB.receive("1:1");
         assertNotNull("should have received something", receivedPayload);
         assertTrue("should have received a message", receivedPayload.has("message"));
         assertEquals("hello world", receivedPayload.get("message"));
 
-        sharingThread.join();
-        sharingThread.checkAssertions();
+        threadedShare.join();
+        threadedShare.assertNoExceptionsOccured();
+        assertNotNull("should have shared the message", threadedShare.getResult());
+        assertEquals("should have one receiver", 1, threadedShare.getResult().get("receiver"));
     }
 
-    class LinccerThread extends Thread {
-        protected Exception exception;
+    @Test
+    public void oneToOneCollision() throws Exception {
+        final Linccer linccerA = new Linccer(description);
+        final Linccer linccerB = new Linccer(description);
+        final Linccer linccerC = new Linccer(description);
 
-        public void checkAssertions() throws Exception {
-            if (exception != null) {
-                throw exception;
+        linccerA.onGpsChanged(22.012, 102.113, 130);
+        linccerB.onGpsChanged(22.011, 102.11, 1030);
+        linccerC.onGpsChanged(22.009, 102.116, 2000);
+
+        ThreadedShare threadedShare = new ThreadedShare(linccerA);
+        threadedShare.start();
+        ThreadedReceive threadedReceive = new ThreadedReceive(linccerB);
+        threadedReceive.start();
+
+        JSONObject receivedPayload = linccerC.receive("1:1");
+        assertNotNull("should have received something", receivedPayload);
+        assertTrue("should have received a message", receivedPayload.has("message"));
+        assertEquals("hello world", receivedPayload.get("message"));
+
+        threadedShare.join();
+        threadedShare.assertNoExceptionsOccured();
+        assertNotNull("should have got status object", threadedShare.getResult());
+
+        threadedReceive.join();
+        threadedReceive.assertNoExceptionsOccured();
+        assertNotNull("should have got status object", threadedReceive.getResult());
+    }
+
+    class ThreadedLinccing extends Thread {
+        protected Exception   mException;
+        private final Linccer mLinccer;
+        JSONObject            mResult;
+
+        public ThreadedLinccing(Linccer linccer) {
+            mLinccer = linccer;
+        }
+
+        public Linccer getLinccer() {
+            return mLinccer;
+        }
+
+        public JSONObject getResult() {
+            return mResult;
+        }
+
+        public void assertNoExceptionsOccured() throws Exception {
+            if (mException != null) {
+                throw mException;
             }
         }
+    }
+
+    class ThreadedShare extends ThreadedLinccing {
+
+        public ThreadedShare(Linccer linccer) {
+            super(linccer);
+        }
+
+        @Override
+        public void run() {
+            try {
+                JSONObject payload = new JSONObject();
+                payload.put("message", "hello world");
+                mResult = getLinccer().share("1:1", payload);
+            } catch (Exception e) {
+                mException = e;
+            }
+        };
+    }
+
+    class ThreadedReceive extends ThreadedLinccing {
+
+        public ThreadedReceive(Linccer linccer) {
+            super(linccer);
+        }
+
+        @Override
+        public void run() {
+            try {
+                mResult = getLinccer().receive("1:1");
+            } catch (Exception e) {
+                mException = e;
+            }
+        };
     }
 }
