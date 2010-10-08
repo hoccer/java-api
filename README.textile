@@ -1,0 +1,32 @@
+h1. Java flavoured Linccer
+
+h2. DESCRIPTION  
+
+The Java flavoured Linccer provides a non threaded API to communicate with
+the RESTful Linccer Services:
+
+bc.. 
+Linccer linccer = new Linccer(new ClientDescription("Demo App"));
+
+// publish a gps position (lat, long, accuracy)
+linccer.onGpsMeasurement(23.44, 102.13, 100); 
+
+// safely pass data to an other client here and now
+linccer.share("1:1", new JSONObject("{ ... }"));
+
+// safely receive passed data from an other client here and now
+JSONObject payload = linccer.share("1:1");
+
+p. More examples can be found in the samples folder.
+
+h2. INSTALL AND TRY OUT
+
+* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-flavored-linccer-api-v0.1.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
+* write some java code using the Linccer
+* compile and run with JAR's in classpath
+
+h2. DEPLOYMENT
+
+* obtain and use an dedicated API Key from http://hoccer.com/developer
+
+p. A larger example can be found in the sample folder.
