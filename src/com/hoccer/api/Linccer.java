@@ -29,7 +29,6 @@
 package com.hoccer.api;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 import org.apache.http.*;
@@ -49,14 +48,13 @@ public class Linccer {
 
     private DefaultHttpClient       mHttpClient;
     private final ClientDescription mConfig;
-    private String                  mClientUri;
     private Environment             mEnvironment = new Environment();
 
     public Linccer(ClientDescription config) throws ClientCreationException {
         mConfig = config;
         setupHttpClient();
 
-        if (mConfig.getClientId() == null) {
+        if (mConfig.getClientUri() == null) {
             createNewClient();
         } else {
             reuseExistingClient();
@@ -64,23 +62,22 @@ public class Linccer {
     }
 
     private void reuseExistingClient() throws ClientCreationException {
-        mClientUri = ClientDescription.getRemoteServer() + "/clients/" + mConfig.getClientId();
-        HttpGet request = new HttpGet(mClientUri);
+        HttpGet request = new HttpGet(mConfig.getClientUri());
         HttpResponse response = null;
         try {
             response = mHttpClient.execute(request);
         } catch (Exception e) {
             throw new ClientCreationException("could not access linccer client at "
-                    + mClientUri + " because of " + e);
+                    + mConfig.getClientUri() + " because of " + e);
         }
 
         if (response == null) {
             throw new ClientCreationException("could not access linccer client at "
-                    + mClientUri + " because server response was empty");
+                    + mConfig.getClientUri() + " because server response was empty");
         }
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new ClientCreationException("could not access linccer client at "
-                    + mClientUri + " because server respond with status code "
+                    + mConfig.getClientUri() + " because server respond with status code "
                     + response.getStatusLine().getStatusCode());
         }
     }
@@ -91,9 +88,9 @@ public class Linccer {
         try {
             clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
 
-            mClientUri = ClientDescription.getRemoteServer()
+            mConfig.setClientUri(ClientDescription.getRemoteServer()
                     + convertResponseToJsonObject(mHttpClient.execute(clientCreationRequest))
-                            .getString("uri");
+                            .getString("uri"));
         } catch (Exception e) {
             throw new ClientCreationException("could not create linccer client because of " + e);
         }
@@ -104,12 +101,12 @@ public class Linccer {
 
         HttpResponse response;
         try {
-            HttpPut request = new HttpPut(mClientUri + "/environment");
+            HttpPut request = new HttpPut(mConfig.getClientUri() + "/environment");
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
             response = mHttpClient.execute(request);
         } catch (Exception e) {
-            throw new UpdateException("could not update gps measurement for " + mClientUri
-                    + " because of " + e);
+            throw new UpdateException("could not update gps measurement for "
+                    + mConfig.getClientUri() + " because of " + e);
         }
 
         if (response.getStatusLine().getStatusCode() != 200) {
@@ -132,7 +129,7 @@ public class Linccer {
         mode = mapMode(mode);
         int statusCode;
         try {
-            HttpPost request = new HttpPost(mClientUri + "/action/" + mode);
+            HttpPost request = new HttpPost(mConfig.getClientUri() + "/action/" + mode);
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = mHttpClient.execute(request);
 
@@ -162,7 +159,7 @@ public class Linccer {
         int statusCode;
 
         try {
-            HttpGet request = new HttpGet(mClientUri + "/action/" + mode);
+            HttpGet request = new HttpGet(mConfig.getClientUri() + "/action/" + mode);
             HttpResponse response = mHttpClient.execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
@@ -183,12 +180,8 @@ public class Linccer {
                 "could not receive payload because server responded with status code " + statusCode);
     }
 
-    public String getId() throws InvalidObjectException {
-        try {
-            return new URI(mClientUri).getPath().substring(9);
-        } catch (URISyntaxException e) {
-            throw new InvalidObjectException("the client was not correctly initalized");
-        }
+    public String getUri() {
+        return mConfig.getClientUri();
     }
 
     private void setupHttpClient() {

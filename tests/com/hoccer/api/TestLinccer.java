@@ -36,52 +36,59 @@ import org.junit.*;
 import org.junit.Test;
 
 public class TestLinccer {
-    private ClientDescription description;
 
     @Before
     public void setUp() {
-        description = new ClientDescription("java-api unit test");
+    }
+
+    private ClientDescription createNewDefaultDescription() {
+        return new ClientDescription("java-api unit test");
     }
 
     @Test
     public void creatingNewLinccer() throws Exception {
-        Linccer linccer = new Linccer(description);
-        assertEquals("client id " + linccer.getId() + " should have a sh1 key length", 32, linccer
-                .getId().length());
+        Linccer linccer = new Linccer(createNewDefaultDescription());
+        assertThat(linccer.getUri().substring(0, 37), equalTo(ClientDescription.getRemoteServer()
+                + "/clients"));
+        String id = linccer.getUri().substring(38);
+        assertEquals("client id " + id + " should have a sh1 key length", 32, id.length());
     }
 
     @Test
     public void creatingMultipleLinccers() throws Exception {
-        Linccer a = new Linccer(description);
-        Linccer b = new Linccer(description);
-        assertThat("two linccers should have different id's", a.getId(), not(equalTo(b.getId())));
+        Linccer a = new Linccer(createNewDefaultDescription());
+        Linccer b = new Linccer(createNewDefaultDescription());
+        assertThat("two linccers should have different id's", a.getUri(), not(equalTo(b.getUri())));
     }
 
     @Test
     public void usingKnownLinccer() throws Exception {
-        Linccer linccer = new Linccer(description);
-        description.setClientId(linccer.getId());
+        Linccer linccer = new Linccer(createNewDefaultDescription());
+        ClientDescription description = createNewDefaultDescription();
+        description.setClientUri(linccer.getUri());
         Linccer reusedLinccer = new Linccer(description);
 
-        assertThat("reused linker should have same id", reusedLinccer.getId(), is(equalTo(linccer
-                .getId())));
+        assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equalTo(linccer
+                .getUri())));
     }
 
     @Test(expected = ClientCreationException.class)
     public void usingWronglyKnownLinccer() throws Exception {
-        description.setClientId("2f341030-d2bc-11df-bd3b-0800200c9a66");
-        Linccer linccer = new Linccer(description);
+        ClientDescription description = createNewDefaultDescription();
+        description.setClientUri(ClientDescription.getRemoteServer()
+                + "/clients/2f341030-d2bc-11df-bd3b-0800200c9a66");
+        new Linccer(description);
     }
 
     @Test
     public void sendingGpsData() throws Exception {
-        Linccer linccer = new Linccer(description);
+        Linccer linccer = new Linccer(createNewDefaultDescription());
         linccer.onGpsChanged(22.011, 102.113, 130);
     }
 
     @Test
     public void sharingWithoutEnvironment() throws Exception {
-        Linccer client = new Linccer(description);
+        Linccer client = new Linccer(createNewDefaultDescription());
         JSONObject payload = new JSONObject();
         payload.put("demo_key", "demo_value");
         assertNull("should not succsess with transfer", client.share("1:1", payload));
@@ -89,7 +96,7 @@ public class TestLinccer {
 
     @Test(expected = BadModeException.class)
     public void sharingWithUnmappableMode() throws Exception {
-        Linccer client = new Linccer(description);
+        Linccer client = new Linccer(createNewDefaultDescription());
         JSONObject payload = new JSONObject();
         payload.put("demo_key", "demo_value");
         client.share("no:mode", payload);
@@ -97,7 +104,7 @@ public class TestLinccer {
 
     @Test
     public void receivingWithoutEnvironment() throws Exception {
-        Linccer linccer = new Linccer(description);
+        Linccer linccer = new Linccer(createNewDefaultDescription());
         assertNull("should not succsess with transfer", linccer.receive("1:1"));
     }
 }

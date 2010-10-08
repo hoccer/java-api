@@ -32,9 +32,9 @@ import org.json.*;
 
 public class ClientDescription {
 
-    static String        mRemoteServer = "http://linker.beta.hoccer.com";
-    private final String mApplicationName;
-    private String       mClientId;
+    private static String mRemoteServer = "http://linker.beta.hoccer.com";
+    private final String  mApplicationName;
+    private String        mClientUri;
 
     public ClientDescription(String applicatioName) {
         mApplicationName = applicatioName;
@@ -52,12 +52,12 @@ public class ClientDescription {
         return mApplicationName;
     }
 
-    public void setClientId(String id) {
-        mClientId = id;
+    public void setClientUri(String uri) {
+        mClientUri = uri;
     }
 
-    public String getClientId() {
-        return mClientId;
+    public String getClientUri() {
+        return mClientUri;
     }
 
     public JSONObject toJson() throws JSONException {
