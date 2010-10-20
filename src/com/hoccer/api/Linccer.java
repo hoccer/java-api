@@ -55,10 +55,10 @@ public class Linccer {
         setupHttpClient();
 
         if (mConfig.getClientUri() == null) {
-            createNewClient();
-        } else {
-            reuseExistingClient();
+            mConfig.setClientUri(ClientDescription.getRemoteServer() + "/clients/"
+                    + UUID.randomUUID());
         }
+        // reuseExistingClient();
     }
 
     private void reuseExistingClient() throws ClientCreationException {
@@ -82,20 +82,6 @@ public class Linccer {
         }
     }
 
-    private void createNewClient() throws ClientCreationException {
-        HttpPost clientCreationRequest = new HttpPost(ClientDescription.getRemoteServer()
-                + "/clients");
-        try {
-            clientCreationRequest.setEntity(new StringEntity(mConfig.toJson().toString()));
-
-            mConfig.setClientUri(ClientDescription.getRemoteServer()
-                    + convertResponseToJsonObject(mHttpClient.execute(clientCreationRequest))
-                            .getString("uri"));
-        } catch (Exception e) {
-            throw new ClientCreationException("could not create linccer client because of " + e);
-        }
-    }
-
     private void onEnvironmentChanged(Environment environment) throws UpdateException {
         mEnvironment = environment;
 
@@ -109,7 +95,7 @@ public class Linccer {
                     + mConfig.getClientUri() + " because of " + e);
         }
 
-        if (response.getStatusLine().getStatusCode() != 200) {
+        if (response.getStatusLine().getStatusCode() != 201) {
             throw new UpdateException(
                     "could not update environment because server responded with status "
                             + response.getStatusLine().getStatusCode());

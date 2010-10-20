@@ -51,7 +51,7 @@ public class TestLinccer {
         assertThat(linccer.getUri().substring(0, 37), equalTo(ClientDescription.getRemoteServer()
                 + "/clients"));
         String id = linccer.getUri().substring(38);
-        assertEquals("client id " + id + " should have a sh1 key length", 32, id.length());
+        assertEquals("client id " + id + " should have a sh1 key length", 36, id.length());
     }
 
     @Test
@@ -70,14 +70,6 @@ public class TestLinccer {
 
         assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equalTo(linccer
                 .getUri())));
-    }
-
-    @Test(expected = ClientCreationException.class)
-    public void usingWronglyKnownLinccer() throws Exception {
-        ClientDescription description = createNewDefaultDescription();
-        description.setClientUri(ClientDescription.getRemoteServer()
-                + "/clients/2f341030-d2bc-11df-bd3b-0800200c9a66");
-        new Linccer(description);
     }
 
     @Test
