@@ -16,8 +16,8 @@ public class TestLinccing {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.011, 102.115, 130);
-        linccerB.onGpsChanged(22.011, 102.11, 130);
+        linccerA.onGpsChanged(22.012, 102.115, 130);
+        linccerB.onGpsChanged(22.012, 102.11, 1030);
 
         ThreadedShare threadedShare = new ThreadedShare(linccerA);
         threadedShare.start();
@@ -33,7 +33,7 @@ public class TestLinccing {
         assertEquals("hello world", threadedShare.getResult().get("message"));
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 8000)
     public void oneToOneCollision() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
