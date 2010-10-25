@@ -58,28 +58,6 @@ public class Linccer {
             mConfig.setClientUri(ClientDescription.getRemoteServer() + "/clients/"
                     + UUID.randomUUID());
         }
-        // reuseExistingClient();
-    }
-
-    private void reuseExistingClient() throws ClientCreationException {
-        HttpGet request = new HttpGet(mConfig.getClientUri());
-        HttpResponse response = null;
-        try {
-            response = mHttpClient.execute(request);
-        } catch (Exception e) {
-            throw new ClientCreationException("could not access linccer client at "
-                    + mConfig.getClientUri() + " because of " + e);
-        }
-
-        if (response == null) {
-            throw new ClientCreationException("could not access linccer client at "
-                    + mConfig.getClientUri() + " because server response was empty");
-        }
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new ClientCreationException("could not access linccer client at "
-                    + mConfig.getClientUri() + " because server respond with status code "
-                    + response.getStatusLine().getStatusCode());
-        }
     }
 
     private void onEnvironmentChanged(Environment environment) throws UpdateException {
@@ -115,7 +93,7 @@ public class Linccer {
         mode = mapMode(mode);
         int statusCode;
         try {
-            HttpPost request = new HttpPost(mConfig.getClientUri() + "/action/" + mode);
+            HttpPut request = new HttpPut(mConfig.getClientUri() + "/action/" + mode);
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = mHttpClient.execute(request);
 
@@ -124,7 +102,7 @@ public class Linccer {
                 case 204:
                     return null;
                 case 200:
-                    return convertResponseToJsonObject(response);
+                    return (JSONObject) convertResponseToJsonArray(response).get(0);
                 default:
                     // handled at the end of the method
             }
@@ -218,11 +196,11 @@ public class Linccer {
 
     private String mapMode(String mode) throws BadModeException {
         if (mode.equals("1:1")) {
-            return "pass";
+            return "one-to-one";
         } else if (mode.equals("1:n")) {
-            return "distribute";
+            return "one-to-many";
         } else if (mode.equals("n:n")) {
-            return "exchange";
+            return "many-to-many";
         }
 
         throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");

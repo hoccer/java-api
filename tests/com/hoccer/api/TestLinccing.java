@@ -7,15 +7,17 @@ import org.junit.Test;
 
 public class TestLinccing {
 
-    private final ClientDescription description = new ClientDescription("java-api unit test");
+    private ClientDescription createDescription() {
+        return new ClientDescription("java-api unit test");
+    }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 8000)
     public void oneToOneSuccsess() throws Exception {
-        final Linccer linccerA = new Linccer(description);
-        Linccer linccerB = new Linccer(description);
+        final Linccer linccerA = new Linccer(createDescription());
+        Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.113, 130);
-        linccerB.onGpsChanged(22.011, 102.11, 1030);
+        linccerA.onGpsChanged(22.011, 102.115, 130);
+        linccerB.onGpsChanged(22.011, 102.11, 130);
 
         ThreadedShare threadedShare = new ThreadedShare(linccerA);
         threadedShare.start();
@@ -28,14 +30,14 @@ public class TestLinccing {
         threadedShare.join();
         threadedShare.assertNoExceptionsOccured();
         assertNotNull("should have shared the message", threadedShare.getResult());
-        assertEquals("should have one receiver", 1, threadedShare.getResult().get("receiver"));
+        assertEquals("hello world", threadedShare.getResult().get("message"));
     }
 
     @Test(timeout = 1000)
     public void oneToOneCollision() throws Exception {
-        final Linccer linccerA = new Linccer(description);
-        final Linccer linccerB = new Linccer(description);
-        final Linccer linccerC = new Linccer(description);
+        final Linccer linccerA = new Linccer(createDescription());
+        final Linccer linccerB = new Linccer(createDescription());
+        final Linccer linccerC = new Linccer(createDescription());
 
         linccerA.onGpsChanged(22.012, 102.113, 130);
         linccerB.onGpsChanged(22.011, 102.11, 1030);
