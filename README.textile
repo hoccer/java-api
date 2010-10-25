@@ -17,11 +17,11 @@ linccer.share("1:1", new JSONObject("{ ... }"));
 // safely receive passed data from an other client here and now
 JSONObject payload = linccer.receive("1:1");
 
-p. More examples can be found in the samples folder.
+p. More examples can soon be found in the samples folder.
 
 h2. INSTALL AND TRY OUT
 
-* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-flavored-linccer-api-v0.1.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
+* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-linccer-client-v0.2.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
 * write some java code using the Linccer
 * compile and run with JAR's in classpath
 
