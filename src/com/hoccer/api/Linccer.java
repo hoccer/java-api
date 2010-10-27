@@ -195,11 +195,11 @@ public class Linccer {
     }
 
     private String mapMode(String mode) throws BadModeException {
-        if (mode.equals("1:1")) {
+        if (mode.equals("1:1") || mode.equals("one-to-one")) {
             return "one-to-one";
-        } else if (mode.equals("1:n")) {
+        } else if (mode.equals("1:n") || mode.equals("one-to-many")) {
             return "one-to-many";
-        } else if (mode.equals("n:n")) {
+        } else if (mode.equals("n:n") || mode.equals("many-to-many")) {
             return "many-to-many";
         }
 
