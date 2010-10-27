@@ -49,20 +49,18 @@ public class TestLinccing {
         threadedReceive.start();
 
         JSONObject receivedPayload = linccerC.receive("1:1");
-        assertNotNull("should have received something", receivedPayload);
-        assertTrue("should have received a message", receivedPayload.has("message"));
-        assertEquals("hello world", receivedPayload.get("message"));
+        assertNull("should not have got the content", receivedPayload);
 
         threadedShare.join();
         threadedShare.assertNoExceptionsOccured();
-        assertNotNull("should have got status object", threadedShare.getResult());
+        assertNull("should not have got the content", threadedShare.getResult());
 
         threadedReceive.join();
         threadedReceive.assertNoExceptionsOccured();
-        assertNotNull("should have got status object", threadedReceive.getResult());
+        assertNotNull("should not have got the content", threadedReceive.getResult());
     }
 
-    @Test(timeout = 6000)
+    @Test(timeout = 8000)
     public void oneToManySuccess() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
