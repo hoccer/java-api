@@ -11,7 +11,7 @@ public class TestLinccing {
         return new ClientDescription("java-api unit test");
     }
 
-    @Test(timeout = 8000)
+    @Test(timeout = 20000)
     public void oneToOneSuccsess() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
@@ -33,7 +33,7 @@ public class TestLinccing {
         assertEquals("hello world", threadedShare.getResult().get("message"));
     }
 
-    @Test(timeout = 8000)
+    @Test(timeout = 20000)
     public void oneToOneCollision() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
@@ -48,19 +48,23 @@ public class TestLinccing {
         ThreadedReceive threadedReceive = new ThreadedReceive(linccerB, "1:1");
         threadedReceive.start();
 
-        JSONObject receivedPayload = linccerC.receive("1:1");
-        assertNull("should not have got the content", receivedPayload);
+        boolean hadCollision = false;
+        try {
+            JSONObject receivedPayload = linccerC.receive("1:1");
+            assertNull("should not have got the content", receivedPayload);
+        } catch (CollidingActionsException e) {
+            hadCollision = true;
+        }
+        assertTrue("should have detected collision", hadCollision);
 
         threadedShare.join();
-        threadedShare.assertNoExceptionsOccured();
-        assertNull("should not have got the content", threadedShare.getResult());
+        threadedShare.assertCollisionOccured();
 
         threadedReceive.join();
-        threadedReceive.assertNoExceptionsOccured();
-        assertNotNull("should not have got the content", threadedReceive.getResult());
+        threadedReceive.assertCollisionOccured();
     }
 
-    @Test(timeout = 8000)
+    @Test(timeout = 20000)
     public void oneToManySuccess() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
@@ -113,6 +117,12 @@ public class TestLinccing {
         public void assertNoExceptionsOccured() throws Exception {
             if (mException != null) {
                 throw mException;
+            }
+        }
+
+        public void assertCollisionOccured() throws Exception {
+            if (!(mException instanceof CollidingActionsException)) {
+                throw new AssertionError("no collsion was detected");
             }
         }
     }

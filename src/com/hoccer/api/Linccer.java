@@ -32,6 +32,7 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.http.*;
+import org.apache.http.client.*;
 import org.apache.http.client.methods.*;
 import org.apache.http.conn.*;
 import org.apache.http.conn.params.*;
@@ -88,7 +89,7 @@ public class Linccer {
     }
 
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
-            ClientActionException {
+            ClientActionException, CollidingActionsException {
 
         mode = mapMode(mode);
         int statusCode;
@@ -103,11 +104,26 @@ public class Linccer {
                     return null;
                 case 200:
                     return (JSONObject) convertResponseToJsonArray(response).get(0);
+                case 409:
+                    throw new CollidingActionsException("The constrains of '" + mode
+                            + "' were violated. Try again.");
                 default:
                     // handled at the end of the method
             }
 
-        } catch (Exception e) {
+        } catch (JSONException e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        } catch (ClientProtocolException e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        } catch (IOException e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        } catch (ParseException e) {
+            throw new ClientActionException("could not share payload " + payload.toString()
+                    + " because of " + e);
+        } catch (UpdateException e) {
             throw new ClientActionException("could not share payload " + payload.toString()
                     + " because of " + e);
         }
@@ -117,7 +133,8 @@ public class Linccer {
 
     }
 
-    public JSONObject receive(String mode) throws BadModeException, ClientActionException {
+    public JSONObject receive(String mode) throws BadModeException, ClientActionException,
+            CollidingActionsException {
 
         mode = mapMode(mode);
         int statusCode;
@@ -132,11 +149,22 @@ public class Linccer {
                     return null;
                 case 200:
                     return convertResponseToJsonArray(response).getJSONObject(0);
+                case 409:
+                    throw new CollidingActionsException("The constrains of '" + mode
+                            + "' were violated. Try again.");
                 default:
                     // handled at the end of the method
             }
 
-        } catch (Exception e) {
+        } catch (JSONException e) {
+            throw new ClientActionException("could not receive payload because of " + e);
+        } catch (ClientProtocolException e) {
+            throw new ClientActionException("could not receive payload because of " + e);
+        } catch (IOException e) {
+            throw new ClientActionException("could not receive payload because of " + e);
+        } catch (ParseException e) {
+            throw new ClientActionException("could not receive payload because of " + e);
+        } catch (UpdateException e) {
             throw new ClientActionException("could not receive payload because of " + e);
         }
 
