@@ -32,9 +32,27 @@ h2. Deployment
 
 h2. Remarks
 
-The environment updates (gps, network, bssid's,...) must be updated regulary (at least every two minutes).
+The environment updates (gps, network, bssid's,...) must be updated regular (at least every two minutes).
 
 h2. Additional Features
+
+h3. Environment Updates
+
+Make sure the Linccer has as much environment data of the client as possible. Use all available sensors. If you implement for a stationary devices, you could read gps, wifi bssids and the like from a config file.
+
+bc.. 
+Linccer linccer = new Linccer(new ClientDescription("Demo App"));
+
+// publish gps position (lat, long, accuracy)
+linccer.onGpsMeasurement(23.44, 102.13, 100);
+
+// publish cell-tower/wifi obtained position (lat, long, accuracy)
+linccer.onNetworkMeasurement(23.44, 102.13, 100);
+
+// publish wifi networks in range (bssids)
+linccer.onWifiMeasurement(new String[] { "00:22:3F:11:5A:2E", "4C:12:3F:11:5A:2C" });
+
+h3. Wait for data
 
 The default behavior of Linccer makes sure you get a "no content" message for "lonely receives".
 When receiving in 'one-to-many' mode, it's possible to add the option "waiting=true" to hold the connection until content is available.
