@@ -7,15 +7,30 @@ import org.json.*;
 public class Environment {
 
     private LocationMeasurement mGpsMeasurement;
+    private LocationMeasurement mNetworkMeasurement;
 
+    /**
+     * Save location which is obtained from the gps unit.
+     */
     public void setGpsMeasurement(double latitude, double longitude, int accuracy, Date timestamp) {
         mGpsMeasurement = new LocationMeasurement(latitude, longitude, accuracy, timestamp);
+    }
+
+    /**
+     * Save location which is obtained from cell-towers and wifi accesspoints.
+     */
+    public void setNetworkMeasurement(double latitude, double longitude, int accuracy,
+            Date timestamp) {
+        mNetworkMeasurement = new LocationMeasurement(latitude, longitude, accuracy, timestamp);
     }
 
     public JSONObject toJson() throws JSONException {
         JSONObject environment = new JSONObject();
         if (mGpsMeasurement != null) {
             environment.put("gps", mGpsMeasurement.toJson());
+        }
+        if (mNetworkMeasurement != null) {
+            environment.put("network", mNetworkMeasurement.toJson());
         }
         return environment;
     }
