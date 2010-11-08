@@ -14,7 +14,8 @@ import com.artcom.y60.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
 
-    private static final String LOG_TAG = "TestAsyncHttpPost";
+    @SuppressWarnings("unused")
+	private static final String LOG_TAG = "TestAsyncHttpPost";
     AsyncHttpPost               mRequest;
 
     public void testExecution() throws Exception {

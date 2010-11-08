@@ -7,7 +7,8 @@ import com.artcom.y60.data.StreamableString;
 
 public class TestAsyncHttpPut extends HttpTestCase {
 
-    private static final String LOG_TAG = "TestAsyncHttpPut";
+    @SuppressWarnings("unused")
+	private static final String LOG_TAG = "TestAsyncHttpPut";
     private AsyncHttpPut        mRequest;
 
     public void testExecution() throws Exception {
