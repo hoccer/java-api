@@ -94,6 +94,11 @@ public class Linccer {
         onEnvironmentChanged(mEnvironment);
     }
 
+    public void onWifiChanged(String[] bssids) throws UpdateException {
+        mEnvironment.setWifiMeasurement(bssids, new Date());
+        onEnvironmentChanged(mEnvironment);
+    }
+
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException, CollidingActionsException {
 
@@ -239,4 +244,5 @@ public class Linccer {
 
         throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
     }
+
 }
