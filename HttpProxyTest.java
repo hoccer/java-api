@@ -133,6 +133,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNotNull(data);
     }
 
+    @Suppress
     public void testGettingNonexistentResource() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
