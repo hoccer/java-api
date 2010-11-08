@@ -88,6 +88,12 @@ public class Linccer {
         onEnvironmentChanged(mEnvironment);
     }
 
+    public void onNetworkChanged(double latitude, double longitude, int accuracy)
+            throws UpdateException {
+        mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, new Date());
+        onEnvironmentChanged(mEnvironment);
+    }
+
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException, CollidingActionsException {
 
@@ -233,5 +239,4 @@ public class Linccer {
 
         throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
     }
-
 }
