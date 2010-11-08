@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.json.*;
 import org.junit.Test;
 
-public class TestLinccing extends LinccerTest {
+public class TestLinccing extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void oneToOneSuccsess() throws Exception {
@@ -89,5 +89,31 @@ public class TestLinccing extends LinccerTest {
         threadedReceive.assertNoExceptionsOccured();
         assertEquals("should also have got the payload", receivedPayload.toString(),
                 threadedReceive.getResult().toString());
+    }
+
+    @Test(timeout = 40000)
+    public void oneToManyWithWaitingOption() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+        Linccer linccerB = new Linccer(createDescription());
+
+        linccerA.onGpsChanged(22.012, 102.115, 130);
+        linccerB.onGpsChanged(22.012, 102.11, 1030);
+
+        ThreadedReceive threadedReceive = new ThreadedReceive(linccerA, "1:n", "waiting=true");
+        threadedReceive.start();
+
+        Thread.sleep(8 * 1000); // wait long time before actually sharing content
+
+        JSONObject payload = new JSONObject();
+        payload.put("message", "hello world");
+        JSONObject sharedPayload = linccerB.share("1:n", "waiting=true", payload);
+
+        threadedReceive.join();
+        threadedReceive.assertNoExceptionsOccured();
+        assertEquals("should have got the payload", payload.toString(), threadedReceive.getResult()
+                .toString());
+
+        assertNotNull("should have shared the message", sharedPayload);
+        assertEquals("hello world", sharedPayload.get("message"));
     }
 }

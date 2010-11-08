@@ -2,9 +2,9 @@ package com.hoccer.api;
 
 import org.json.*;
 
-public class LinccerTest {
+public class LinccerTestsBase {
 
-    public LinccerTest() {
+    public LinccerTestsBase() {
         super();
     }
 
@@ -17,10 +17,18 @@ public class LinccerTest {
         private final Linccer  mLinccer;
         JSONObject             mResult;
         protected final String mMode;
+        protected final String mOptions;
 
         public ThreadedLinccing(Linccer linccer, String mode) {
             mLinccer = linccer;
             mMode = mode;
+            mOptions = "";
+        }
+
+        public ThreadedLinccing(Linccer linccer, String mode, String options) {
+            mLinccer = linccer;
+            mMode = mode;
+            mOptions = options;
         }
 
         public Linccer getLinccer() {
@@ -68,10 +76,14 @@ public class LinccerTest {
             super(linccer, mode);
         }
 
+        public ThreadedReceive(Linccer linccer, String mode, String options) {
+            super(linccer, mode, options);
+        }
+
         @Override
         public void run() {
             try {
-                mResult = getLinccer().receive(mMode);
+                mResult = getLinccer().receive(mMode, mOptions);
             } catch (Exception e) {
                 mException = e;
             }

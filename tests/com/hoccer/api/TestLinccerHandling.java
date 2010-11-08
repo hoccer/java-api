@@ -35,7 +35,7 @@ import org.json.*;
 import org.junit.*;
 import org.junit.Test;
 
-public class TestLinccer {
+public class TestLinccerHandling {
 
     @Before
     public void setUp() {

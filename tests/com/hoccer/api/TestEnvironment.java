@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.json.*;
 import org.junit.Test;
 
-public class TestEnvironment extends LinccerTest {
+public class TestEnvironment extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void gpsTest() throws Exception {

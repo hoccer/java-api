@@ -101,11 +101,17 @@ public class Linccer {
 
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
             ClientActionException, CollidingActionsException {
+        return share(mode, "", payload);
+    }
+
+    public JSONObject share(String mode, String options, JSONObject payload)
+            throws BadModeException, ClientActionException, CollidingActionsException {
 
         mode = mapMode(mode);
         int statusCode;
         try {
-            HttpPut request = new HttpPut(mConfig.getClientUri() + "/action/" + mode);
+            HttpPut request = new HttpPut(mConfig.getClientUri() + "/action/" + mode + "?"
+                    + options);
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = mHttpClient.execute(request);
 
@@ -146,12 +152,18 @@ public class Linccer {
 
     public JSONObject receive(String mode) throws BadModeException, ClientActionException,
             CollidingActionsException {
+        return receive(mode, "");
+    }
+
+    public JSONObject receive(String mode, String options) throws BadModeException,
+            ClientActionException, CollidingActionsException {
 
         mode = mapMode(mode);
         int statusCode;
 
         try {
-            HttpGet request = new HttpGet(mConfig.getClientUri() + "/action/" + mode);
+            HttpGet request = new HttpGet(mConfig.getClientUri() + "/action/" + mode + "?"
+                    + options);
             HttpResponse response = mHttpClient.execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
