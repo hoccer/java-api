@@ -27,7 +27,7 @@ h2. Install and try out
 
 h2. Deployment
 
-* obtain and use an dedicated API Key from http://developer.hoccer.com
+* obtain and use an dedicated API Key from "developer.hoccer.com":http://developer.hoccer.com
 * ... nothing more right now
 
 h2. Remarks
@@ -47,7 +47,7 @@ linccer.onGpsMeasurement(23.44, 102.13, 100);
 // publish cell-tower/wifi obtained position (lat, long, accuracy)
 linccer.onNetworkMeasurement(23.44, 102.13, 100);
 
-// publish wifi networks in range (bssids)
+// publish visible wifi networks (bssids)
 linccer.onWifiMeasurement(new String[] { "00:22:3F:11:5A:2E", "4C:12:3F:11:5A:2C" });
 
 h3. Wait for data
@@ -57,4 +57,4 @@ When receiving in 'one-to-many' mode, it's possible to add the option "waiting=t
 
 h2. Further Reading
 
-Please visit the general Linccer documentation at http://developer.hoccer.com/about_api.html
+Please check the general "Linccer documentation":http://developer.hoccer.com/about_api.html.
