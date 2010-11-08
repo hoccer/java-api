@@ -1,6 +1,8 @@
 package com.artcom.y60.http;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,22 +33,45 @@ public class HttpHelperTest extends HttpTestCase {
     }
     
     public void testSimpleUrlEncoding() {
-        
         assertEquals("a+funky+test", URLEncoder.encode("a funky test"));
     }
     
-    public void testUrlEncodingAHashMap() {
+    public void testUrlEncodingAHashMap() throws UnsupportedEncodingException {
         Map<String, String> map = new HashMap<String, String>();
         map.put("key1", "A & B");
         map.put("key%", "C & D");
-        assertEquals("key%25=C+%26+D&key1=A+%26+B", HttpHelper.urlEncodeKeysAndValues(map));
+        
+        String encoded = HttpHelper.urlEncodeKeysAndValues(map);
+        String[] keyValuePairs = encoded.split("&");
+        Map<String, String> decodedMap = new HashMap<String, String>();
+        int counter;
+        for (counter = 0; counter < keyValuePairs.length; counter++) {
+        	String decoded = URLDecoder.decode(keyValuePairs[counter], "UTF-8");
+        	String[] keyValuePair;
+        	keyValuePair = decoded.split("=");
+        	decodedMap.put(keyValuePair[0], keyValuePair[1]);
+        }
+        assertEquals("A & B", decodedMap.get("key1"));
+        assertEquals("C & D", decodedMap.get("key%"));
     }
     
-    public void testUrlEncodingTheValuesOfAHashMap() {
+    public void testUrlEncodingTheValuesOfAHashMap() throws UnsupportedEncodingException {
         Map<String, String> map = new HashMap<String, String>();
         map.put("key[1]", "A & B");
         map.put("key%", "C & D");
-        assertEquals("key[1]=A+%26+B&key%=C+%26+D", HttpHelper.urlEncodeValues(map));
+        
+        String encoded = HttpHelper.urlEncodeValues(map);
+        String[] keyValuePairs = encoded.split("&");
+        Map<String, String> decodedMap = new HashMap<String, String>();
+        int counter;
+        for (counter = 0; counter < keyValuePairs.length; counter++) {
+        	String[] keyValuePair = keyValuePairs[counter].split("=");
+        	keyValuePair[1] = URLDecoder.decode(keyValuePair[1], "UTF-8");
+        	Logger.v(LOG_TAG, keyValuePair[0] + ":" + keyValuePair[1]);
+        	decodedMap.put(keyValuePair[0], keyValuePair[1]);
+        }
+        assertEquals("A & B", decodedMap.get("key[1]"));
+        assertEquals("C & D", decodedMap.get("key%"));
     }
     
     public void testParsingSomeUrls() {
