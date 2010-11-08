@@ -97,7 +97,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     }
 
     public void testRequestingDownload() throws Exception {
-
         initializeActivity();
         final HttpProxyHelper helper = createHelper();
         final Uri uri = TestUriHelper.createUri();
@@ -134,8 +133,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         assertNotNull(data);
     }
 
-    // TODO fix me in a reasonable manner.
-    @Suppress
     public void testGettingNonexistentResource() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
@@ -144,6 +141,13 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         helper.addResourceChangeListenerAndReport(uri, listener);
         helper.requestDownload(uri);
 
+        try {
+        	helper.requestDownload(uri);
+        } catch (Exception ex) {
+        	Logger.v(LOG_TAG, "Uri not found!!! ", ex.getMessage());
+            assertTrue("expected a 404 exception in the service", ex.getMessage().contains("404"));
+        }
+        
         TestHelper.blockUntilTrue("not available callback should have been called", 5000,
                 new TestHelper.Condition() {
                     @Override
