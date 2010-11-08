@@ -61,6 +61,31 @@ public class Linccer {
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        disconnect();
+        super.finalize();
+    }
+
+    public void disconnect() throws UpdateException {
+        System.out.println("disconnecting");
+
+        HttpResponse response;
+        try {
+            HttpDelete request = new HttpDelete(mConfig.getClientUri() + "/environment");
+            response = mHttpClient.execute(request);
+        } catch (Exception e) {
+            throw new UpdateException("could not update gps measurement for "
+                    + mConfig.getClientUri() + " because of " + e);
+        }
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            throw new UpdateException(
+                    "could not delete environment because server responded with status "
+                            + response.getStatusLine().getStatusCode());
+        }
+    }
+
     private void onEnvironmentChanged(Environment environment) throws UpdateException {
         mEnvironment = environment;
 

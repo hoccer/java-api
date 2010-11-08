@@ -15,10 +15,13 @@ public class TestLinccing extends LinccerTestsBase {
         linccerA.onGpsChanged(22.012, 102.115, 130);
         linccerB.onGpsChanged(22.012, 102.11, 1030);
 
+        long time = System.currentTimeMillis();
         ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:1");
         threadedShare.start();
 
         JSONObject receivedPayload = linccerB.receive("1:1");
+        System.out.println(System.currentTimeMillis() - time);
+
         assertNotNull("should have received something", receivedPayload);
         assertTrue("should have received a message", receivedPayload.has("message"));
         assertEquals("hello world", receivedPayload.get("message"));
