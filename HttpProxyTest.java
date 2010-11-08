@@ -138,7 +138,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         final TestListener listener = new TestListener();
-        Uri uri = Uri.parse("hxxp://x");
+        Uri uri = Uri.parse("http://www.artcom.de/doesnotexist");
         helper.addResourceChangeListenerAndReport(uri, listener);
         helper.requestDownload(uri);
 

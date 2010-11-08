@@ -67,7 +67,6 @@ public class HttpHelperTest extends HttpTestCase {
         for (counter = 0; counter < keyValuePairs.length; counter++) {
         	String[] keyValuePair = keyValuePairs[counter].split("=");
         	keyValuePair[1] = URLDecoder.decode(keyValuePair[1], "UTF-8");
-        	Logger.v(LOG_TAG, keyValuePair[0] + ":" + keyValuePair[1]);
         	decodedMap.put(keyValuePair[0], keyValuePair[1]);
         }
         assertEquals("A & B", decodedMap.get("key[1]"));
