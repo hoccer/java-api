@@ -33,6 +33,7 @@ import org.json.*;
 public class ClientDescription {
 
     private static String mRemoteServer = "http://linker.beta.hoccer.com";
+//    private static String mRemoteServer = "http://127.0.0.1:9292";
     private final String  mApplicationName;
     private String        mClientUri;
 

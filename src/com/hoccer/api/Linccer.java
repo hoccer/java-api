@@ -87,6 +87,7 @@ public class Linccer {
     }
 
     private void onEnvironmentChanged(Environment environment) throws UpdateException {
+        System.out.println("environment changed");
         mEnvironment = environment;
 
         HttpResponse response;
@@ -141,6 +142,7 @@ public class Linccer {
             HttpResponse response = mHttpClient.execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
+            System.out.println("StatusCode for share" + statusCode);
             switch (statusCode) {
                 case 204:
                     return null;
