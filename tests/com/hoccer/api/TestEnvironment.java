@@ -16,6 +16,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.onGpsChanged(22.012, 102.11, 1030);
 
         assertConnectable(linccerA, linccerB);
+        
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -27,6 +30,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.onGpsChanged(22.012, 102.11, 1030);
 
         assertNotConnectable(linccerA, linccerB);
+        
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -38,6 +44,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.onNetworkChanged(22.012, 102.11, 1030);
 
         assertConnectable(linccerA, linccerB);
+        
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -45,7 +54,7 @@ public class TestEnvironment extends LinccerTestsBase {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onNetworkChanged(24.012, 102.115, 130);
+        linccerA.onNetworkChanged(24.012, 105.14, 130);
         linccerB.onNetworkChanged(22.012, 102.11, 1030);
 
         assertNotConnectable(linccerA, linccerB);
@@ -60,6 +69,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.onWifiChanged(new String[] { "00:22:3F:11:5A:2E", "5C:12:3F:11:5A:2C" });
 
         assertConnectable(linccerA, linccerB);
+        
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -71,6 +83,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.onWifiChanged(new String[] { "10:22:3F:11:5A:2E", "5C:12:3F:11:5A:2C" });
 
         assertNotConnectable(linccerA, linccerB);
+        
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     private void assertConnectable(final Linccer linccerA, Linccer linccerB)

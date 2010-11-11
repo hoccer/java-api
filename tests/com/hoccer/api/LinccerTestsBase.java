@@ -60,6 +60,8 @@ public class LinccerTestsBase {
 
         @Override
         public void run() {
+            System.out.println("sharing");
+
             try {
                 JSONObject payload = new JSONObject();
                 payload.put("message", "hello world");
@@ -82,6 +84,8 @@ public class LinccerTestsBase {
 
         @Override
         public void run() {
+            System.out.println("receiving");
+
             try {
                 mResult = getLinccer().receive(mMode, mOptions);
             } catch (Exception e) {

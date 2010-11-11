@@ -99,9 +99,9 @@ public class TestLinccing extends LinccerTestsBase {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.115, 130);
+        linccerA.onGpsChanged(22.012, 102.11, 130);
         linccerB.onGpsChanged(22.012, 102.11, 1030);
-
+        
         ThreadedReceive threadedReceive = new ThreadedReceive(linccerA, "1:n", "waiting=true");
         threadedReceive.start();
 
