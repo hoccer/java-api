@@ -75,7 +75,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         TestListener listener = new TestListener();
         helper.addResourceChangeListenerAndReport(uri, listener);
 
-        helper.requestResourceWhichIsDeprecated(uri);
+        helper.requestResource(uri.toString());
 
         long start = System.currentTimeMillis();
         while (!listener.wasResourceAvailableCalled()) {
@@ -124,7 +124,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListenerAndReport(uri, listener);
 
-        helper.requestResourceWhichIsDeprecated(uri);
+        helper.requestResource(uri.toString());
 
         blockUntilResourceAvailableWasCalled(listener, 8000);
 
@@ -166,7 +166,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         Uri uri = TestUriHelper.createUri();
         helper.addResourceChangeListenerAndReport(uri, listener);
 
-        helper.requestResourceWhichIsDeprecated(uri);
+        helper.requestResource(uri.toString());
 
         blockUntilResourceAvailableWasCalled(listener, 4000);
 
@@ -187,7 +187,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     public void testGetException() throws Exception {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
-        helper.requestResourceWhichIsDeprecated(Uri.parse("http://bla"));
+        helper.requestResource("http://bla");
     }
 
     @Suppress
