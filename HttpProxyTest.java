@@ -17,25 +17,16 @@ import com.artcom.y60.TestHelper;
  */
 public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
-    // Constants ---------------------------------------------------------
-
     public static final String LOG_TAG = "HttpProxyTest";
 
-    // Instance Variables ------------------------------------------------
-
     private Intent             mStartIntent;
-
-    // Constructors ------------------------------------------------------
 
     public HttpProxyTest() {
 
         super(HttpProxyTestActivity.class);
     }
 
-    // Public Instance Methods -------------------------------------------
-
     public void testResourceIsAsynchronouslyUpdated() throws Exception {
-
         initializeActivity();
         final HttpProxyHelper helper = createHelper();
 
@@ -51,7 +42,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
             public boolean isSatisfied() {
                 return listener.wasResourceAvailableCalled();
             }
-
         });
 
         Logger.v(LOG_TAG, "now let's check results");
@@ -67,7 +57,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     }
 
     public void testRemovingResourceFromCache() throws Exception {
-
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         Uri uri = TestUriHelper.createUri();
@@ -79,11 +68,9 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
 
         long start = System.currentTimeMillis();
         while (!listener.wasResourceAvailableCalled()) {
-
             if (System.currentTimeMillis() - start > 2000) {
                 throw new TimeoutException("took to long");
             }
-
             Thread.sleep(50);
         }
 
@@ -195,7 +182,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         helper.removeFromCache(Uri.parse("http://bla"));
-
     }
 
     @Suppress
@@ -203,7 +189,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         helper.fetchFromCache(Uri.parse("http://bla"));
-
     }
 
     @Suppress
@@ -211,26 +196,18 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         initializeActivity();
         HttpProxyHelper helper = createHelper();
         helper.isInCache("http://bla");
-
     }
-
-    // Protected Instance Methods ----------------------------------------
 
     @Override
     protected void setUp() throws Exception {
-
         super.setUp();
-
         mStartIntent = new Intent(Intent.ACTION_MAIN);
     }
 
     @Override
     protected void tearDown() throws Exception {
-
         super.tearDown();
     }
-
-    // Private Instance Methods ------------------------------------------
 
     private void blockUntilResourceAvailableWasCalled(TestListener pListener, long pTimeout)
             throws TimeoutException, InterruptedException {
@@ -244,32 +221,23 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     }
 
     private HttpProxyHelper createHelper() throws Exception {
-
         final DummyListener lsner = new DummyListener();
         HttpProxyHelper helper = new HttpProxyHelper(getActivity(), lsner);
-
         TestHelper.blockUntilTrue("HTTP helper not bound", 5000, new TestHelper.Condition() {
-
             @Override
             public boolean isSatisfied() {
                 return lsner.isBound();
             }
-
         });
-
         return helper;
     }
 
     private void initializeActivity() {
-
         startActivity(mStartIntent, null, null);
         assertNotNull(getActivity());
     }
 
-    // Inner Classes -----------------------------------------------------
-
     class TestListener implements ResourceListener {
-
         private boolean mWasResourceAvailableCalled    = false;
         private boolean mWasResourceNotAvailableCalled = false;
 
