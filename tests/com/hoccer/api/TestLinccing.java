@@ -30,6 +30,9 @@ public class TestLinccing extends LinccerTestsBase {
         threadedShare.assertNoExceptionsOccured();
         assertNotNull("should have shared the message", threadedShare.getResult());
         assertEquals("hello world", threadedShare.getResult().get("message"));
+
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -61,6 +64,10 @@ public class TestLinccing extends LinccerTestsBase {
 
         threadedReceive.join();
         threadedReceive.assertCollisionOccured();
+
+        linccerA.disconnect();
+        linccerB.disconnect();
+        linccerC.disconnect();
     }
 
     @Test(timeout = 20000)
@@ -92,6 +99,9 @@ public class TestLinccing extends LinccerTestsBase {
         threadedReceive.assertNoExceptionsOccured();
         assertEquals("should also have got the payload", receivedPayload.toString(),
                 threadedReceive.getResult().toString());
+
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 
     @Test(timeout = 40000)
@@ -101,7 +111,7 @@ public class TestLinccing extends LinccerTestsBase {
 
         linccerA.onGpsChanged(22.012, 102.11, 130);
         linccerB.onGpsChanged(22.012, 102.11, 1030);
-        
+
         ThreadedReceive threadedReceive = new ThreadedReceive(linccerA, "1:n", "waiting=true");
         threadedReceive.start();
 
@@ -118,5 +128,8 @@ public class TestLinccing extends LinccerTestsBase {
 
         assertNotNull("should have shared the message", sharedPayload);
         assertEquals("hello world", sharedPayload.get("message"));
+
+        linccerA.disconnect();
+        linccerB.disconnect();
     }
 }
