@@ -28,10 +28,11 @@
  */
 package com.hoccer.api;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import org.json.*;
-import org.junit.Before;
+import org.junit.*;
 import org.junit.Test;
 
 public class TestLinccerHandling {
@@ -47,7 +48,7 @@ public class TestLinccerHandling {
     @Test
     public void creatingNewLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
-        assertThat(linccer.getUri().substring(0, 37), equals(ClientDescription.getRemoteServer()
+        assertThat(linccer.getUri().substring(0, 37), equalTo(ClientDescription.getRemoteServer()
                 + "/clients"));
         String id = linccer.getUri().substring(38);
         assertEquals("client id " + id + " should have a sh1 key length", 36, id.length());
@@ -57,7 +58,7 @@ public class TestLinccerHandling {
     public void creatingMultipleLinccers() throws Exception {
         Linccer a = new Linccer(createNewDefaultDescription());
         Linccer b = new Linccer(createNewDefaultDescription());
-        assertThat("two linccers should have different id's", a.getUri(), not(equals(b.getUri())));
+        assertThat("two linccers should have different id's", a.getUri(), not(equalTo(b.getUri())));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class TestLinccerHandling {
         description.setClientUri(linccer.getUri());
         Linccer reusedLinccer = new Linccer(description);
 
-        assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equals(linccer
+        assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equalTo(linccer
                 .getUri())));
     }
 
