@@ -22,7 +22,6 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
     private Intent             mStartIntent;
 
     public HttpProxyTest() {
-
         super(HttpProxyTestActivity.class);
     }
 
@@ -52,7 +51,7 @@ public class HttpProxyTest extends ActivityUnitTestCase<HttpProxyTestActivity> {
         byte[] fromService = helper.fetchFromCache(uri);
         assertNotNull("content from cache was null", fromService);
 
-        byte[] fromHttp = HttpHelper.getAsByteArray(Uri.parse(uri.toString()));
+        byte[] fromHttp = HttpHelper.getAsByteArray(uri.toString());
         assertTrue("content doesn't match", Arrays.equals(fromService, fromHttp));
     }
 
