@@ -1,4 +1,4 @@
-package com.artcom.y60.data;
+package com.hoccer.data;
 
 public class UnknownContentTypeException extends Exception {
     

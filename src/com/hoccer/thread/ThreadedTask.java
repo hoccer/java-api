@@ -1,4 +1,4 @@
-package com.artcom.y60.thread;
+package com.hoccer.thread;
 
 public abstract class ThreadedTask extends Thread {
 

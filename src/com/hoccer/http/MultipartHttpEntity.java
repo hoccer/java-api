@@ -1,4 +1,4 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.io.*;
 
@@ -6,20 +6,19 @@ import org.apache.http.*;
 import org.apache.http.entity.*;
 import org.apache.http.message.*;
 
-import com.artcom.y60.data.*;
-import com.artcom.y60.thread.*;
+import com.hoccer.data.*;
+import com.hoccer.thread.*;
 
 public class MultipartHttpEntity extends AbstractHttpEntity {
 
-    private static final String LOG_TAG         = "MultipartHttpEntity";
-    public static final String  BORDER          = "ycKtoN8VURwvDC4sUzYC9Mo7l0IVUyDDVf";
+    public static final String BORDER          = "ycKtoN8VURwvDC4sUzYC9Mo7l0IVUyDDVf";
 
-    private byte[]              mPreample       = null;
-    private final byte[]        mEnd            = ("\r\n--" + BORDER + "--\r\n").getBytes();
-    private StreamableContent   mStreamable;
+    private byte[]             mPreample       = null;
+    private final byte[]       mEnd            = ("\r\n--" + BORDER + "--\r\n").getBytes();
+    private StreamableContent  mStreamable;
 
-    private StatusHandler       mStatusCallback = null;
-    private long                mDataSize;
+    private StatusHandler      mStatusCallback = null;
+    private long               mDataSize;
 
     public MultipartHttpEntity() {
     }

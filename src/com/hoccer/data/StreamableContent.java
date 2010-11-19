@@ -1,4 +1,4 @@
-package com.artcom.y60.data;
+package com.hoccer.data;
 
 import java.io.IOException;
 import java.io.InputStream;

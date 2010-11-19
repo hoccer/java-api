@@ -1,4 +1,4 @@
-package com.artcom.y60.thread;
+package com.hoccer.thread;
 
 public interface StatusHandler {
     
