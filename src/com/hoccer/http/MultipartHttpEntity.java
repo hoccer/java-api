@@ -42,10 +42,10 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
     private byte[] createPreamble(String name, String filename, String mime) {
         StringBuilder preamble = new StringBuilder();
         preamble.append("--" + BORDER + "\r\n");
-        preamble.append("Content-Disposition: form-data; name=\"" + name + "\" ");
+        preamble.append("Content-Disposition: form-data; name=\"" + name + "\"; ");
         preamble.append("filename=\"" + filename + "\"\r\n");
         preamble.append("Content-Type: " + mime + "\r\n");
-        preamble.append("Content-Transfer-Encoding: binary\r\n\r\n");
+        preamble.append("\r\n");
 
         return preamble.toString().getBytes();
     }

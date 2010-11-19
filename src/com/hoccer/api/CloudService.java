@@ -80,18 +80,19 @@ public class CloudService {
     }
 
     protected String sign(String url) {
-        String signature = digest(url);
-
         Date date = new Date();
-        return url + "&api_key=115745c0d609012d2f4e001ec2be2ed9&timestamp=" + date.getTime() / 1000
-                + "&signature=" + signature;
+        url = url + "&api_key=115745c0d609012d2f4e001ec2be2ed9&timestamp=" + date.getTime() / 1000;
+
+        System.out.println(url);
+        String signature = digest(url, "DNonxFIWCxS3kHgC9oVG+lUz/60=");
+
+        return url + "&signature=" + signature;
     }
 
-    private String digest(String url) {
-        String key = "DNonxFIWCxS3kHgC9oVG+lUz/60=";
+    protected String digest(String url, String secretKey) {
 
         // get an hmac_sha1 key from the raw key bytes
-        SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), "HmacSHA1");
+        SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA1");
 
         // get an hmac_sha1 Mac instance and initialize with the signing key
         Mac mac;

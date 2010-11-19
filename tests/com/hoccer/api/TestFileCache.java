@@ -42,12 +42,27 @@ public class TestFileCache {
     public void storeTextInFileCache() throws Exception {
         FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
 
-        String locationUri = filecache.store(new StreamableString("hello world"), 2);
+        String locationUri = filecache.store(new StreamableString("hello world"), 23);
         assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
 
         StreamableContent data = new StreamableString();
         filecache.fetch(locationUri, data);
 
         assertThat(data.toString(), is(equalTo("hello world")));
+    }
+
+    @Test(timeout = 4000)
+    public void storeBinaryDataInFileCache() throws Exception {
+        FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
+
+        GenericStreamableContent content = new GenericStreamableContent();
+        content.setFilename("data.bin");
+        content.setContentType("image/png");
+        byte[] data = { 23, 42, 23 };
+        content.openOutputStream().write(data);
+
+        String locationUri = filecache.store(content, 2);
+        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
+
     }
 }
