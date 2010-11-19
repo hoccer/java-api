@@ -43,7 +43,7 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
 
         String locationUri = filecache.store(new StreamableString("hello world"), 1);
-        // assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
+        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
 
         StreamableContent data = new StreamableString();
         filecache.fetch(locationUri, data);
