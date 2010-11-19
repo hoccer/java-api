@@ -39,4 +39,9 @@ public class StreamableString implements StreamableContent {
         return "data.txt";
     }
 
+    @Override
+    public String toString() {
+        return mData.toString();
+    }
+
 }

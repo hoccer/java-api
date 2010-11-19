@@ -67,4 +67,12 @@ public class ClientDescription {
         return json;
     }
 
+    public String getApiKey() {
+        return "115745c0d609012d2f4e001ec2be2ed9";
+    }
+
+    public String getSharedSecret() {
+        return "DNonxFIWCxS3kHgC9oVG+lUz/60=";
+    }
+
 }

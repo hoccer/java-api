@@ -38,25 +38,28 @@ import com.hoccer.data.*;
 
 public class TestFileCache {
 
-    @Test(timeout = 4000)
+    @Test
     public void storeTextInFileCache() throws Exception {
         FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
 
-        String locationUri = filecache.store(new StreamableString("hello world"), 23);
-        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
+        String locationUri = filecache.store(new StreamableString("hello world"), 1);
+        // assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
 
         StreamableContent data = new StreamableString();
         filecache.fetch(locationUri, data);
 
         assertThat(data.toString(), is(equalTo("hello world")));
+
+        Thread.sleep(2000);
+        filecache.fetch(locationUri, data);
     }
 
-    @Test(timeout = 4000)
+    @Test
     public void storeBinaryDataInFileCache() throws Exception {
         FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
 
         GenericStreamableContent content = new GenericStreamableContent();
-        content.setFilename("data.bin");
+        content.setFilename("data.png");
         content.setContentType("image/png");
         byte[] data = { 23, 42, 23 };
         content.openOutputStream().write(data);

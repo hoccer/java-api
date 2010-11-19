@@ -1,6 +1,7 @@
 package com.hoccer.api;
 
 import java.io.*;
+import java.net.*;
 import java.security.*;
 import java.util.*;
 
@@ -81,12 +82,15 @@ public class CloudService {
 
     protected String sign(String url) {
         Date date = new Date();
-        url = url + "&api_key=115745c0d609012d2f4e001ec2be2ed9&timestamp=" + date.getTime() / 1000;
+        url = url + "&api_key=" + mConfig.getApiKey() + "&timestamp=" + date.getTime() / 1000;
 
-        System.out.println(url);
-        String signature = digest(url, "DNonxFIWCxS3kHgC9oVG+lUz/60=");
+        String signature = digest(url, mConfig.getSharedSecret());
 
-        return url + "&signature=" + signature;
+        try {
+            return url + "&signature=" + URLEncoder.encode(signature, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return "unsupported encoding"; // does not happen
+        }
     }
 
     protected String digest(String url, String secretKey) {

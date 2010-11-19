@@ -59,6 +59,12 @@ public class FileCache extends CloudService {
         HttpGet request = new HttpGet(locationUri);
         HttpResponse response = getHttpClient().execute(request);
 
+        int statuscode = response.getStatusLine().getStatusCode();
+        if (statuscode != 200) {
+            throw new HttpResponseException(statuscode, "Unexpected status code while requesting"
+                    + locationUri);
+        }
+
         InputStream is = response.getEntity().getContent();
         OutputStream storageStream = data.openOutputStream();
         long downloaded = 0;
