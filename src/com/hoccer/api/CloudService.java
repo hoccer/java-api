@@ -15,7 +15,7 @@ import org.json.*;
 
 public class CloudService {
 
-    protected DefaultHttpClient       mHttpClient;
+    private DefaultHttpClient         mHttpClient;
     protected final ClientDescription mConfig;
 
     public CloudService(ClientDescription config) {
@@ -47,10 +47,9 @@ public class CloudService {
         return new JSONArray(body);
     }
 
-    private String convertResponseToString(HttpResponse response) throws UpdateException,
-            IOException {
+    protected String convertResponseToString(HttpResponse response) throws IOException {
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new UpdateException("server respond with status code "
+            throw new ParseException("server respond with status code "
                     + response.getStatusLine().getStatusCode());
         }
 
@@ -67,6 +66,10 @@ public class CloudService {
 
         String body = EntityUtils.toString(entity);
         return body;
+    }
+
+    protected DefaultHttpClient getHttpClient() {
+        return mHttpClient;
     }
 
 }

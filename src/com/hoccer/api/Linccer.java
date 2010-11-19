@@ -60,7 +60,7 @@ public class Linccer extends CloudService {
         HttpResponse response;
         try {
             HttpDelete request = new HttpDelete(mConfig.getClientUri() + "/environment");
-            response = mHttpClient.execute(request);
+            response = getHttpClient().execute(request);
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for "
                     + mConfig.getClientUri() + " because of " + e);
@@ -80,7 +80,7 @@ public class Linccer extends CloudService {
         try {
             HttpPut request = new HttpPut(mConfig.getClientUri() + "/environment");
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
-            response = mHttpClient.execute(request);
+            response = getHttpClient().execute(request);
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for "
                     + mConfig.getClientUri() + " because of " + e);
@@ -125,7 +125,7 @@ public class Linccer extends CloudService {
             HttpPut request = new HttpPut(mConfig.getClientUri() + "/action/" + mode + "?"
                     + options);
             request.setEntity(new StringEntity(payload.toString()));
-            HttpResponse response = mHttpClient.execute(request);
+            HttpResponse response = getHttpClient().execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
@@ -176,7 +176,7 @@ public class Linccer extends CloudService {
         try {
             HttpGet request = new HttpGet(mConfig.getClientUri() + "/action/" + mode + "?"
                     + options);
-            HttpResponse response = mHttpClient.execute(request);
+            HttpResponse response = getHttpClient().execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
