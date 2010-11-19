@@ -1,16 +1,13 @@
 package com.artcom.y60.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
-import org.apache.http.Header;
-import org.apache.http.entity.AbstractHttpEntity;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.*;
+import org.apache.http.entity.*;
+import org.apache.http.message.*;
 
-import com.artcom.y60.Logger;
-import com.artcom.y60.data.StreamableContent;
-import com.artcom.y60.thread.StatusHandler;
+import com.artcom.y60.data.*;
+import com.artcom.y60.thread.*;
 
 public class MultipartHttpEntity extends AbstractHttpEntity {
 
@@ -90,7 +87,6 @@ public class MultipartHttpEntity extends AbstractHttpEntity {
         int len;
         InputStream stream = mStreamable.openInputStream();
         while ((len = stream.read(buffer)) != -1) {
-            Logger.v(LOG_TAG, "writing multipart http entity");
             outstream.write(buffer, 0, len);
             uploaded += len;
             if (mStatusCallback != null) {
