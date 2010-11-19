@@ -34,26 +34,15 @@ import java.util.*;
 import org.apache.http.*;
 import org.apache.http.client.*;
 import org.apache.http.client.methods.*;
-import org.apache.http.conn.*;
-import org.apache.http.conn.params.*;
-import org.apache.http.conn.scheme.*;
-import org.apache.http.conn.ssl.*;
 import org.apache.http.entity.*;
-import org.apache.http.impl.client.*;
-import org.apache.http.impl.conn.tsccm.*;
-import org.apache.http.params.*;
-import org.apache.http.util.*;
 import org.json.*;
 
-public class Linccer {
+public class Linccer extends CloudService {
 
-    private DefaultHttpClient       mHttpClient;
-    private final ClientDescription mConfig;
-    private Environment             mEnvironment = new Environment();
+    private Environment mEnvironment = new Environment();
 
     public Linccer(ClientDescription config) throws ClientCreationException {
-        mConfig = config;
-        setupHttpClient();
+        super(config);
 
         if (mConfig.getClientUri() == null) {
             mConfig.setClientUri(ClientDescription.getRemoteServer() + "/clients/"
@@ -220,52 +209,6 @@ public class Linccer {
 
     public String getUri() {
         return mConfig.getClientUri();
-    }
-
-    private void setupHttpClient() {
-        BasicHttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
-        ConnManagerParams.setMaxTotalConnections(httpParams, 100);
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-        ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
-        mHttpClient = new DefaultHttpClient(cm, httpParams);
-        mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
-    }
-
-    private JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
-            IOException, JSONException, UpdateException {
-        String body = convertResponseToString(response);
-        return new JSONObject(body);
-    }
-
-    private JSONArray convertResponseToJsonArray(HttpResponse response) throws ParseException,
-            IOException, JSONException, UpdateException {
-        String body = convertResponseToString(response);
-        return new JSONArray(body);
-    }
-
-    private String convertResponseToString(HttpResponse response) throws UpdateException,
-            IOException {
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new UpdateException("server respond with status code "
-                    + response.getStatusLine().getStatusCode());
-        }
-
-        HttpEntity entity = response.getEntity();
-        if (entity == null) {
-            throw new ParseException("http body was empty");
-        }
-        long len = entity.getContentLength();
-        if (len > 2048) {
-            throw new ParseException(
-                    "http body is to big and must be streamed (max is 2048, but was " + len
-                            + " byte)");
-        }
-
-        String body = EntityUtils.toString(entity);
-        return body;
     }
 
     private String mapMode(String mode) throws BadModeException {
