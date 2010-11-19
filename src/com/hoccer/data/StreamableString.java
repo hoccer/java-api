@@ -1,10 +1,6 @@
 package com.hoccer.data;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class StreamableString implements StreamableContent {
 
@@ -12,6 +8,10 @@ public class StreamableString implements StreamableContent {
 
     public StreamableString(String text) throws IOException {
         mData.write(text.getBytes());
+    }
+
+    public StreamableString() throws IOException {
+
     }
 
     @Override

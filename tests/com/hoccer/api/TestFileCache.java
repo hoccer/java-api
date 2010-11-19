@@ -30,6 +30,7 @@ package com.hoccer.api;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
 
 import org.junit.*;
 
@@ -42,6 +43,11 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
 
         String locationUri = filecache.store(new StreamableString("hello world"), 2);
-        assertThat(locationUri, is(equalTo("http://")));
+        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
+
+        StreamableContent data = new StreamableString();
+        filecache.fetch(locationUri, data);
+
+        assertThat(data.toString(), is(equalTo("hello world")));
     }
 }
