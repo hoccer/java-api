@@ -1,6 +1,11 @@
 package com.hoccer.api;
 
 import java.io.*;
+import java.security.*;
+import java.util.*;
+
+import javax.crypto.*;
+import javax.crypto.spec.*;
 
 import org.apache.http.*;
 import org.apache.http.conn.*;
@@ -12,6 +17,8 @@ import org.apache.http.impl.conn.tsccm.*;
 import org.apache.http.params.*;
 import org.apache.http.util.*;
 import org.json.*;
+
+import com.sun.org.apache.xml.internal.security.utils.*;
 
 public class CloudService {
 
@@ -72,4 +79,37 @@ public class CloudService {
         return mHttpClient;
     }
 
+    protected String sign(String url) {
+        String signature = digest(url);
+
+        Date date = new Date();
+        return url + "&api_key=115745c0d609012d2f4e001ec2be2ed9&timestamp=" + date.getTime() / 1000
+                + "&signature=" + signature;
+    }
+
+    private String digest(String url) {
+        String key = "DNonxFIWCxS3kHgC9oVG+lUz/60=";
+
+        // get an hmac_sha1 key from the raw key bytes
+        SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), "HmacSHA1");
+
+        // get an hmac_sha1 Mac instance and initialize with the signing key
+        Mac mac;
+        try {
+            mac = Mac.getInstance("HmacSHA1");
+            mac.init(signingKey);
+
+            // compute the hmac on input data bytes
+            byte[] rawHmac = mac.doFinal(url.getBytes());
+            // base64-encode the hmac
+            return Base64.encode(rawHmac);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+
+        throw new RuntimeException("keks");
+    }
 }

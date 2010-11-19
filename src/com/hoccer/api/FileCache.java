@@ -12,9 +12,10 @@ import com.hoccer.thread.*;
 
 public class FileCache extends CloudService {
 
-    private long    downloadTime;
-    private boolean isFetchStopped;
-    private int     progress;
+    private long         downloadTime;
+    private boolean      isFetchStopped;
+    private int          progress;
+    private final String baseUri = "http://eight.local:9292"; // "http://filecache.sandbox.hoccer.com";
 
     public FileCache(ClientDescription config) {
         super(config);
@@ -41,8 +42,8 @@ public class FileCache extends CloudService {
             }
         });
 
-        HttpPost request = new HttpPost("http://filecache.sandbox.hoccer.com?expires_in="
-                + secondsUntilExipred);
+        String url = baseUri + "?expires_in=" + secondsUntilExipred;
+        HttpPost request = new HttpPost(sign(url));
         request.setEntity(multipart);
         HttpResponse response = getHttpClient().execute(request);
 
