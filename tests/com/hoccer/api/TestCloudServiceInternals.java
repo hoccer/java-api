@@ -8,7 +8,7 @@ import org.junit.*;
 public class TestCloudServiceInternals extends CloudService {
 
     public TestCloudServiceInternals() {
-        super(new ClientDescription("unit test"));
+        super(new ClientConfig("unit test"));
     }
 
     @Test

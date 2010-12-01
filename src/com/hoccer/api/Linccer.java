@@ -41,12 +41,11 @@ public class Linccer extends CloudService {
 
     private Environment mEnvironment = new Environment();
 
-    public Linccer(ClientDescription config) throws ClientCreationException {
+    public Linccer(ClientConfig config) throws ClientCreationException {
         super(config);
 
         if (mConfig.getClientUri() == null) {
-            mConfig.setClientUri(ClientDescription.getRemoteServer() + "/clients/"
-                    + UUID.randomUUID());
+            mConfig.setClientUri(mConfig.getLinccerBaseUri() + "/clients/" + UUID.randomUUID());
         }
     }
 

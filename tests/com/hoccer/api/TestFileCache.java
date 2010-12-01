@@ -40,7 +40,7 @@ public class TestFileCache {
 
     @Test
     public void storeTextInFileCache() throws Exception {
-        FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
         String locationUri = filecache.store(new StreamableString("hello world"), 1);
         assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
@@ -56,7 +56,7 @@ public class TestFileCache {
 
     @Test
     public void storeBinaryDataInFileCache() throws Exception {
-        FileCache filecache = new FileCache(new ClientDescription("File Cache Unit Test"));
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
         GenericStreamableContent content = new GenericStreamableContent();
         content.setFilename("data.png");

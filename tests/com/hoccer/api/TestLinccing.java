@@ -42,8 +42,7 @@ public class TestLinccing extends LinccerTestsBase {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.115, 130);
-        linccerB.onGpsChanged(22.012, 102.11, 1030);
+        placeNearBy(linccerA, linccerB);
 
         long time = System.currentTimeMillis();
         ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:1");
@@ -187,8 +186,7 @@ public class TestLinccing extends LinccerTestsBase {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.11, 130);
-        linccerB.onGpsChanged(22.012, 102.11, 1030);
+        placeNearBy(linccerA, linccerB);
 
         ThreadedReceive threadedReceive = new ThreadedReceive(linccerA, "1:n", "waiting=true");
         threadedReceive.start();
@@ -222,11 +220,11 @@ public class TestLinccing extends LinccerTestsBase {
     }
 
     private void placeNearBy(Linccer... linccers) throws UpdateException {
-
-        double latitude = 22.01;
-        double longitude = 102.11;
-
         Random rand = new Random(System.currentTimeMillis());
+
+        double latitude = 22.01 + rand.nextGaussian() * 10;
+        double longitude = 102.11 + rand.nextGaussian() * 10;
+
         for (Linccer linccer : linccers) {
             linccer.onGpsChanged(latitude + (rand.nextGaussian() / 1000.0), longitude
                     + (rand.nextGaussian() / 1000.0), rand.nextInt(1000));

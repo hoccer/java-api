@@ -37,7 +37,7 @@ public class WaitingForContent {
     public static void main(String[] args) {
 
         try {
-            final Linccer linccer = new Linccer(new ClientDescription("PlaygroundLinccer"));
+            final Linccer linccer = new Linccer(new ClientConfig("PlaygroundLinccer"));
             new Thread(new EnvironmentUpdater(linccer)).start();
 
             while (true) {

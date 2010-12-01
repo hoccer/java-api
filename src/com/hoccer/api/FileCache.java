@@ -17,7 +17,7 @@ public class FileCache extends CloudService {
     private int          progress;
     private final String baseUri = "http://filecache.sandbox.hoccer.com";
 
-    public FileCache(ClientDescription config) {
+    public FileCache(ClientConfig config) {
         super(config);
     }
 

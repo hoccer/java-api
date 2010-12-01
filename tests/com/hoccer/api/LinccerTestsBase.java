@@ -8,8 +8,8 @@ public class LinccerTestsBase {
         super();
     }
 
-    protected ClientDescription createDescription() {
-        return new ClientDescription("java-api unit test");
+    protected ClientConfig createDescription() {
+        return new ClientConfig("java-api unit test");
     }
 
     protected class ThreadedLinccing extends Thread {

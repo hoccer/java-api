@@ -24,9 +24,9 @@ import com.sun.org.apache.xml.internal.security.utils.*;
 public class CloudService {
 
     private DefaultHttpClient         mHttpClient;
-    protected final ClientDescription mConfig;
+    protected final ClientConfig mConfig;
 
-    public CloudService(ClientDescription config) {
+    public CloudService(ClientConfig config) {
         mConfig = config;
         setupHttpClient();
     }

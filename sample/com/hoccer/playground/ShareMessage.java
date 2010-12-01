@@ -11,7 +11,7 @@ public class ShareMessage {
     public static void main(String[] args) {
 
         try {
-            final Linccer linccer = new Linccer(new ClientDescription("PlaygroundLinccer"));
+            final Linccer linccer = new Linccer(new ClientConfig("PlaygroundLinccer"));
             linccer.onGpsChanged(52.5167780325, 13.409039925, 1000);
 
             JSONObject payload = linccer.share("1:n", new JSONObject(

@@ -30,23 +30,19 @@ package com.hoccer.api;
 
 import org.json.*;
 
-public class ClientDescription {
+public class ClientConfig {
 
-    private static String mRemoteServer = "https://linker.beta.hoccer.com";
+    private final static String mLinccerUri = "https://linker.beta.hoccer.com";
     // private static String mRemoteServer = "http://127.0.0.1:9292";
-    private final String  mApplicationName;
-    private String        mClientUri;
+    private final String        mApplicationName;
+    private String              mClientUri;
 
-    public ClientDescription(String applicatioName) {
+    public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
     }
 
-    static void setRemoteServer(String remoteServer) {
-        mRemoteServer = remoteServer;
-    }
-
-    public static String getRemoteServer() {
-        return mRemoteServer;
+    public static String getLinccerBaseUri() {
+        return mLinccerUri;
     }
 
     public String getApplicationName() {

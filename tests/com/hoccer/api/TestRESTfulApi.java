@@ -16,7 +16,7 @@ public class TestRESTfulApi {
     @Test
     public void testReadingNonexistentClientId() throws Exception {
 
-        HttpPost request = new HttpPost(ClientDescription.getRemoteServer()
+        HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri()
                 + "/c278d820-d1f0-11df-bd3b-0800200c9a66");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
@@ -27,7 +27,7 @@ public class TestRESTfulApi {
     @Test(timeout = 1000)
     public void lonlyReceive() throws Exception {
 
-        HttpPut envUpdate = new HttpPut(ClientDescription.getRemoteServer()
+        HttpPut envUpdate = new HttpPut(ClientConfig.getLinccerBaseUri()
                 + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/environment");
         envUpdate.setEntity(new StringEntity(
                 "{gps: {\"longitude\": 13, \"latitude\": 50, \"accuracy\": 100} }"));
@@ -37,7 +37,7 @@ public class TestRESTfulApi {
                 .getStatusCode());
         envUpdate.abort();
 
-        HttpGet receive = new HttpGet(ClientDescription.getRemoteServer()
+        HttpGet receive = new HttpGet(ClientConfig.getLinccerBaseUri()
                 + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/action/one-to-one");
         response = mHttpClient.execute(receive);
         String body = (response.getEntity() != null) ? EntityUtils.toString(response.getEntity())

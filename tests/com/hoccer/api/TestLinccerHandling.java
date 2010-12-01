@@ -41,14 +41,14 @@ public class TestLinccerHandling {
     public void setUp() {
     }
 
-    private ClientDescription createNewDefaultDescription() {
-        return new ClientDescription("java-api unit test");
+    private ClientConfig createNewDefaultDescription() {
+        return new ClientConfig("java-api unit test");
     }
 
     @Test
     public void creatingNewLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
-        assertThat(linccer.getUri().substring(0, 38), equalTo(ClientDescription.getRemoteServer()
+        assertThat(linccer.getUri().substring(0, 38), equalTo(ClientConfig.getLinccerBaseUri()
                 + "/clients"));
         String id = linccer.getUri().substring(39);
         assertEquals("client id " + id + " should have a sh1 key length", 36, id.length());
@@ -64,7 +64,7 @@ public class TestLinccerHandling {
     @Test
     public void usingKnownLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
-        ClientDescription description = createNewDefaultDescription();
+        ClientConfig description = createNewDefaultDescription();
         description.setClientUri(linccer.getUri());
         Linccer reusedLinccer = new Linccer(description);
 
