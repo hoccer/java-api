@@ -59,8 +59,7 @@ public class TestLinccing extends LinccerTestsBase {
         assertNotNull("should have shared the message", threadedShare.getResult());
         assertEquals("hello world", threadedShare.getResult().get("message"));
 
-        linccerA.disconnect();
-        linccerB.disconnect();
+        disconnect(linccerA, linccerB);
     }
 
     @Test(timeout = 20000)
@@ -93,9 +92,7 @@ public class TestLinccing extends LinccerTestsBase {
         threadedReceive.join();
         threadedReceive.assertCollisionOccured();
 
-        linccerA.disconnect();
-        linccerB.disconnect();
-        linccerC.disconnect();
+        disconnect(linccerA, linccerB, linccerC);
     }
 
     @Test(timeout = 20000)
@@ -128,8 +125,7 @@ public class TestLinccing extends LinccerTestsBase {
         assertEquals("should also have got the payload", receivedPayload.toString(),
                 threadedReceive.getResult().toString());
 
-        linccerA.disconnect();
-        linccerB.disconnect();
+        disconnect(linccerA, linccerB);
     }
 
     @Test(timeout = 40000)
@@ -157,7 +153,17 @@ public class TestLinccing extends LinccerTestsBase {
         assertNotNull("should have shared the message", sharedPayload);
         assertEquals("hello world", sharedPayload.get("message"));
 
-        linccerA.disconnect();
-        linccerB.disconnect();
+        disconnect(linccerA, linccerB);
+    }
+
+    private void disconnect(Linccer... linccers) throws UpdateException {
+        long startTime = System.currentTimeMillis();
+        for (Linccer linccer : linccers) {
+            linccer.disconnect();
+        }
+        long duration = System.currentTimeMillis() - startTime;
+        assertTrue("disconnecting should not take longer than 1 sec but took " + duration / 1000.0
+                + " sec", duration < 1000);
+
     }
 }

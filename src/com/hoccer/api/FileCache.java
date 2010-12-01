@@ -15,9 +15,7 @@ public class FileCache extends CloudService {
     private long         downloadTime;
     private boolean      isFetchStopped;
     private int          progress;
-    private final String baseUri = "http://eight.local:9292"; //
-
-    // "http://filecache.sandbox.hoccer.com";
+    private final String baseUri = "http://filecache.sandbox.hoccer.com";
 
     public FileCache(ClientDescription config) {
         super(config);
