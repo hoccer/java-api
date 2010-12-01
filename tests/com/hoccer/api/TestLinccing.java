@@ -30,6 +30,8 @@ package com.hoccer.api;
 
 import static org.junit.Assert.*;
 
+import java.util.*;
+
 import org.json.*;
 import org.junit.Test;
 
@@ -62,15 +64,36 @@ public class TestLinccing extends LinccerTestsBase {
         disconnect(linccerA, linccerB);
     }
 
-    @Test(timeout = 20000)
-    public void oneToOneCollision() throws Exception {
+    @Test(timeout = 6000)
+    public void oneToOneSuccsessWithThreeClients() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.113, 130);
-        linccerB.onGpsChanged(22.011, 102.11, 1030);
-        linccerC.onGpsChanged(22.009, 102.116, 2000);
+        placeNearBy(linccerA, linccerB, linccerC);
+
+        ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:1");
+        threadedShare.start();
+
+        long startTime = System.currentTimeMillis();
+        assertNotNull("should have got the content", linccerC.receive("1:1"));
+        double duration = (System.currentTimeMillis() - startTime) / 1000;
+        assertTrue("should have took about 2 seconds but took " + duration + " sec",
+                duration > 1.95 && duration < 2.05);
+
+        threadedShare.join();
+        threadedShare.assertNoExceptionsOccured();
+
+        disconnect(linccerA, linccerB, linccerC);
+    }
+
+    @Test(timeout = 20000)
+    public void oneToOneReceiveCollision() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+        final Linccer linccerB = new Linccer(createDescription());
+        final Linccer linccerC = new Linccer(createDescription());
+
+        placeNearBy(linccerA, linccerB, linccerC);
 
         ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:1");
         threadedShare.start();
@@ -79,8 +102,8 @@ public class TestLinccing extends LinccerTestsBase {
 
         boolean hadCollision = false;
         try {
-            JSONObject receivedPayload = linccerC.receive("1:1");
-            assertNull("should not have got the content", receivedPayload);
+            linccerC.receive("1:1");
+            assertFalse("should have got an exception", true);
         } catch (CollidingActionsException e) {
             hadCollision = true;
         }
@@ -96,14 +119,45 @@ public class TestLinccing extends LinccerTestsBase {
     }
 
     @Test(timeout = 20000)
+    public void oneToOneShareCollision() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+        final Linccer linccerB = new Linccer(createDescription());
+        final Linccer linccerC = new Linccer(createDescription());
+
+        placeNearBy(linccerA, linccerB, linccerC);
+
+        ThreadedShare threadedShareA = new ThreadedShare(linccerA, "1:1");
+        threadedShareA.start();
+        ThreadedShare threadedShareB = new ThreadedShare(linccerB, "1:1");
+        threadedShareB.start();
+
+        boolean hadCollision = false;
+        try {
+            System.out.println("before");
+            linccerC.receive("1:1");
+            System.out.println("after");
+            assertFalse("should have got an exception", true);
+        } catch (CollidingActionsException e) {
+            hadCollision = true;
+        }
+        assertTrue("should have detected collision", hadCollision);
+
+        threadedShareA.join();
+        threadedShareA.assertCollisionOccured();
+
+        threadedShareB.join();
+        threadedShareB.assertCollisionOccured();
+
+        disconnect(linccerA, linccerB, linccerC);
+    }
+
+    @Test(timeout = 20000)
     public void oneToManySuccess() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
 
-        linccerA.onGpsChanged(22.012, 102.113, 130);
-        linccerB.onGpsChanged(22.011, 102.11, 1030);
-        linccerC.onGpsChanged(22.009, 102.116, 2000);
+        placeNearBy(linccerA, linccerB, linccerC);
 
         ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:n");
         threadedShare.start();
@@ -165,5 +219,17 @@ public class TestLinccing extends LinccerTestsBase {
         assertTrue("disconnecting should not take longer than 1 sec but took " + duration / 1000.0
                 + " sec", duration < 1000);
 
+    }
+
+    private void placeNearBy(Linccer... linccers) throws UpdateException {
+
+        double latitude = 22.01;
+        double longitude = 102.11;
+
+        Random rand = new Random(System.currentTimeMillis());
+        for (Linccer linccer : linccers) {
+            linccer.onGpsChanged(latitude + (rand.nextGaussian() / 1000.0), longitude
+                    + (rand.nextGaussian() / 1000.0), rand.nextInt(1000));
+        }
     }
 }
