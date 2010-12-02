@@ -2,6 +2,7 @@ package com.hoccer.thread;
 
 public abstract class ThreadedTask extends Thread {
 
+    @SuppressWarnings("unused")
     private static String LOG_TAG   = "ThreadedTask";
     private int           mProgress = 0;
 

@@ -40,6 +40,7 @@ import java.util.*;
  */
 public class NanoHTTPD {
 
+    @SuppressWarnings("unused")
     private static String LOG_TAG = "NanoHTTPD";
 
     // ==================================================
@@ -56,7 +57,7 @@ public class NanoHTTPD {
     public Response serve(ClientRequest request) {
         System.out.println(request.method + " '" + request.uri + "' ");
 
-        Enumeration e = request.header.propertyNames();
+        Enumeration<?> e = request.header.propertyNames();
         while (e.hasMoreElements()) {
             String value = (String) e.nextElement();
             System.out.println("  HDR: '" + value + "' = '" + request.header.getProperty(value)
@@ -494,7 +495,7 @@ public class NanoHTTPD {
                 }
 
                 if (header != null) {
-                    Enumeration e = header.keys();
+                    Enumeration<?> e = header.keys();
                     while (e.hasMoreElements()) {
                         String key = (String) e.nextElement();
                         String value = header.getProperty(key);
@@ -664,8 +665,7 @@ public class NanoHTTPD {
             String mime = null;
             int dot = f.getCanonicalPath().lastIndexOf('.');
             if (dot >= 0) {
-                mime = (String) theMimeTypes.get(f.getCanonicalPath().substring(dot + 1)
-                        .toLowerCase());
+                mime = theMimeTypes.get(f.getCanonicalPath().substring(dot + 1).toLowerCase());
             }
             if (mime == null) {
                 mime = MIME_DEFAULT_BINARY;
@@ -704,7 +704,7 @@ public class NanoHTTPD {
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
      */
-    private static Hashtable                  theMimeTypes = new Hashtable();
+    private static Hashtable<String, String>  theMimeTypes = new Hashtable<String, String>();
     static {
         StringTokenizer st = new StringTokenizer("htm		text/html " + "html		text/html "
                 + "txt		text/plain " + "asc		text/plain " + "gif		image/gif " + "jpg		image/jpeg "

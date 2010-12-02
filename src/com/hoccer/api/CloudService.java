@@ -43,6 +43,7 @@ public class CloudService {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
+    @SuppressWarnings("unused")
     private JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
         String body = convertResponseToString(response);

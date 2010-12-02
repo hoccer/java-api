@@ -138,7 +138,7 @@ package com.hoccer.data;
  */
 public class Base64 {
 
-    /*  ******** P U B L I C F I E L D S ******** */
+    /*   ******** P U B L I C F I E L D S ******** */
 
     /** No options specified. Value is zero. */
     public final static int     NO_OPTIONS          = 0;
@@ -174,7 +174,7 @@ public class Base64 {
      */
     public final static int     ORDERED             = 32;
 
-    /*  ******** P R I V A T E F I E L D S ******** */
+    /*   ******** P R I V A T E F I E L D S ******** */
 
     /** Maximum line length (76) of Base64 output. */
     private final static int    MAX_LINE_LENGTH     = 76;
@@ -189,11 +189,11 @@ public class Base64 {
     private final static String PREFERRED_ENCODING  = "US-ASCII";
 
     private final static byte   WHITE_SPACE_ENC     = -5;                // Indicates white space
-                                                                          // in encoding
+    // in encoding
     private final static byte   EQUALS_SIGN_ENC     = -1;                // Indicates equals sign
-                                                                          // in encoding
+    // in encoding
 
-    /*  ******** S T A N D A R D B A S E 6 4 A L P H A B E T ******** */
+    /*   ******** S T A N D A R D B A S E 6 4 A L P H A B E T ******** */
 
     /** The 64 valid Base64 values. */
     /* Host platform me be something funny like EBCDIC, so we hardcode these values. */
@@ -213,7 +213,7 @@ public class Base64 {
      * indicating some other meaning.
      **/
     private final static byte[] _STANDARD_DECODABET = { -9, -9, -9, -9, -9, -9, -9, -9, -9, // Decimal
-                                                                                            // 0 - 8
+            // 0 - 8
             -5, -5, // Whitespace: Tab and Linefeed
             -9, -9, // Decimal 11 - 12
             -5, // Whitespace: Carriage Return
@@ -246,7 +246,7 @@ public class Base64 {
             -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 // Decimal 244 - 255
                                                     };
 
-    /*  ******** U R L S A F E B A S E 6 4 A L P H A B E T ******** */
+    /*   ******** U R L S A F E B A S E 6 4 A L P H A B E T ******** */
 
     /**
      * Used in the URL- and Filename-safe dialect described in Section 4 of RFC3548: <a
@@ -269,7 +269,7 @@ public class Base64 {
      * Used in decoding URL- and Filename-safe dialects of Base64.
      */
     private final static byte[] _URL_SAFE_DECODABET = { -9, -9, -9, -9, -9, -9, -9, -9, -9, // Decimal
-                                                                                            // 0 - 8
+            // 0 - 8
             -5, -5, // Whitespace: Tab and Linefeed
             -9, -9, // Decimal 11 - 12
             -5, // Whitespace: Carriage Return
@@ -306,7 +306,7 @@ public class Base64 {
             -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 // Decimal 244 - 255
                                                     };
 
-    /*  ******** O R D E R E D B A S E 6 4 A L P H A B E T ******** */
+    /*   ******** O R D E R E D B A S E 6 4 A L P H A B E T ******** */
 
     /**
      * I don't get the point of this technique, but someone requested it, and it is described here:
@@ -327,7 +327,7 @@ public class Base64 {
      * Used in decoding the "ordered" dialect of Base64.
      */
     private final static byte[] _ORDERED_DECODABET  = { -9, -9, -9, -9, -9, -9, -9, -9, -9, // Decimal
-                                                                                            // 0 - 8
+            // 0 - 8
             -5, -5, // Whitespace: Tab and Linefeed
             -9, -9, // Decimal 11 - 12
             -5, // Whitespace: Carriage Return
@@ -364,7 +364,7 @@ public class Base64 {
             -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9, -9 // Decimal 244 - 255
                                                     };
 
-    /*  ******** D E T E R M I N E W H I C H A L H A B E T ******** */
+    /*   ******** D E T E R M I N E W H I C H A L H A B E T ******** */
 
     /**
      * Returns one of the _SOMETHING_ALPHABET byte arrays depending on the options specified. It's
@@ -400,7 +400,7 @@ public class Base64 {
     private Base64() {
     }
 
-    /*  ******** E N C O D I N G M E T H O D S ******** */
+    /*   ******** E N C O D I N G M E T H O D S ******** */
 
     /**
      * Encodes up to the first three bytes of array <var>threeBytes</var> and returns a four-byte
@@ -973,7 +973,7 @@ public class Base64 {
 
     } // end encodeBytesToBytes
 
-    /*  ******** D E C O D I N G M E T H O D S ******** */
+    /*   ******** D E C O D I N G M E T H O D S ******** */
 
     /**
      * Decodes four bytes from array <var>source</var> and writes the resulting bytes (up to three
@@ -1348,6 +1348,7 @@ public class Base64 {
             // the provided class loader.
             else {
                 ois = new java.io.ObjectInputStream(bais) {
+                    @SuppressWarnings("unchecked")
                     @Override
                     public Class<?> resolveClass(java.io.ObjectStreamClass streamClass)
                             throws java.io.IOException, ClassNotFoundException {
@@ -1544,13 +1545,13 @@ public class Base64 {
             // Set up some useful variables
             java.io.File file = new java.io.File(filename);
             byte[] buffer = new byte[Math.max((int) (file.length() * 1.4 + 1), 40)]; // Need max()
-                                                                                     // for math on
-                                                                                     // small files
-                                                                                     // (v2.2.1);
-                                                                                     // Need +1 for
-                                                                                     // a few corner
-                                                                                     // cases
-                                                                                     // (v2.3.5)
+            // for math on
+            // small files
+            // (v2.2.1);
+            // Need +1 for
+            // a few corner
+            // cases
+            // (v2.3.5)
             int length = 0;
             int numBytes = 0;
 
@@ -1640,7 +1641,7 @@ public class Base64 {
         } // end finally
     } // end decodeFileToFile
 
-    /*  ******** I N N E R C L A S S I N P U T S T R E A M ******** */
+    /*   ******** I N N E R C L A S S I N P U T S T R E A M ******** */
 
     /**
      * A {@link Base64.InputStream} will read data from another <tt>java.io.InputStream</tt>, given
@@ -1844,7 +1845,7 @@ public class Base64 {
 
     } // end inner class InputStream
 
-    /*  ******** I N N E R C L A S S O U T P U T S T R E A M ******** */
+    /*   ******** I N N E R C L A S S O U T P U T S T R E A M ******** */
 
     /**
      * A {@link Base64.OutputStream} will write data to another <tt>java.io.OutputStream</tt>, given

@@ -45,7 +45,9 @@ public class Linccer extends CloudService {
         super(config);
 
         if (mConfig.getClientUri() == null) {
-            mConfig.setClientUri(mConfig.getLinccerBaseUri() + "/clients/" + UUID.randomUUID());
+            mConfig
+                    .setClientUri(ClientConfig.getLinccerBaseUri() + "/clients/"
+                            + UUID.randomUUID());
         }
     }
 
