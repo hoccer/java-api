@@ -19,11 +19,11 @@ import org.apache.http.params.*;
 import org.apache.http.util.*;
 import org.json.*;
 
-import com.sun.org.apache.xml.internal.security.utils.*;
+import com.hoccer.data.*;
 
 public class CloudService {
 
-    private DefaultHttpClient         mHttpClient;
+    private DefaultHttpClient    mHttpClient;
     protected final ClientConfig mConfig;
 
     public CloudService(ClientConfig config) {
@@ -107,7 +107,7 @@ public class CloudService {
             // compute the hmac on input data bytes
             byte[] rawHmac = mac.doFinal(url.getBytes());
             // base64-encode the hmac
-            return Base64.encode(rawHmac);
+            return Base64.encodeBytes(rawHmac);
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
