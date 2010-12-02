@@ -1,8 +1,12 @@
 package com.hoccer.api;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
 
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Environment {
 
@@ -67,17 +71,17 @@ public class Environment {
     }
 
     private class WifiMeasurement {
-        private final String[] bssids;
-        private final Date     timestamp;
+        private final Collection<String> bssids;
+        private final Date               timestamp;
 
         public WifiMeasurement(String[] bssids, Date timestamp) {
-            this.bssids = bssids;
+            this.bssids = Arrays.asList(bssids);
             this.timestamp = timestamp;
         }
 
         public JSONObject toJson() throws JSONException {
             JSONObject json = new JSONObject();
-            json.put("bssids", new JSONArray(bssids));
+            json.put("bssids", new JSONArray(this.bssids));
 
             json.put("timestamp", timestamp.getTime() / 1000L);
             return json;
