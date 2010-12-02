@@ -41,7 +41,7 @@ public class Linccer extends CloudService {
 
     private Environment mEnvironment = new Environment();
 
-    public Linccer(ClientConfig config) throws ClientCreationException {
+    public Linccer(ClientConfig config)  {
         super(config);
 
         if (mConfig.getClientUri() == null) {
