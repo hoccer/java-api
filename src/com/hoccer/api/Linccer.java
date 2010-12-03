@@ -1,47 +1,40 @@
 /*
- *  Copyright (C) 2010, Hoccer GmbH Berlin, Germany <www.hoccer.com>
- * 
- *  These coded instructions, statements, and computer programs contain
- *  proprietary information of Hoccer GmbH Berlin, and are copy protected
- *  by law. They may be used, modified and redistributed under the terms
- *  of GNU General Public License referenced below. 
- *     
- *  Alternative licensing without the obligations of the GPL is
- *  available upon request.
- * 
- *  GPL v3 Licensing:
- * 
- *  This file is part of the "Hoccer Java-API".
- * 
- *  Hoccer Java-API is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  Hoccer Java-API is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with Hoccer Java-API. If not, see <http: * www.gnu.org/licenses/>.
+ * Copyright (C) 2010, Hoccer GmbH Berlin, Germany <www.hoccer.com> These coded instructions,
+ * statements, and computer programs contain proprietary information of Hoccer GmbH Berlin, and are
+ * copy protected by law. They may be used, modified and redistributed under the terms of GNU
+ * General Public License referenced below. Alternative licensing without the obligations of the GPL
+ * is available upon request. GPL v3 Licensing: This file is part of the "Hoccer Java-API". Hoccer
+ * Java-API is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. Hoccer Java-API is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You
+ * should have received a copy of the GNU General Public License along with Hoccer Java-API. If not,
+ * see <http: * www.gnu.org/licenses/>.
  */
 package com.hoccer.api;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
-import org.apache.http.*;
-import org.apache.http.client.*;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.*;
-import org.json.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Linccer extends CloudService {
 
     private Environment mEnvironment = new Environment();
 
-    public Linccer(ClientConfig config)  {
+    public Linccer(ClientConfig config) {
         super(config);
 
         if (mConfig.getClientUri() == null) {
@@ -96,20 +89,43 @@ public class Linccer extends CloudService {
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
             throws UpdateException {
+        onGpsChanged(latitude, longitude, accuracy, new Date());
+    }
 
-        mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, new Date());
+    public void onGpsChanged(double latitude, double longitude, int accuracy, Date date)
+            throws UpdateException {
+        mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, date);
         onEnvironmentChanged(mEnvironment);
+    }
+
+    public void onGpsChanged(double latitude, double longitude, int accuracy, long time)
+            throws UpdateException {
+        onGpsChanged(latitude, longitude, accuracy, new Date(time));
     }
 
     public void onNetworkChanged(double latitude, double longitude, int accuracy)
             throws UpdateException {
-        mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, new Date());
+        onNetworkChanged(latitude, longitude, accuracy, new Date());
+    }
+
+    public void onNetworkChanged(double latitude, double longitude, int accuracy, Date date)
+            throws UpdateException {
+        mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, date);
+        onEnvironmentChanged(mEnvironment);
+    }
+
+    public void onNetworkChanged(double latitude, double longitude, int accuracy, long time)
+            throws UpdateException {
+        onNetworkChanged(latitude, longitude, accuracy, new Date(time));
+    }
+
+    public void onWifiChanged(List<String> bssids) throws UpdateException {
+        mEnvironment.setWifiMeasurement(bssids, new Date());
         onEnvironmentChanged(mEnvironment);
     }
 
     public void onWifiChanged(String[] bssids) throws UpdateException {
-        mEnvironment.setWifiMeasurement(bssids, new Date());
-        onEnvironmentChanged(mEnvironment);
+        onWifiChanged(Arrays.asList(bssids));
     }
 
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,

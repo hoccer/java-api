@@ -1,8 +1,8 @@
 package com.hoccer.api;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +29,7 @@ public class Environment {
         mNetworkMeasurement = new LocationMeasurement(latitude, longitude, accuracy, timestamp);
     }
 
-    public void setWifiMeasurement(String[] bssids, Date date) {
+    public void setWifiMeasurement(List<String> bssids, Date date) {
         mWifiMeasurement = new WifiMeasurement(bssids, date);
     }
 
@@ -74,8 +74,8 @@ public class Environment {
         private final Collection<String> bssids;
         private final Date               timestamp;
 
-        public WifiMeasurement(String[] bssids, Date timestamp) {
-            this.bssids = Arrays.asList(bssids);
+        public WifiMeasurement(List<String> bssids, Date timestamp) {
+            this.bssids = bssids;
             this.timestamp = timestamp;
         }
 
