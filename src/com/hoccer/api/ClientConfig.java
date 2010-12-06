@@ -28,17 +28,26 @@
  */
 package com.hoccer.api;
 
-import org.json.*;
+import java.util.UUID;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ClientConfig {
 
     private final static String mLinccerUri = "https://linker.beta.hoccer.com";
     // private static String mRemoteServer = "http://127.0.0.1:9292";
     private final String        mApplicationName;
-    private String              mClientUri;
+    private final UUID          mClientId;
 
     public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
+        mClientId = UUID.randomUUID();
+    }
+
+    public ClientConfig(String applicatioName, UUID clientId) {
+        mApplicationName = applicatioName;
+        mClientId = clientId;
     }
 
     public static String getLinccerBaseUri() {
@@ -49,12 +58,8 @@ public class ClientConfig {
         return mApplicationName;
     }
 
-    public void setClientUri(String uri) {
-        mClientUri = uri;
-    }
-
     public String getClientUri() {
-        return mClientUri;
+        return ClientConfig.getLinccerBaseUri() + "/clients/" + getClientId();
     }
 
     public JSONObject toJson() throws JSONException {
@@ -69,6 +74,10 @@ public class ClientConfig {
 
     public String getSharedSecret() {
         return "DNonxFIWCxS3kHgC9oVG+lUz/60=";
+    }
+
+    public UUID getClientId() {
+        return mClientId;
     }
 
 }

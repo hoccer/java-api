@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -36,12 +35,6 @@ public class Linccer extends CloudService {
 
     public Linccer(ClientConfig config) {
         super(config);
-
-        if (mConfig.getClientUri() == null) {
-            mConfig
-                    .setClientUri(ClientConfig.getLinccerBaseUri() + "/clients/"
-                            + UUID.randomUUID());
-        }
     }
 
     @Override

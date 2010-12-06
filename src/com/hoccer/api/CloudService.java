@@ -1,25 +1,34 @@
 package com.hoccer.api;
 
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
-import javax.crypto.*;
-import javax.crypto.spec.*;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.http.*;
-import org.apache.http.conn.*;
-import org.apache.http.conn.params.*;
-import org.apache.http.conn.scheme.*;
-import org.apache.http.conn.ssl.*;
-import org.apache.http.impl.client.*;
-import org.apache.http.impl.conn.tsccm.*;
-import org.apache.http.params.*;
-import org.apache.http.util.*;
-import org.json.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import com.hoccer.data.*;
+import com.hoccer.data.Base64;
 
 public class CloudService {
 
@@ -29,6 +38,10 @@ public class CloudService {
     public CloudService(ClientConfig config) {
         mConfig = config;
         setupHttpClient();
+    }
+
+    public ClientConfig getClientConfig() {
+        return mConfig;
     }
 
     protected void setupHttpClient() {
