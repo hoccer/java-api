@@ -28,11 +28,15 @@
  */
 package com.hoccer.api;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
-import org.json.*;
-import org.junit.*;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TestLinccerHandling {
@@ -64,8 +68,8 @@ public class TestLinccerHandling {
     @Test
     public void usingKnownLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
-        ClientConfig description = createNewDefaultDescription();
-        description.setClientUri(linccer.getUri());
+        ClientConfig description = new ClientConfig("java-api unit test", linccer.getClientConfig()
+                .getClientId());
         Linccer reusedLinccer = new Linccer(description);
 
         assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equalTo(linccer

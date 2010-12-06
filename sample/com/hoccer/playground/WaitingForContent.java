@@ -28,9 +28,10 @@
  */
 package com.hoccer.playground;
 
-import org.json.*;
+import org.json.JSONObject;
 
-import com.hoccer.api.*;
+import com.hoccer.api.ClientConfig;
+import com.hoccer.api.Linccer;
 
 public class WaitingForContent {
 
@@ -60,7 +61,7 @@ public class WaitingForContent {
         public void run() {
             try {
                 while (true) {
-                    mLinccer.onGpsChanged(52.5167780325, 13.409039925, 1000);
+                    mLinccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
                     Thread.sleep(10 * 1000);
                 }
             } catch (Exception e) {
