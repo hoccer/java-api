@@ -35,8 +35,8 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private final static String mLinccerUri = "https://linker.beta.hoccer.com";
-    // private static String mRemoteServer = "http://127.0.0.1:9292";
+    private final static String mLinccerUri   = "https://linker.beta.hoccer.com";
+    private final static String mFileCacheUri = "https://filecache.sandbox.hoccer.com";
     private final String        mApplicationName;
     private final UUID          mClientId;
 
@@ -78,6 +78,10 @@ public class ClientConfig {
 
     public UUID getClientId() {
         return mClientId;
+    }
+
+    public static String getFileCacheBaseUri() {
+        return mFileCacheUri;
     }
 
 }
