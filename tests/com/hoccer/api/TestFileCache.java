@@ -28,13 +28,16 @@
  */
 package com.hoccer.api;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
-import org.junit.*;
+import org.junit.Test;
 
-import com.hoccer.data.*;
+import com.hoccer.data.GenericStreamableContent;
+import com.hoccer.data.StreamableContent;
+import com.hoccer.data.StreamableString;
 
 public class TestFileCache {
 
@@ -42,8 +45,9 @@ public class TestFileCache {
     public void storeTextInFileCache() throws Exception {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
-        String locationUri = filecache.store(new StreamableString("hello world"), 1);
-        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
+        String locationUri = filecache.store(new StreamableString("hello world"), 3);
+        assertThat(locationUri, containsString("http://filecache"));
+        assertThat(locationUri, containsString(".hoccer.com"));
 
         StreamableContent data = new StreamableString();
         filecache.fetch(locationUri, data);
@@ -65,7 +69,7 @@ public class TestFileCache {
         content.openOutputStream().write(data);
 
         String locationUri = filecache.store(content, 2);
-        assertThat(locationUri, containsString("http://filecache.sandbox.hoccer.com/"));
-
+        assertThat(locationUri, containsString("http://filecache"));
+        assertThat(locationUri, containsString(".hoccer.com"));
     }
 }

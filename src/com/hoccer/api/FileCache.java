@@ -1,21 +1,24 @@
 package com.hoccer.api;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import org.apache.http.*;
-import org.apache.http.client.*;
-import org.apache.http.client.methods.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 
-import com.hoccer.data.*;
-import com.hoccer.http.*;
-import com.hoccer.thread.*;
+import com.hoccer.data.StreamableContent;
+import com.hoccer.http.MultipartHttpEntity;
+import com.hoccer.thread.StatusHandler;
 
 public class FileCache extends CloudService {
 
-    private long         downloadTime;
-    private boolean      isFetchStopped;
-    private int          progress;
-    private final String baseUri = "http://filecache.sandbox.hoccer.com";
+    private long    downloadTime;
+    private boolean isFetchStopped;
+    private int     progress;
 
     public FileCache(ClientConfig config) {
         super(config);
@@ -42,7 +45,8 @@ public class FileCache extends CloudService {
             }
         });
 
-        String url = baseUri + "/?expires_in=" + secondsUntilExipred;
+        getClientConfig();
+        String url = ClientConfig.getFileCacheBaseUri() + "/?expires_in=" + secondsUntilExipred;
         HttpPost request = new HttpPost(sign(url));
         request.setEntity(multipart);
         HttpResponse response = getHttpClient().execute(request);
@@ -59,8 +63,8 @@ public class FileCache extends CloudService {
 
         int statuscode = response.getStatusLine().getStatusCode();
         if (statuscode != 200) {
-            throw new HttpResponseException(statuscode, "Unexpected status code while requesting"
-                    + locationUri);
+            throw new HttpResponseException(statuscode, "Unexpected status code " + statuscode
+                    + " while requesting " + locationUri);
         }
 
         InputStream is = response.getEntity().getContent();
