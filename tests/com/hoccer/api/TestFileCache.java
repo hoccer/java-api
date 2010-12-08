@@ -45,7 +45,7 @@ public class TestFileCache {
     public void storeTextInFileCache() throws Exception {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
-        String locationUri = filecache.store(new StreamableString("hello world"), 3);
+        String locationUri = filecache.store(new StreamableString("hello world"), 10);
         assertThat(locationUri, containsString("http://filecache"));
         assertThat(locationUri, containsString(".hoccer.com"));
 

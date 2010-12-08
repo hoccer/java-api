@@ -1,13 +1,15 @@
 package com.hoccer.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.apache.http.*;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.*;
-import org.apache.http.impl.client.*;
-import org.apache.http.util.*;
-import org.junit.*;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.junit.Test;
 
 public class TestRESTfulApi {
 
@@ -30,7 +32,7 @@ public class TestRESTfulApi {
         HttpPut envUpdate = new HttpPut(ClientConfig.getLinccerBaseUri()
                 + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/environment");
         envUpdate.setEntity(new StringEntity(
-                "{gps: {\"longitude\": 13, \"latitude\": 50, \"accuracy\": 100} }"));
+                "{\"gps\": {\"longitude\": 13, \"latitude\": 50, \"accuracy\": 100} }"));
         HttpResponse response = mHttpClient.execute(envUpdate);
         assertEquals("should have updated the environment but server said "
                 + EntityUtils.toString(response.getEntity()), 201, response.getStatusLine()
