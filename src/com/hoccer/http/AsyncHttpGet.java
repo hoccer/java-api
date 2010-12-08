@@ -1,4 +1,4 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;

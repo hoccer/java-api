@@ -1,8 +1,25 @@
 package com.hoccer.http;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URLEncoder;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 server in Java
@@ -166,7 +183,6 @@ public class NanoHTTPD {
                         myHttpSession = new HTTPSession(myServerSocket.accept());
                     }
                 } catch (IOException e) {
-                    Logger.e(LOG_TAG, e);
                 }
             }
 
@@ -185,7 +201,6 @@ public class NanoHTTPD {
                 try {
                     myServerSocket.close();
                 } catch (IOException e) {
-                    Logger.e(LOG_TAG, e);
                 }
             }
 
@@ -193,7 +208,6 @@ public class NanoHTTPD {
                 myHttpSession.abort();
             }
 
-            Logger.v(LOG_TAG, "waiting for unbund");
             Thread.sleep(500);
         }
     }
@@ -283,7 +297,6 @@ public class NanoHTTPD {
             mThread = new Thread(this);
             mThread.setDaemon(true);
             mThread.start();
-            Logger.v(LOG_TAG, "session thread is done");
         }
 
         public void abort() throws InterruptedException {
@@ -335,7 +348,6 @@ public class NanoHTTPD {
                     sendResponse(r.status, r.mimeType, r.header, r.data);
 
                 in.close();
-                Logger.v(LOG_TAG, "sended response");
             } catch (IOException ioe) {
                 try {
                     sendError(HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: IOException: "
@@ -343,7 +355,6 @@ public class NanoHTTPD {
                 } catch (Throwable t) {
                 }
             } catch (InterruptedException ie) {
-                Logger.e(LOG_TAG, ie);
                 // Thrown by sendError, ignore and exit the thread.
             }
         }
@@ -395,7 +406,6 @@ public class NanoHTTPD {
         private long getContentSize(Properties header) {
             long size = 0x7FFFFFFFFFFFFFFFl;
             String contentLength = header.getProperty("content-length");
-            Logger.v(LOG_TAG, "content length: ", contentLength);
             if (contentLength != null) {
                 try {
                     size = Integer.parseInt(contentLength);
@@ -531,7 +541,7 @@ public class NanoHTTPD {
             String tok = st.nextToken();
             if (tok.equals("/"))
                 newUri += "/";
-            else if (tok.equals(" "))
+            else if (tok.equals(" ")) {
                 newUri += "%20";
             } else {
                 try {
@@ -653,6 +663,7 @@ public class NanoHTTPD {
             }
             if (mime == null) {
                 mime = MIME_DEFAULT_BINARY;
+            }
 
             // Support (simple) skipping:
             long startFrom = 0;

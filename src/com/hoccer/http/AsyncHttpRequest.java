@@ -1,4 +1,4 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,10 +18,9 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
-import com.artcom.y60.Logger;
-import com.artcom.y60.data.GenericStreamableContent;
-import com.artcom.y60.data.StreamableContent;
-import com.artcom.y60.thread.ThreadedTask;
+import com.hoccer.data.GenericStreamableContent;
+import com.hoccer.data.StreamableContent;
+import com.hoccer.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
 
@@ -120,9 +119,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
     @Override
     public void interrupt() {
-        Logger.v(LOG_TAG, "interrupt called");
         if (!mRequest.isAborted()) {
-            Logger.v(LOG_TAG, "request not aborted yet -  ABORTING");
             mRequest.abort();
         }
         super.interrupt();
@@ -134,7 +131,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         setProgress(1);
 
         try {
-            Logger.v(LOG_TAG, this.getClass(), " before executing request");
             long uploadStart = System.currentTimeMillis();
             mResponse = mHttpClient.execute(mRequest);
             mUploadTime = System.currentTimeMillis() - uploadStart;
@@ -148,7 +144,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onClientError(e);
             return;
         } catch (IOException e) {
-            Logger.v(LOG_TAG, this.getClass(), " io exception");
             onIoError(e);
             return;
         }
@@ -171,7 +166,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             long downloadStart = System.currentTimeMillis();
             while ((len = is.read(buffer)) != -1) {
                 if (isInterrupted()) {
-                    Logger.v(LOG_TAG, "INTERRUPT");
                     onClientError(new InterruptedException("download is interruped"));
                     return;
                 }
@@ -229,8 +223,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     protected void onPostExecute() {
 
         if (mResponse == null) {
-            Logger.e(LOG_TAG, new NullPointerException("response of request " + mRequest.getURI()
-                    + " was null"));
             return;
         }
 
@@ -250,14 +242,12 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     protected void onIoError(IOException e) {
-        Logger.e(LOG_TAG, e);
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(e);
         }
     }
 
     protected void onClientError(Exception e) {
-        Logger.e(LOG_TAG, e);
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(e);
         }
@@ -288,15 +278,12 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     protected void onClientError(int pStatusCode) {
-        Logger.e(LOG_TAG, "Error response code was ", pStatusCode);
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(pStatusCode, mResponseContent);
         }
     }
 
     protected void onServerError(int pStatusCode) {
-        Logger.e(LOG_TAG, "Error response code was ", pStatusCode, " body: ", mResponseContent
-                .toString());
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(pStatusCode, mResponseContent);
         }
