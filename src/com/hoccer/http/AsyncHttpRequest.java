@@ -100,7 +100,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     /**
-     * @return true: server reponded with 2xx, payload not neccessarily downloaded
+     * @return true: server responded with 2xx, payload not neccessarily downloaded
      */
     public boolean wasSuccessful() {
         int status = getStatusCode();
