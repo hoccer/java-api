@@ -28,11 +28,14 @@
  */
 package com.hoccer.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.util.*;
+import java.util.Random;
 
-import org.json.*;
+import org.json.JSONObject;
 import org.junit.Test;
 
 public class TestLinccing extends LinccerTestsBase {
@@ -44,12 +47,10 @@ public class TestLinccing extends LinccerTestsBase {
 
         placeNearBy(linccerA, linccerB);
 
-        long time = System.currentTimeMillis();
         ThreadedShare threadedShare = new ThreadedShare(linccerA, "1:1");
         threadedShare.start();
 
         JSONObject receivedPayload = linccerB.receive("1:1");
-        System.out.println(System.currentTimeMillis() - time);
 
         assertNotNull("should have received something", receivedPayload);
         assertTrue("should have received a message", receivedPayload.has("message"));
@@ -132,9 +133,7 @@ public class TestLinccing extends LinccerTestsBase {
 
         boolean hadCollision = false;
         try {
-            System.out.println("before");
             linccerC.receive("1:1");
-            System.out.println("after");
             assertFalse("should have got an exception", true);
         } catch (CollidingActionsException e) {
             hadCollision = true;
