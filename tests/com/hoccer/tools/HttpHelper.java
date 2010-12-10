@@ -391,6 +391,7 @@ public class HttpHelper {
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, pConnectionTimeout);
         HttpConnectionParams.setSoTimeout(httpParams, pConnectionTimeout);
+        HttpClientParams.setRedirecting(httpParams, true);
 
         DefaultHttpClient httpclient = new DefaultHttpClient(httpParams);
 

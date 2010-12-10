@@ -106,6 +106,8 @@ public class TestAsyncHttpPost extends HttpTestCase {
 
     public void testGettingNoifiedAbooutSuccessViaResponseHandler() throws Exception {
 
+        getServer().setResponseDelay(200);
+
         mRequest = new AsyncHttpPost(getServer().getUri());
         ResponseHandlerForTesting requestStatus = new ResponseHandlerForTesting();
         mRequest.registerResponseHandler(requestStatus);

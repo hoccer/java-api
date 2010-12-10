@@ -103,8 +103,6 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 .contains(MultipartHttpEntity.BORDER));
         assertTrue("putted data should contain content-type informations", mulitpartString
                 .contains("Content-Type: text/plain"));
-        assertTrue("putted data should contain transfer encoding", mulitpartString
-                .contains("Content-Transfer-Encoding: binary"));
 
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
@@ -134,8 +132,6 @@ public class TestAsyncHttpPut extends HttpTestCase {
                 .contains(MultipartHttpEntity.BORDER));
         assertTrue("putted data should contain content-type informations", mulitpartString
                 .contains("Content-Type: text/xml"));
-        assertTrue("putted data should contain transfer encoding", mulitpartString
-                .contains("Content-Transfer-Encoding: binary"));
 
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
