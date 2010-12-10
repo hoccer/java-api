@@ -1,4 +1,4 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,14 +8,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
-import android.test.suitebuilder.annotation.Suppress;
-
-import com.artcom.y60.TestHelper;
+import com.hoccer.tools.TestHelper;
 
 public class TestAsyncHttpPost extends HttpTestCase {
 
     @SuppressWarnings("unused")
-	private static final String LOG_TAG = "TestAsyncHttpPost";
+    private static final String LOG_TAG = "TestAsyncHttpPost";
     AsyncHttpPost               mRequest;
 
     public void testExecution() throws Exception {

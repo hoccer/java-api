@@ -1,11 +1,11 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.net.SocketException;
 
-import com.artcom.y60.TestHelper;
+import com.hoccer.tools.TestHelper;
 
 public class TestMockedHttpServer extends HttpTestCase {
-    
+
     public void testStartingAndStoppingTheServer() throws Exception {
         NanoHTTPD server = new NanoHTTPD(6066);
         assertEquals("NanoHTTP should respond", 200, HttpHelper
@@ -19,14 +19,14 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("NanoHTTP should not respond", wasRefused);
     }
-    
+
     public void testHttpGet() throws Exception {
         assertEquals("our mock server should respond to GET",
                 "I'm a mock server for test purposes", HttpHelper.getAsString(getServer().getUri()));
     }
-    
+
     public void test404HttpGet() throws Exception {
-        
+
         boolean gotTheError = false;
         try {
             HttpHelper.getAsString(getServer().getUri() + "/not-existing");
@@ -35,44 +35,44 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("our mock server should respond with 404 'not found'", gotTheError);
     }
-    
+
     public void testDelayedHttpGet() throws Exception {
-        
+
         getServer().setResponseDelay(1000);
         long time = System.currentTimeMillis();
         HttpHelper.getAsString(getServer().getUri());
-        
+
         TestHelper.assertGreater("our mock server should respond to GET", 1000, System
                 .currentTimeMillis()
                 - time);
     }
-    
+
     public void testHttpPostWithParametersInBody() throws Exception {
         assertEquals("our mock server should respond to POST", "hello mock server", HttpHelper
                 .post(getServer().getUri(), "message=hello mock server",
                         "application/x-www-form-urlencoded", "text/plain"));
     }
-    
+
     public void testHttpPostWithParametersInUrl() throws Exception {
         assertEquals("our mock server should respond to POST", "hello", HttpHelper.post(getServer()
                 .getUri()
                 + "/?message=hello", "", "application/x-www-form-urlencoded", "text/plain"));
     }
-    
+
     public void testHttpPostWithStringDataInBody() throws Exception {
         assertEquals("mock server should store text which was posted in request body",
                 "this is plain string data, as said by the content-type header", HttpHelper.post(
                         getServer().getUri(),
                         "this is plain string data, as said by the content-type header",
                         "text/plain", "text/plain"));
-        
+
     }
-    
+
     public void testEmptyHttpPost() throws Exception {
         assertEquals("our mock server should respond to an empty POST", "no data posted",
                 HttpHelper.post(getServer().getUri(), "", "text/plain", "text/plain"));
     }
-    
+
     public void test404HttpPost() throws Exception {
         boolean gotTheError = false;
         try {
@@ -83,7 +83,7 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("our mock server should respond with 404 'not found'", gotTheError);
     }
-    
+
     public void testHttpPut() throws Exception {
         String uri = getServer().getUri() + "/test-resource";
         HttpHelper.putAsString(uri, "I've been putted");
@@ -93,7 +93,7 @@ public class TestMockedHttpServer extends HttpTestCase {
                 "our mock server should store and serve the putted text at the provided location",
                 "I've been putted", HttpHelper.getAsString(uri));
     }
-    
+
     public void testHttpPutToRoot() throws Exception {
         boolean hadExpectedException = false;
         try {
@@ -104,9 +104,9 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("our mock server should deny creating a resource at /", hadExpectedException);
     }
-    
+
     public void testPuttingUnknownMimeTypedData() throws Exception {
-        
+
         boolean hadExpectedException = false;
         String uri = getServer().getUri() + "/test-resource";
         try {
@@ -117,9 +117,9 @@ public class TestMockedHttpServer extends HttpTestCase {
         }
         assertTrue("our mock server should not be able to create resource", hadExpectedException);
     }
-    
+
     public void testPuttingXmlMimeTypedData() throws Exception {
-        
+
         String uri = getServer().getUri() + "/test-resource";
         HttpHelper.putAsString(uri, "I've been putted", "text/xml");
         assertEquals("our mock server should receive the PUT request", "PUT", getServer()
@@ -128,7 +128,7 @@ public class TestMockedHttpServer extends HttpTestCase {
                 "our mock server should store and serve the putted xml data at the provided location",
                 "I've been putted", HttpHelper.getAsString(uri));
     }
-    
+
     public void testEmptyPost() throws Exception {
         String response = HttpHelper.post(getServer().getUri(), "", "text/plain", "text/plain");
         assertEquals("server should tell about empty post", "no data posted", response);

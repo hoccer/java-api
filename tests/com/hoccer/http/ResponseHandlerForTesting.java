@@ -1,9 +1,8 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.util.HashMap;
 
-import com.artcom.y60.Logger;
-import com.artcom.y60.data.StreamableContent;
+import com.hoccer.data.StreamableContent;
 
 public class ResponseHandlerForTesting implements HttpResponseHandler {
 
@@ -20,7 +19,6 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     @Override
     public void onHeaderAvailable(HashMap<String, String> headers) {
-        Logger.v(LOG_TAG, "onHeaderAvailable called");
         reset();
         areHeadersAvailable = true;
         hasOnHeadersAvailableBeenCalled = true;
@@ -28,7 +26,6 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     @Override
     public void onError(int statusCode, StreamableContent body) {
-        Logger.v(LOG_TAG, "onError called");
         reset();
         hasError = true;
         this.body = body;
@@ -36,13 +33,16 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     @Override
     public void onReceiving(double pProgress) {
-        Logger.v(LOG_TAG, "onReceiving called");
         progress = pProgress;
     }
 
     @Override
+    public void onSending(double progress) {
+        progress = progress;
+    }
+
+    @Override
     public void onSuccess(int statusCode, StreamableContent body) {
-        Logger.v(LOG_TAG, "onSuccess called");
         reset();
         wasSuccessful = true;
         this.body = body;

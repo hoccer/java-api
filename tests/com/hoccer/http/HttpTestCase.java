@@ -1,10 +1,10 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
-import android.test.InstrumentationTestCase;
+import junit.framework.TestCase;
 
-import com.artcom.y60.TestHelper;
+import com.hoccer.tools.TestHelper;
 
-public class HttpTestCase extends InstrumentationTestCase {
+public class HttpTestCase extends TestCase {
 
     private MockHttpServer mServer;
 

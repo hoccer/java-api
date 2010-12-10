@@ -1,14 +1,14 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
-import com.artcom.y60.TestHelper;
-import com.artcom.y60.data.GenericStreamableContent;
-import com.artcom.y60.data.StreamableContent;
-import com.artcom.y60.data.StreamableString;
+import com.hoccer.data.GenericStreamableContent;
+import com.hoccer.data.StreamableContent;
+import com.hoccer.data.StreamableString;
+import com.hoccer.tools.TestHelper;
 
 public class TestAsyncHttpPut extends HttpTestCase {
 
     @SuppressWarnings("unused")
-	private static final String LOG_TAG = "TestAsyncHttpPut";
+    private static final String LOG_TAG = "TestAsyncHttpPut";
     private AsyncHttpPut        mRequest;
 
     public void testExecution() throws Exception {

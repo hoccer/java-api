@@ -1,4 +1,4 @@
-package com.artcom.y60.http;
+package com.hoccer.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
