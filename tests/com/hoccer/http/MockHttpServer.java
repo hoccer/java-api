@@ -124,7 +124,9 @@ public class MockHttpServer extends NanoHTTPD {
         }
 
         mSubResources.put(request.uri, request.body);
-        return new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, request.body);
+        NanoHTTPD.Response response = new NanoHTTPD.Response(HTTP_OK, MIME_PLAINTEXT, request.body);
+        response.addHeader("Content-length", "" + request.body.getBytes().length);
+        return response;
     }
 
     /**

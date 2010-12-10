@@ -147,7 +147,6 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onIoError(e);
             return;
         }
-        setDownloadProgress(2);
 
         if (mResponse == null) {
             onClientError(new NullPointerException("expected http response object is null"));
@@ -173,6 +172,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
             }
+            setDownloadProgress(100);
             mDownloadTime = System.currentTimeMillis() - downloadStart;
         } catch (IOException e) {
             onIoError(e);
@@ -292,14 +292,15 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     protected void setDownloadProgress(int pProgress) {
         super.setProgress(pProgress);
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onReceiving(getProgress());
+            mResponseHandlerCallback.onReceiving(pProgress);
         }
     }
 
     protected void setUploadProgress(int pProgress) {
         super.setProgress(pProgress);
+
         if (mResponseHandlerCallback != null) {
-            mResponseHandlerCallback.onSending(getProgress());
+            mResponseHandlerCallback.onSending(pProgress);
         }
     }
 

@@ -1,9 +1,13 @@
 package com.hoccer.http;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.data.StreamableString;
 import com.hoccer.tools.HttpHelper;
+import com.hoccer.tools.ProgressResponseHandler;
 import com.hoccer.tools.TestHelper;
 
 public class TestAsyncHttpPut extends HttpTestCase {
@@ -144,5 +148,51 @@ public class TestAsyncHttpPut extends HttpTestCase {
         assertTrue("should find the multipart end in " + pMultipartString, posOfMultipartEnd != -1);
         assertEquals("the putted data should be placed inside the multipart data!", dataString,
                 pMultipartString.substring(posOfEmptyLine + 4, posOfMultipartEnd));
+    }
+
+    public void testUpAndDownloadingProgress() throws Exception {
+        String uri = getServer().getUri() + "/data";
+        mRequest = new AsyncHttpPut(uri);
+
+        GenericStreamableContent data = new GenericStreamableContent();
+        data.setContentType("text/xml");
+
+        Random rand = new Random(System.currentTimeMillis());
+        byte[] content = new byte[10000];
+
+        data.openOutputStream().write(content, 0, content.length);
+
+        mRequest.setBody(data);
+
+        final ArrayList<Double> sendingProgressHistroy = new ArrayList<Double>();
+        final ArrayList<Double> receivingProgressHistroy = new ArrayList<Double>();
+        mRequest.registerResponseHandler(new ProgressResponseHandler() {
+
+            @Override
+            public void onSending(double progress) {
+                // System.out.println(progress);
+                sendingProgressHistroy.add(progress);
+            }
+
+            @Override
+            public void onReceiving(double progress) {
+                // System.out.println(progress);
+                receivingProgressHistroy.add(progress);
+            }
+
+        });
+
+        mRequest.start();
+        blockUntilRequestIsDone(mRequest);
+
+        double[] expectedUploadSequence = { 1, 20, 40, 61, 81, 100 };
+        double[] expectedDownloadSequence = { 0, 81, 100 };
+
+        assertEquals(expectedUploadSequence.length, sendingProgressHistroy.size());
+        assertEquals(expectedDownloadSequence.length, receivingProgressHistroy.size());
+
+        for (int i = 0; i < expectedUploadSequence.length; i++) {
+            assertEquals("", expectedUploadSequence[i], sendingProgressHistroy.get(i));
+        }
     }
 }

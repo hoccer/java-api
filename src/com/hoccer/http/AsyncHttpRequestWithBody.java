@@ -12,6 +12,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import com.hoccer.data.MonitoredInputStream;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.thread.StatusHandler;
 
@@ -33,8 +34,19 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
 
     public void setBody(StreamableContent pStreamableData) throws IOException {
 
-        InputStreamEntity entity = new InputStreamEntity(pStreamableData.openInputStream(),
-                pStreamableData.getStreamLength());
+        final long streamLength = pStreamableData.getStreamLength();
+
+        InputStreamEntity entity = new InputStreamEntity(new MonitoredInputStream(pStreamableData
+                .openInputStream()) {
+
+            @Override
+            public void onBytesRead(long totalNumBytesRead) {
+
+                double progress = (totalNumBytesRead / (double) streamLength) * 100;
+                setUploadProgress((int) progress);
+            }
+
+        }, pStreamableData.getStreamLength());
 
         entity.setContentType(pStreamableData.getContentType());
         getRequest().setEntity(entity);
@@ -50,13 +62,12 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
 
             @Override
             public void onSuccess() {
-                // if multipart is uploaded, the whole request is almost finished
-                setUploadProgress(95);
+                setUploadProgress(100);
             }
 
             @Override
             public void onProgress(int progress) {
-                setUploadProgress(Math.max(0, progress - 5));
+                setUploadProgress(Math.min(Math.max(0, progress), 100));
             }
 
             @Override
