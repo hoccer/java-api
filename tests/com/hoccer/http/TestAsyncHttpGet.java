@@ -6,8 +6,8 @@ import java.io.InputStream;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 
-import com.artcom.y60.Logger;
-import com.artcom.y60.TestHelper;
+import com.hoccer.tools.HttpHelper;
+import com.hoccer.tools.TestHelper;
 
 public class TestAsyncHttpGet extends HttpTestCase {
 
@@ -63,9 +63,6 @@ public class TestAsyncHttpGet extends HttpTestCase {
 
         long time = mRequest.getDownloadTime();
         long size = mRequest.getBodyAsStreamableContent().getStreamLength();
-        Logger.v(LOG_TAG, "time: ", time, "ms and size: ", size, " bytes ==> ", (size / 1000.0)
-                / (time / 1000.0), "kb/s");
-
     }
 
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {

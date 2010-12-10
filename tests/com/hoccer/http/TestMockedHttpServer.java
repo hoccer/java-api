@@ -2,6 +2,9 @@ package com.hoccer.http;
 
 import java.net.SocketException;
 
+import com.hoccer.tools.HttpClientException;
+import com.hoccer.tools.HttpHelper;
+import com.hoccer.tools.HttpServerException;
 import com.hoccer.tools.TestHelper;
 
 public class TestMockedHttpServer extends HttpTestCase {

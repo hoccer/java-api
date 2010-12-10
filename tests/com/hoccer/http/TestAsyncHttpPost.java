@@ -146,7 +146,6 @@ public class TestAsyncHttpPost extends HttpTestCase {
                 requestStatus.body.toString());
     }
 
-    @Suppress
     public void testCustomHttpClientToSupressRedirectionAfterPost() throws Exception {
         HttpParams httpParams = new BasicHttpParams();
         HttpClientParams.setRedirecting(httpParams, false);

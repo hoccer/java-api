@@ -3,6 +3,7 @@ package com.hoccer.http;
 import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.data.StreamableString;
+import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
 public class TestAsyncHttpPut extends HttpTestCase {
