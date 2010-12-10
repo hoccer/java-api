@@ -45,7 +45,6 @@ public class FileCache extends CloudService {
             }
         });
 
-        getClientConfig();
         String url = ClientConfig.getFileCacheBaseUri() + "/?expires_in=" + secondsUntilExipred;
         HttpPost request = new HttpPost(sign(url));
         request.setEntity(multipart);
