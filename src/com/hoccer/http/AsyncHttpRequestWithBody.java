@@ -51,12 +51,12 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
             @Override
             public void onSuccess() {
                 // if multipart is uploaded, the whole request is almost finished
-                setProgress(95);
+                setUploadProgress(95);
             }
 
             @Override
             public void onProgress(int progress) {
-                setProgress(Math.max(0, progress - 5));
+                setUploadProgress(Math.max(0, progress - 5));
             }
 
             @Override

@@ -14,5 +14,7 @@ public interface HttpResponseHandler {
 
     public void onReceiving(double progress);
 
+    public void onSending(double progress);
+
     public void onError(Exception e);
 }

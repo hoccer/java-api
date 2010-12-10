@@ -100,7 +100,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     }
 
     /**
-     * @return true: server reponded with 2xx, payload not neccessarily downloaded
+     * @return true: server responded with 2xx, payload not neccessarily downloaded
      */
     public boolean wasSuccessful() {
         int status = getStatusCode();
@@ -128,7 +128,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     @Override
     public void doInBackground() {
 
-        setProgress(1);
+        setUploadProgress(1);
 
         try {
             long uploadStart = System.currentTimeMillis();
@@ -147,7 +147,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
             onIoError(e);
             return;
         }
-        setProgress(2);
+        setDownloadProgress(2);
 
         if (mResponse == null) {
             onClientError(new NullPointerException("expected http response object is null"));
@@ -169,7 +169,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                     onClientError(new InterruptedException("download is interruped"));
                     return;
                 }
-                setProgress((int) ((downloaded / (double) size) * 100));
+                setDownloadProgress((int) ((downloaded / (double) size) * 100));
                 storageStream.write(buffer, 0, len);
                 downloaded += len;
             }
@@ -289,11 +289,17 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         }
     }
 
-    @Override
-    protected void setProgress(int pProgress) {
+    protected void setDownloadProgress(int pProgress) {
         super.setProgress(pProgress);
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onReceiving(getProgress());
+        }
+    }
+
+    protected void setUploadProgress(int pProgress) {
+        super.setProgress(pProgress);
+        if (mResponseHandlerCallback != null) {
+            mResponseHandlerCallback.onSending(getProgress());
         }
     }
 
