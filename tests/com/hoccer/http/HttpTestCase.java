@@ -57,4 +57,8 @@ public class HttpTestCase extends TestCase {
             }
         });
     }
+
+    public void testDummy() {
+
+    }
 }

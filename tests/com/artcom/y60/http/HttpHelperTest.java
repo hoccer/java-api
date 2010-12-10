@@ -1,7 +1,6 @@
 package com.artcom.y60.http;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -13,7 +12,6 @@ import org.apache.http.HttpResponse;
 import com.hoccer.http.HttpTestCase;
 import com.hoccer.tools.HttpClientException;
 import com.hoccer.tools.HttpHelper;
-import com.sun.jndi.toolkit.url.Uri;
 
 public class HttpHelperTest extends HttpTestCase {
 
@@ -82,20 +80,14 @@ public class HttpHelperTest extends HttpTestCase {
     }
 
     private void assertParsable(String uri) {
-        try {
-            assertEquals((new Uri(uri)).toString(), URI.create(uri).toString());
-        } catch (MalformedURLException e) {
-            throw new AssertionError(uri + " is not parsable");
-        }
+        assertEquals(uri, URI.create(uri).toString());
     }
 
     private void assertNotParsable(String uri) {
         boolean parsable = true;
         try {
-            assertEquals((new Uri(uri)).toString(), URI.create(uri).toString());
+            assertEquals(uri, URI.create(uri).toString());
         } catch (IllegalArgumentException e) {
-            parsable = false;
-        } catch (MalformedURLException e) {
             parsable = false;
         }
         assertFalse(uri + "should not be parsable", parsable);
