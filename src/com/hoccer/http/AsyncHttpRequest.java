@@ -57,7 +57,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         // overwrite user-agent if it's not already customized
         Object userAgent = mHttpClient.getParams().getParameter("http.useragent");
         if (userAgent == null || userAgent.toString().contains("Apache-HttpClient")) {
-            mHttpClient.getParams().setParameter("http.useragent", "Y60/1.0 Android");
+            mHttpClient.getParams().setParameter("http.useragent", "Hoccer Java API");
         }
 
         // remember redirects
