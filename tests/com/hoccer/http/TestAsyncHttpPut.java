@@ -10,7 +10,7 @@ import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.ProgressResponseHandler;
 import com.hoccer.tools.TestHelper;
 
-public class TestAsyncHttpPut extends HttpTestCase {
+public class TestAsyncHttpPut extends AsyncHttpTestCase {
 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = "TestAsyncHttpPut";

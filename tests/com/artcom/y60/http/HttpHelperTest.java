@@ -9,11 +9,11 @@ import java.util.Map;
 
 import org.apache.http.HttpResponse;
 
-import com.hoccer.http.HttpTestCase;
+import com.hoccer.http.AsyncHttpTestCase;
 import com.hoccer.tools.HttpClientException;
 import com.hoccer.tools.HttpHelper;
 
-public class HttpHelperTest extends HttpTestCase {
+public class HttpHelperTest extends AsyncHttpTestCase {
 
     private static final String LOG_TAG = "HttpHelperTest";
 

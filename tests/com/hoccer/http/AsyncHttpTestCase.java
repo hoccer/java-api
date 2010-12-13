@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 import com.hoccer.tools.TestHelper;
 
-public class HttpTestCase extends TestCase {
+public class AsyncHttpTestCase extends TestCase {
 
     private MockHttpServer mServer;
 
