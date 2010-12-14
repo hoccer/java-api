@@ -33,11 +33,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
+import java.util.UUID;
+
 import org.junit.Test;
 
 import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.data.StreamableString;
+import com.hoccer.http.AsyncHttpPut;
+import com.hoccer.http.AsyncHttpRequest;
+import com.hoccer.tools.TestHelper;
 
 public class TestFileCache {
 
@@ -74,7 +79,30 @@ public class TestFileCache {
     }
 
     @Test
-    public void asyncStoringOfText() {
+    public void asyncStoringOfText() throws Exception {
 
+        String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID()
+                + "?expires_in=10000";
+
+        AsyncHttpPut storeRequest = new AsyncHttpPut(uri);
+        storeRequest.setBody(new StreamableString("hello world"));
+        storeRequest.start();
+
+        blockUntilRequestIsDone(storeRequest);
+
+        assertThat(storeRequest.getStatusCode(), is(equalTo(200)));
+        assertThat(storeRequest.getBodyAsString(), containsString("http://filecache"));
+        assertThat(storeRequest.getBodyAsString(), containsString(".hoccer.com"));
+    }
+
+    protected void blockUntilRequestIsDone(final AsyncHttpRequest pRequest) throws Exception {
+        TestHelper.blockUntilTrue("request should have been performed by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return pRequest.isTaskCompleted();
+                    }
+                });
     }
 }

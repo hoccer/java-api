@@ -8,14 +8,14 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     private static final String LOG_TAG                         = "ResponseHandlerForTesting";
 
-    boolean                     areHeadersAvailable             = false;
-    boolean                     hasOnHeadersAvailableBeenCalled = false;
-    boolean                     hasError                        = false;
-    boolean                     isReceiving                     = false;
-    boolean                     wasSuccessful                   = false;
+    public boolean              areHeadersAvailable             = false;
+    public boolean              hasOnHeadersAvailableBeenCalled = false;
+    public boolean              hasError                        = false;
+    public boolean              isReceiving                     = false;
+    public boolean              wasSuccessful                   = false;
 
-    double                      progress                        = -1;
-    StreamableContent           body                            = null;
+    public double               progress                        = -1;
+    public StreamableContent    body                            = null;
 
     @Override
     public void onHeaderAvailable(HashMap<String, String> headers) {

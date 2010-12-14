@@ -48,6 +48,8 @@ public abstract class AsyncHttpRequestWithBody extends AsyncHttpRequest {
 
         }, pStreamableData.getStreamLength());
 
+        getRequest().addHeader("Content-Disposition",
+                " attachment; filename=\"" + pStreamableData.getFilename() + "\"");
         entity.setContentType(pStreamableData.getContentType());
         getRequest().setEntity(entity);
         getRequest().addHeader("Content-Type", pStreamableData.getContentType());
