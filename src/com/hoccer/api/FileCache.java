@@ -13,16 +13,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 
 import com.hoccer.data.StreamableContent;
+import com.hoccer.http.AsyncHttpGet;
 import com.hoccer.http.AsyncHttpPut;
 import com.hoccer.http.AsyncHttpRequest;
 import com.hoccer.http.HttpResponseHandler;
 import com.hoccer.http.MultipartHttpEntity;
 
 public class FileCache extends CloudService {
-
-    private long                                    downloadTime;
-    private boolean                                 isFetchStopped;
-    private int                                     progress;
 
     private final HashMap<String, AsyncHttpRequest> mOngoingRequests = new HashMap<String, AsyncHttpRequest>();
 
@@ -63,9 +60,6 @@ public class FileCache extends CloudService {
         byte[] buffer = new byte[0xFFFF];
         int len;
         while ((len = is.read(buffer)) != -1) {
-            if (isFetchStopped) {
-                return;
-            }
             storageStream.write(buffer, 0, len);
         }
     }
@@ -79,8 +73,17 @@ public class FileCache extends CloudService {
         storeRequest.registerResponseHandler(responseHandler);
         storeRequest.setBody(data);
         storeRequest.start();
+        mOngoingRequests.put(uri, storeRequest);
 
         return uri;
+    }
+
+    public void asyncFetch(String uri, StreamableContent sink, HttpResponseHandler responseHandler) {
+        AsyncHttpGet fetchRequest = new AsyncHttpGet(uri);
+        fetchRequest.registerResponseHandler(responseHandler);
+        fetchRequest.setStreamableContent(sink);
+        fetchRequest.start();
+        mOngoingRequests.put(uri, fetchRequest);
     }
 
     public void cancel(String uri) {

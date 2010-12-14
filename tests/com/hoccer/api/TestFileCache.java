@@ -126,6 +126,31 @@ public class TestFileCache {
 
         assertThat(handler.body.toString(), containsString("http://filecache"));
         assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
+    }
+
+    @Test
+    public void asyncFetchingOfTextViaFileCache() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        String uri = filecache.store(new StreamableString("hello file cache"), 10);
+
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+        GenericStreamableContent sink = new GenericStreamableContent();
+        filecache.asyncFetch(uri, sink, handler);
+
+        TestHelper.blockUntilTrue("request should have been successful by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return handler.wasSuccessful;
+                    }
+                });
+
+        Thread.sleep(3000);
+
+        assertThat(uri, is(equalTo("hello world 12 11")));
+        assertThat(handler.body.getFilename(), is(equalTo("hello world 12 11")));
 
     }
 }
