@@ -42,6 +42,8 @@ import com.hoccer.data.StreamableContent;
 import com.hoccer.data.StreamableString;
 import com.hoccer.http.AsyncHttpPut;
 import com.hoccer.http.AsyncHttpRequest;
+import com.hoccer.http.ResponseHandlerForTesting;
+import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
 public class TestFileCache {
@@ -79,7 +81,7 @@ public class TestFileCache {
     }
 
     @Test
-    public void asyncStoringOfText() throws Exception {
+    public void plainAsyncStoringOfText() throws Exception {
 
         String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID()
                 + "?expires_in=10000";
@@ -104,5 +106,26 @@ public class TestFileCache {
                         return pRequest.isTaskCompleted();
                     }
                 });
+    }
+
+    @Test
+    public void asyncStoringOfTextViaFileCache() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+        String uri = filecache.asyncStore(new StreamableString("hello world 12 11"), 10, handler);
+
+        TestHelper.blockUntilTrue("request should have been successful by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return handler.wasSuccessful;
+                    }
+                });
+
+        assertThat(handler.body.toString(), containsString("http://filecache"));
+        assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
+
     }
 }

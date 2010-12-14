@@ -106,6 +106,7 @@ public class FileCache extends CloudService {
         String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID();
 
         AsyncHttpPut storeRequest = new AsyncHttpPut(uri + "?expires_in=" + secondsUntilExipred);
+        storeRequest.registerResponseHandler(responseHandler);
         storeRequest.setBody(data);
         storeRequest.start();
 
