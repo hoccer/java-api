@@ -10,7 +10,7 @@ import org.apache.http.params.HttpParams;
 
 import com.hoccer.tools.TestHelper;
 
-public class TestAsyncHttpPost extends HttpTestCase {
+public class TestAsyncHttpPost extends AsyncHttpTestCase {
 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = "TestAsyncHttpPost";

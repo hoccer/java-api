@@ -9,7 +9,7 @@ import org.apache.http.params.BasicHttpParams;
 import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
-public class TestAsyncHttpGet extends HttpTestCase {
+public class TestAsyncHttpGet extends AsyncHttpTestCase {
 
     private static final String LOG_TAG = "TestAsyncHttpGet";
     AsyncHttpGet                mRequest;

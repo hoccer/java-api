@@ -11,7 +11,9 @@ public class PassHoccerCompatibleBookmark {
     public static void main(String[] args) {
 
         // String content = "{type: 'text/uri-list', content: 'http://hoccer.com/'}";
-        String content = "{type: 'image/jpeg', uri: 'http://hoccer.com/wp-content/themes/hoccer/images/logo.jpg'}";
+        // String content =
+        // "{type: 'image/jpeg', uri: 'http://hoccer.com/wp-content/themes/hoccer/images/logo.jpg'}";
+        String content = "{type: 'audio/ogg', uri: 'http://filecache.beta.hoccer.com:80/f4dd4350e8f5012d697a00163e001ab0'}";
 
         try {
             final Linccer linccer = new Linccer(new ClientConfig("Simple Hoccer Bookmark Passer"));
@@ -22,7 +24,7 @@ public class PassHoccerCompatibleBookmark {
                     + linccer.getClientConfig().getClientId() + "'}"));
             payload.put("data", new JSONArray("[" + content + "]"));
 
-            JSONObject result = linccer.share("1:n", payload);
+            JSONObject result = linccer.share("1:1", payload);
             if (result == null)
                 System.out.println("no one received");
             else

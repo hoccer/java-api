@@ -72,4 +72,9 @@ public class TestFileCache {
         assertThat(locationUri, containsString("http://filecache"));
         assertThat(locationUri, containsString(".hoccer.com"));
     }
+
+    @Test
+    public void asyncStoringOfText() {
+
+    }
 }
