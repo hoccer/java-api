@@ -320,4 +320,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mRequest.addHeader(key, value);
         // mHttpClient.se getParams().setParameter(key, value);
     }
+
+    @Override
+    public boolean isTaskCompleted() {
+        synchronized (this) {
+            return isRequestCompleted();
+        }
+    }
 }
