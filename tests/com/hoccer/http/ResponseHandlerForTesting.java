@@ -38,7 +38,7 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     @Override
     public void onSending(double progress) {
-        progress = progress;
+        this.progress = progress;
     }
 
     @Override

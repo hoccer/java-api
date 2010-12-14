@@ -149,8 +149,8 @@ public class TestFileCache {
 
         Thread.sleep(3000);
 
+        assertThat(handler.body.toString(), is(equalTo("hello world 12 11")));
         assertThat(uri, is(equalTo("hello world 12 11")));
-        assertThat(handler.body.getFilename(), is(equalTo("hello world 12 11")));
 
     }
 }
