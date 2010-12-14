@@ -3,6 +3,7 @@ package com.hoccer.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -11,6 +12,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 
 import com.hoccer.data.StreamableContent;
+import com.hoccer.http.AsyncHttpPut;
+import com.hoccer.http.HttpResponseHandler;
 import com.hoccer.http.MultipartHttpEntity;
 import com.hoccer.thread.StatusHandler;
 
@@ -95,5 +98,17 @@ public class FileCache extends CloudService {
 
     public void stopFetch() {
         isFetchStopped = true;
+    }
+
+    public String asyncStore(StreamableContent data, int secondsUntilExipred,
+            HttpResponseHandler responseHandler) throws IOException {
+
+        String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID();
+
+        AsyncHttpPut storeRequest = new AsyncHttpPut(uri + "?expires_in=" + secondsUntilExipred);
+        storeRequest.setBody(data);
+        storeRequest.start();
+
+        return uri;
     }
 }
