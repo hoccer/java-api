@@ -122,16 +122,16 @@ public class TestAsyncHttpGet extends AsyncHttpTestCase {
         mRequest = new AsyncHttpGet(getServer().getUri());
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
-        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
-                getServer().getLastRequest().header.getProperty("user-agent"));
+        assertEquals("User-Agent string in HTTP header", "Hoccer Java API", getServer()
+                .getLastRequest().header.getProperty("user-agent"));
     }
 
     public void testDefaultUserAgentStringInRequestWithCustomHttpClient() throws Exception {
         mRequest = new AsyncHttpGet(getServer().getUri(), new DefaultHttpClient());
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
-        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
-                getServer().getLastRequest().header.getProperty("user-agent"));
+        assertEquals("User-Agent string in HTTP header", " shuld be y60", getServer()
+                .getLastRequest().header.getProperty("user-agent"));
     }
 
     public void testOwnUserAgentStringInRequestWithCustomHttpClient() throws Exception {
@@ -150,8 +150,8 @@ public class TestAsyncHttpGet extends AsyncHttpTestCase {
         mRequest = new AsyncHttpGet(getServer().getUri(), httpClient);
         mRequest.start();
         blockUntilNormalHttpGetResponse();
-        assertEquals("User-Agent string in HTTP header shuld be y60", "Y60/1.0 Android",
-                getServer().getLastRequest().header.getProperty("user-agent"));
+        assertEquals("User-Agent string in HTTP header", "Hoccer Java API", getServer()
+                .getLastRequest().header.getProperty("user-agent"));
     }
 
     public void testUriOfSolvableRequest() throws Exception {

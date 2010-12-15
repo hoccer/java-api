@@ -33,6 +33,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -132,10 +133,15 @@ public class TestFileCache {
     public void asyncFetchingOfTextViaFileCache() throws Exception {
 
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
-        String uri = filecache.store(new StreamableString("hello file cache"), 10);
+        final String uri = filecache.store(new StreamableString("hello file cache"), 10);
 
-        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
-        GenericStreamableContent sink = new GenericStreamableContent();
+        final GenericStreamableContent sink = new GenericStreamableContent();
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting() {
+            @Override
+            public void onHeaderAvailable(HashMap<String, String> headers) {
+                AsyncHttpRequest.setTypeAndFilename(sink, headers, uri);
+            }
+        };
         filecache.asyncFetch(uri, sink, handler);
 
         TestHelper.blockUntilTrue("request should have been successful by now", 3000,
@@ -146,11 +152,9 @@ public class TestFileCache {
                         return handler.wasSuccessful;
                     }
                 });
-
-        Thread.sleep(3000);
-
-        assertThat(uri, is(equalTo("hello world 12 11")));
-        assertThat(handler.body.getFilename(), is(equalTo("hello world 12 11")));
+        assertThat(uri, containsString("http://filecache"));
+        assertThat(sink.getContentType(), is(equalTo("text/plain;charset=utf-8")));
+        assertThat(handler.body.toString(), is(equalTo("hello file cache")));
 
     }
 }

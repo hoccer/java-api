@@ -266,9 +266,29 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         if (mResponseContent == null) {
             GenericStreamableContent contentReceiver = new GenericStreamableContent();
-            contentReceiver.setContentType(headers.get("Content-Type"));
+            setTypeAndFilename(contentReceiver, headers, getUri());
+
             mResponseContent = contentReceiver;
         }
+    }
+
+    public static void setTypeAndFilename(GenericStreamableContent contentReceiver,
+            HashMap<String, String> headers, String uri) {
+        String type = headers.get("Content-Type");
+        if (type == null) {
+            type = "text/plain";
+        }
+
+        contentReceiver.setContentType(type);
+
+        String filename = headers.get("Content-Disposition");
+        if (filename == null || !filename.matches(".*filename=\".*\"")) {
+            filename = uri.substring(uri.lastIndexOf('/'));
+        } else {
+            filename = filename.substring(filename.indexOf("filename=\"") + 10,
+                    filename.length() - 1);
+        }
+        contentReceiver.setFilename(filename);
     }
 
     protected void onSuccess(int pStatusCode) {
