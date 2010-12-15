@@ -2,6 +2,7 @@ package com.hoccer.data;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -29,7 +30,7 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     @Override
-    public InputStream openInputStream() {
+    public InputStream openInputStream() throws IOException {
         return new ByteArrayInputStream(mResultStream.toByteArray());
     }
 
@@ -39,7 +40,7 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     @Override
-    public OutputStream openOutputStream() {
+    public OutputStream openOutputStream() throws IOException {
         return mResultStream;
     }
 
