@@ -238,16 +238,20 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
                     + getStatusCode()));
         }
 
+        mIsRequestCompleted = true;
+
         super.onPostExecute();
     }
 
     protected void onIoError(IOException e) {
+        mIsRequestCompleted = true;
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(e);
         }
     }
 
     protected void onClientError(Exception e) {
+        mIsRequestCompleted = true;
         if (mResponseHandlerCallback != null) {
             mResponseHandlerCallback.onError(e);
         }

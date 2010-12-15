@@ -130,7 +130,7 @@ public class TestAsyncHttpGet extends AsyncHttpTestCase {
         mRequest = new AsyncHttpGet(getServer().getUri(), new DefaultHttpClient());
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
-        assertEquals("User-Agent string in HTTP header", "Hocer Java API", getServer()
+        assertEquals("User-Agent string in HTTP header", "Hoccer Java API", getServer()
                 .getLastRequest().header.getProperty("user-agent"));
     }
 

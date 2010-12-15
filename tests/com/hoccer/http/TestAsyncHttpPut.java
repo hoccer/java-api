@@ -1,7 +1,8 @@
 package com.hoccer.http;
 
 import java.util.ArrayList;
-import java.util.Random;
+
+import junit.framework.AssertionFailedError;
 
 import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
@@ -157,7 +158,6 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
 
-        Random rand = new Random(System.currentTimeMillis());
         byte[] content = new byte[10000];
 
         data.openOutputStream().write(content, 0, content.length);
@@ -194,5 +194,43 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
         for (int i = 0; i < expectedUploadSequence.length; i++) {
             assertEquals("", expectedUploadSequence[i], sendingProgressHistroy.get(i));
         }
+    }
+
+    public void testAbortingUpload() throws Exception {
+        String uri = getServer().getUri() + "/data";
+        mRequest = new AsyncHttpPut(uri);
+
+        GenericStreamableContent data = new GenericStreamableContent();
+        data.setContentType("text/xml");
+
+        byte[] content = new byte[10000];
+
+        data.openOutputStream().write(content, 0, content.length);
+        mRequest.setBody(data);
+
+        mRequest.registerResponseHandler(new ProgressResponseHandler() {
+
+            @Override
+            public void onSending(double progress) {
+                if (progress > 10) {
+                    mRequest.interrupt();
+                }
+
+                if (progress > 50) {
+                    throw new AssertionFailedError("request should have been aborted");
+                }
+            }
+
+            @Override
+            public void onReceiving(double progress) {
+                throw new AssertionFailedError("request should have been aborted while uploading");
+            }
+
+        });
+
+        mRequest.start();
+        blockUntilRequestIsDone(mRequest);
+
+        assertFalse(mRequest.wasSuccessful());
     }
 }

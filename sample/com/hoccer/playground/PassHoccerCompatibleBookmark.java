@@ -15,9 +15,9 @@ public class PassHoccerCompatibleBookmark {
         // String content = "{type: 'text/uri-list', content: 'http://hoccer.com/'}";
         // String content =
         // "{type: 'image/jpeg', uri: 'http://hoccer.com/wp-content/themes/hoccer/images/logo.jpg'}";
+        String content = "{type: 'audio/ogg', uri: 'http://filecache.beta.hoccer.com/41c46a9e-0a75-4690-8cb7-9779909c91c7'}";
         // String content =
-        // "{type: 'audio/ogg', uri: 'http://filecache.beta.hoccer.com:80/f4dd4350e8f5012d697a00163e001ab0'}";
-        String content = "{type: 'image/jpeg', uri: 'http://filecache.beta.hoccer.com/1122ffaa-8c99-49ee-b045-33d737cc50f9'}";
+        // "{type: 'image/jpeg', uri: 'http://filecache.beta.hoccer.com/1122ffaa-8c99-49ee-b045-33d737cc50f9'}";
 
         try {
             final Linccer linccer = new Linccer(new ClientConfig("Simple Hoccer Bookmark Passer",

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -86,10 +87,12 @@ public class FileCache extends CloudService {
         mOngoingRequests.put(uri, fetchRequest);
     }
 
-    public void cancel(String uri) {
+    public void cancel(String uri) throws NoSuchElementException {
         AsyncHttpRequest request = mOngoingRequests.remove(uri);
         if (request != null) {
             request.interrupt();
-        }
+        } else
+            throw new NoSuchElementException(uri
+                    + " could not be found in ongoing request with size " + mOngoingRequests.size());
     }
 }
