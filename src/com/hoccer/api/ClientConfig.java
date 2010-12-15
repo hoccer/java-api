@@ -35,19 +35,47 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private final static String mLinccerUri   = "https://linccer.beta.hoccer.com";
-    private final static String mFileCacheUri = "http://filecache.beta.hoccer.com";
+    private final static String mLinccerUri   = "https://linccer.sandbox.hoccer.com";
+    private final static String mFileCacheUri = "https://filecache.sandbox.hoccer.com";
     private final String        mApplicationName;
     private final UUID          mClientId;
+
+    private String              mApiKey;
+    private String              mSharedSecret;
 
     public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
         mClientId = UUID.randomUUID();
+
+        useDemoApiKey();
     }
 
     public ClientConfig(String applicatioName, UUID clientId) {
         mApplicationName = applicatioName;
         mClientId = clientId;
+
+        useDemoApiKey();
+    }
+
+    public ClientConfig(String applicatioName, String apiKey, String sharedSecret) {
+        mApplicationName = applicatioName;
+        mClientId = UUID.randomUUID();
+
+        mApiKey = apiKey;
+        mSharedSecret = sharedSecret;
+    }
+
+    public ClientConfig(String applicatioName, String apiKey, String sharedSecret, UUID clientId) {
+        mApplicationName = applicatioName;
+        mClientId = clientId;
+
+        mApiKey = apiKey;
+        mSharedSecret = sharedSecret;
+    }
+
+    private void useDemoApiKey() {
+        mApiKey = "e101e890ea97012d6b6f00163e001ab0";
+        mSharedSecret = "JofbFD6w6xtNYdaDgp4KOXf/k/s=";
     }
 
     public static String getLinccerBaseUri() {
@@ -69,11 +97,11 @@ public class ClientConfig {
     }
 
     public String getApiKey() {
-        return "115745c0d609012d2f4e001ec2be2ed9";
+        return mApiKey;
     }
 
     public String getSharedSecret() {
-        return "DNonxFIWCxS3kHgC9oVG+lUz/60=";
+        return mSharedSecret;
     }
 
     public UUID getClientId() {

@@ -54,7 +54,7 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
         String locationUri = filecache.store(new StreamableString("hello world"), 10);
-        assertThat(locationUri, containsString("http://filecache"));
+        assertThat(locationUri, containsString("https://filecache"));
         assertThat(locationUri, containsString(".hoccer.com"));
 
         StreamableContent data = new StreamableString();
@@ -77,7 +77,7 @@ public class TestFileCache {
         content.openOutputStream().write(data);
 
         String locationUri = filecache.store(content, 2);
-        assertThat(locationUri, containsString("http://filecache"));
+        assertThat(locationUri, containsString("https://filecache"));
         assertThat(locationUri, containsString(".hoccer.com"));
     }
 
@@ -94,7 +94,7 @@ public class TestFileCache {
         blockUntilRequestIsDone(storeRequest);
 
         assertThat(storeRequest.getStatusCode(), is(equalTo(200)));
-        assertThat(storeRequest.getBodyAsString(), containsString("http://filecache"));
+        assertThat(storeRequest.getBodyAsString(), containsString("https://filecache"));
         assertThat(storeRequest.getBodyAsString(), containsString(".hoccer.com"));
     }
 
@@ -125,7 +125,7 @@ public class TestFileCache {
                     }
                 });
 
-        assertThat(handler.body.toString(), containsString("http://filecache"));
+        assertThat(handler.body.toString(), containsString("https://filecache"));
         assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
     }
 
@@ -152,7 +152,7 @@ public class TestFileCache {
                         return handler.wasSuccessful;
                     }
                 });
-        assertThat(uri, containsString("http://filecache"));
+        assertThat(uri, containsString("https://filecache"));
         assertThat(sink.getContentType(), is(equalTo("text/plain;charset=utf-8")));
         assertThat(handler.body.toString(), is(equalTo("hello file cache")));
 
