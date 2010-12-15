@@ -88,6 +88,8 @@ public class FileCache extends CloudService {
 
     public void cancel(String uri) {
         AsyncHttpRequest request = mOngoingRequests.remove(uri);
-        request.interrupt();
+        if (request != null) {
+            request.interrupt();
+        }
     }
 }

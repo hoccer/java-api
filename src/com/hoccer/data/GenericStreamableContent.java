@@ -35,7 +35,7 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     @Override
-    public long getStreamLength() {
+    public long getStreamLength() throws IOException {
         return mResultStream.size();
     }
 
