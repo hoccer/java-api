@@ -221,8 +221,8 @@ public class TestLinccing extends LinccerTestsBase {
     private void placeNearBy(Linccer... linccers) throws UpdateException {
         Random rand = new Random(System.currentTimeMillis());
 
-        double latitude = 22.01 + rand.nextGaussian() * 10;
-        double longitude = 102.11 + rand.nextGaussian() * 10;
+        double latitude = 22.012 + rand.nextGaussian() * 10;
+        double longitude = 102.112 + rand.nextGaussian() * 10;
 
         for (Linccer linccer : linccers) {
             linccer.onGpsChanged(latitude + (rand.nextGaussian() / 1000.0), longitude
