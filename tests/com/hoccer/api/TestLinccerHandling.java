@@ -52,9 +52,9 @@ public class TestLinccerHandling {
     @Test
     public void creatingNewLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
-        assertThat(linccer.getUri().substring(0, 39), equalTo(ClientConfig.getLinccerBaseUri()
-                + "/clients"));
-        String id = linccer.getUri().substring(40);
+        assertThat(linccer.getUri().substring(0, linccer.getUri().length() - 37),
+                equalTo(ClientConfig.getLinccerBaseUri() + "/clients"));
+        String id = linccer.getUri().substring(linccer.getUri().length() - 36);
         assertEquals("client id " + id + " should have a sh1 key length", 36, id.length());
     }
 
