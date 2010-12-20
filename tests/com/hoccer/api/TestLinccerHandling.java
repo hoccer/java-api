@@ -56,6 +56,7 @@ public class TestLinccerHandling {
                 equalTo(ClientConfig.getLinccerBaseUri() + "/clients"));
         String id = linccer.getUri().substring(linccer.getUri().length() - 36);
         assertEquals("client id " + id + " should have a sh1 key length", 36, id.length());
+
     }
 
     @Test

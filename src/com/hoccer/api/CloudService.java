@@ -96,7 +96,7 @@ public class CloudService {
 
     protected String sign(String url) {
         Date date = new Date();
-        url = url + "&api_key=" + mConfig.getApiKey() + "&timestamp=" + date.getTime() / 1000;
+        url = url + "?api_key=" + mConfig.getApiKey() + "&timestamp=" + date.getTime() / 1000;
 
         String signature = digest(url, mConfig.getSharedSecret());
 
@@ -129,6 +129,6 @@ public class CloudService {
             e.printStackTrace();
         }
 
-        throw new RuntimeException("keks");
+        throw new RuntimeException("bad signing");
     }
 }

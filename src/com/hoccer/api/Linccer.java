@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,7 +47,8 @@ public class Linccer extends CloudService {
     public void disconnect() throws UpdateException {
         HttpResponse response;
         try {
-            HttpDelete request = new HttpDelete(mConfig.getClientUri() + "/environment");
+            String uri = mConfig.getClientUri() + "/environment";
+            HttpDelete request = new HttpDelete(sign(uri));
             response = getHttpClient().execute(request);
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for "
@@ -65,7 +67,8 @@ public class Linccer extends CloudService {
 
         HttpResponse response;
         try {
-            HttpPut request = new HttpPut(mConfig.getClientUri() + "/environment");
+            String uri = mConfig.getClientUri() + "/environment";
+            HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
             response = getHttpClient().execute(request);
         } catch (Exception e) {
@@ -74,9 +77,17 @@ public class Linccer extends CloudService {
         }
 
         if (response.getStatusLine().getStatusCode() != 201) {
-            throw new UpdateException(
-                    "could not update environment because server responded with status "
-                            + response.getStatusLine().getStatusCode());
+            try {
+                throw new UpdateException(
+                        "could not update environment because server responded with "
+                                + response.getStatusLine().getStatusCode() + ": "
+                                + EntityUtils.toString(response.getEntity()));
+            } catch (ParseException e) {
+            } catch (IOException e) {
+            }
+            throw new UpdateException("could not update environment because server responded with "
+                    + response.getStatusLine().getStatusCode() + " and an unparsable body");
+
         }
     }
 
@@ -132,8 +143,8 @@ public class Linccer extends CloudService {
         mode = mapMode(mode);
         int statusCode;
         try {
-            HttpPut request = new HttpPut(mConfig.getClientUri() + "/action/" + mode + "?"
-                    + options);
+            String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
+            HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = getHttpClient().execute(request);
 
@@ -184,8 +195,8 @@ public class Linccer extends CloudService {
         int statusCode;
 
         try {
-            HttpGet request = new HttpGet(mConfig.getClientUri() + "/action/" + mode + "?"
-                    + options);
+            String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
+            HttpGet request = new HttpGet(sign(uri));
             HttpResponse response = getHttpClient().execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
