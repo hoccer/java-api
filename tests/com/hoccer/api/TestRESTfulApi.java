@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -40,14 +41,38 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ManagedClientConnection;
+import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.params.ConnPerRoute;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 public class TestRESTfulApi {
 
-    DefaultHttpClient mHttpClient = new DefaultHttpClient();
+
+    DefaultHttpClient mHttpClient;
+    public TestRESTfulApi() {
+        BasicHttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
+        ConnManagerParams.setMaxTotalConnections(httpParams, 100);
+        HttpConnectionParams.setStaleCheckingEnabled(httpParams, true);
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+        ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
+        mHttpClient = new DefaultHttpClient(cm, httpParams);
+    }
 
     @Test
     public void testPostingNonexistentClientId() throws Exception {
@@ -78,12 +103,16 @@ public class TestRESTfulApi {
         String client = ClientConfig.getLinccerBaseUri()
         + "/clients/"+ UUID.randomUUID().toString();
         
-       // publishPosition(client + "/environment");
+       publishPosition(client + "/environment");
         
         HttpResponse response = receiveOneToOne(client);
+        //response.getEntity().consumeContent();
 
         HttpDelete request = new HttpDelete(client + "/environment");
+        System.out.println("starting delete");
         response = mHttpClient.execute(request);
+        System.out.println("delete completed");
+        response.getEntity().consumeContent();
         assertEquals("should be able to sign off client", 200,
                 response.getStatusLine().getStatusCode());
     }
@@ -108,6 +137,8 @@ public class TestRESTfulApi {
         HttpGet receive = new HttpGet(client + "/action/one-to-one");
         HttpResponse response;
         response = mHttpClient.execute(receive);
+        mHttpClient.getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
+
         return response;
     }
 

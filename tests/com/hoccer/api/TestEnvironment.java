@@ -59,7 +59,7 @@ public class TestEnvironment extends LinccerTestsBase {
 
         placeNearBy(linccerA);
 
-        assertNull("should not receive something", linccerA.receive("1:1"));
+        assertNull("should not receive something", linccerA.receive("one-to-one"));
         
         disconnect(linccerA);
     }
