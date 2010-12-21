@@ -61,7 +61,6 @@ public class TestEnvironment extends LinccerTestsBase {
 
         assertNull("should not receive something", linccerA.receive("1:1"));
         
-        System.out.println("disconnect A");
         disconnect(linccerA);
     }
 
@@ -74,13 +73,9 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerA.onGpsChanged(24.012, 102.115, 130);
         linccerB.onGpsChanged(22.012, 102.11, 1030);
 
-        System.out.println("before assert");
         assertNotConnectable(linccerA, linccerB);
 
-        System.out.println("disconnect A");
-        linccerA.disconnect();
-        System.out.println("disconnect B");
-        linccerB.disconnect();
+        disconnect(linccerA, linccerB);
     }
 
     @Test(timeout = 20000)

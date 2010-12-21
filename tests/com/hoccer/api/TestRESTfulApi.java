@@ -30,7 +30,12 @@ package com.hoccer.api;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.UUID;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -48,7 +53,7 @@ public class TestRESTfulApi {
     public void testPostingNonexistentClientId() throws Exception {
 
         HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri()
-                + "/c278d820-d1f0-11df-bd3b-0800200c9a66");
+                + "clients/"+UUID.randomUUID().toString()+ "/environment");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
         assertEquals("should get error for bad operation on client uri", 404,
@@ -58,35 +63,65 @@ public class TestRESTfulApi {
     @Test
     public void testSigningOffNonexistingClient() throws Exception {
 
-        HttpDelete request = new HttpDelete(ClientConfig.getLinccerBaseUri()
-                + "/c278d820-d1f0-11df-bd3b-0800200c9a66/environment");
+        String uri = ClientConfig.getLinccerBaseUri()
+        + "/clients/"+UUID.randomUUID().toString()+ "/environment";
+        
+        HttpDelete request = new HttpDelete(uri);
         HttpResponse response = mHttpClient.execute(request);
-        assertEquals("should get error for nonexisten client uri", 404,
+        assertEquals("should be able to sign off noexisting client uri", 200,
                 response.getStatusLine().getStatusCode());
     }
 
+    @Test(timeout = 4000)
+    public void testSigningOffJustCreatedClient() throws Exception {
+
+        String client = ClientConfig.getLinccerBaseUri()
+        + "/clients/"+ UUID.randomUUID().toString();
+        
+       // publishPosition(client + "/environment");
+        
+        HttpResponse response = receiveOneToOne(client);
+
+        HttpDelete request = new HttpDelete(client + "/environment");
+        response = mHttpClient.execute(request);
+        assertEquals("should be able to sign off client", 200,
+                response.getStatusLine().getStatusCode());
+    }
+
+    
     @Test(timeout = 1000)
     public void lonlyReceive() throws Exception {
 
-        String uri = ClientConfig.getLinccerBaseUri()
-                + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/environment";
+        String client = ClientConfig.getLinccerBaseUri()
+                + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66";
 
+        publishPosition(client + "/environment");
+
+        HttpResponse response = receiveOneToOne(client);
+        String body = (response.getEntity() != null) ? EntityUtils.toString(response.getEntity())
+                : "<no body>";
+        assertEquals("should have been told about 'no data' but server said " + body, 204, response
+                .getStatusLine().getStatusCode());
+    }
+
+    private HttpResponse receiveOneToOne(String client) throws IOException, ClientProtocolException {
+        HttpGet receive = new HttpGet(client + "/action/one-to-one");
+        HttpResponse response;
+        response = mHttpClient.execute(receive);
+        return response;
+    }
+
+    private int latitude = 13;
+    private void publishPosition(String uri) throws UnsupportedEncodingException, IOException,
+            ClientProtocolException {
         HttpPut envUpdate = new HttpPut(ApiSigningTools.sign(uri, TestApiKeySigning.demoKey,
                 TestApiKeySigning.demoSecret));
         envUpdate.setEntity(new StringEntity(
-                "{\"gps\": {\"longitude\": 13, \"latitude\": 50, \"accuracy\": 100} }"));
+                "{\"gps\": {\"longitude\": "+ latitude++ + ", \"latitude\": 50, \"accuracy\": 100} }"));
         HttpResponse response = mHttpClient.execute(envUpdate);
         assertEquals("should have updated the environment but server said "
                 + EntityUtils.toString(response.getEntity()), 201, response.getStatusLine()
                 .getStatusCode());
         envUpdate.abort();
-
-        HttpGet receive = new HttpGet(ClientConfig.getLinccerBaseUri()
-                + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/action/one-to-one");
-        response = mHttpClient.execute(receive);
-        String body = (response.getEntity() != null) ? EntityUtils.toString(response.getEntity())
-                : "<no body>";
-        assertEquals("should have been told about 'no data' but server said " + body, 204, response
-                .getStatusLine().getStatusCode());
     }
 }
