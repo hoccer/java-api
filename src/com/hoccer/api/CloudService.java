@@ -71,8 +71,9 @@ public class CloudService {
 
     protected String convertResponseToString(HttpResponse response) throws IOException {
         if (response.getStatusLine().getStatusCode() != 200) {
-            throw new ParseException("server respond with status code "
-                    + response.getStatusLine().getStatusCode());
+            throw new ParseException("server respond with "
+                    + response.getStatusLine().getStatusCode() + ": "
+                    + EntityUtils.toString(response.getEntity(), "<unparsable body>"));
         }
 
         HttpEntity entity = response.getEntity();
