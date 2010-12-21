@@ -56,6 +56,10 @@ h3. Wait for data
 The default behavior of Linccer makes sure you get a "no content" message for "lonely receives".
 When receiving in 'one-to-many' mode, it's possible to add the option "waiting=true" to hold the connection until content is available. This is useful for devices which automaticly want to receive all distributed data (eg. photowall, party-music-player, geo chat, ...).
 
+h2. Licensing
+
+This code is dual licensed (commercial and GPL v3). See LICENSE file for more informations about the GPL. Alternative licensing without the obligations of the GPL is available upon request.
+
 h2. Further Reading
 
 Please check the general "Linccer documentation":http://developer.hoccer.com/about_api.html.
