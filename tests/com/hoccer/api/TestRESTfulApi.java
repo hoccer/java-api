@@ -31,6 +31,7 @@ package com.hoccer.api;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -44,13 +45,23 @@ public class TestRESTfulApi {
     DefaultHttpClient mHttpClient = new DefaultHttpClient();
 
     @Test
-    public void testReadingNonexistentClientId() throws Exception {
+    public void testPostingNonexistentClientId() throws Exception {
 
         HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri()
                 + "/c278d820-d1f0-11df-bd3b-0800200c9a66");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
-        assertEquals("should get 'precondition failed' error for nonexisten client uri", 404,
+        assertEquals("should get error for bad operation on client uri", 404,
+                response.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testSigningOffNonexistingClient() throws Exception {
+
+        HttpDelete request = new HttpDelete(ClientConfig.getLinccerBaseUri()
+                + "/c278d820-d1f0-11df-bd3b-0800200c9a66/environment");
+        HttpResponse response = mHttpClient.execute(request);
+        assertEquals("should get error for nonexisten client uri", 404,
                 response.getStatusLine().getStatusCode());
     }
 

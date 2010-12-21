@@ -28,6 +28,10 @@
  ******************************************************************************/
 package com.hoccer.api;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.json.*;
 
 public class LinccerTestsBase {
@@ -116,5 +120,28 @@ public class LinccerTestsBase {
                 mException = e;
             }
         };
+    }
+    
+    static void placeNearBy(Linccer... linccers) throws UpdateException {
+        Random rand = new Random(System.currentTimeMillis());
+
+        double latitude = 22.012 + rand.nextGaussian() * 10;
+        double longitude = 102.112 + rand.nextGaussian() * 10;
+
+        for (Linccer linccer : linccers) {
+            linccer.onGpsChanged(latitude + (rand.nextGaussian() / 1000.0), longitude
+                    + (rand.nextGaussian() / 1000.0), rand.nextInt(1000));
+        }
+    }
+    
+     static void disconnect(Linccer... linccers) throws UpdateException {
+        long startTime = System.currentTimeMillis();
+        for (Linccer linccer : linccers) {
+            linccer.disconnect();
+        }
+        long duration = System.currentTimeMillis() - startTime;
+        assertTrue("disconnecting should not take longer than 1 sec but took " + duration / 1000.0
+                + " sec", duration < 1000);
+
     }
 }

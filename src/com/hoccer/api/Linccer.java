@@ -163,6 +163,7 @@ public class Linccer extends CloudService {
             HttpResponse response = getHttpClient().execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
+            System.out.println("shared " + statusCode);
             switch (statusCode) {
                 case 204:
                     return null;
@@ -214,6 +215,7 @@ public class Linccer extends CloudService {
             HttpResponse response = getHttpClient().execute(request);
 
             statusCode = response.getStatusLine().getStatusCode();
+            System.out.println("received " + statusCode);
             switch (statusCode) {
                 case 204:
                     return null;

@@ -53,7 +53,20 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerB.disconnect();
     }
 
-    @Test(timeout = 20000)
+    @Test(timeout = 4000)
+    public void lonlyGpsTest() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+
+        placeNearBy(linccerA);
+
+        assertNull("should not receive something", linccerA.receive("1:1"));
+        
+        System.out.println("disconnect A");
+        disconnect(linccerA);
+    }
+
+    
+    @Test(timeout = 4000)
     public void gpsNotMatchingTest() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
@@ -61,9 +74,12 @@ public class TestEnvironment extends LinccerTestsBase {
         linccerA.onGpsChanged(24.012, 102.115, 130);
         linccerB.onGpsChanged(22.012, 102.11, 1030);
 
+        System.out.println("before assert");
         assertNotConnectable(linccerA, linccerB);
 
+        System.out.println("disconnect A");
         linccerA.disconnect();
+        System.out.println("disconnect B");
         linccerB.disconnect();
     }
 
@@ -73,7 +89,7 @@ public class TestEnvironment extends LinccerTestsBase {
         Linccer linccerB = new Linccer(createDescription());
 
         linccerA.onNetworkChanged(22.012, 102.115, 130);
-        linccerB.onNetworkChanged(22.012, 102.11, 1030);
+        linccerB.onNetworkChanged(22.012, 102.115, 1030);
 
         assertConnectable(linccerA, linccerB);
 
