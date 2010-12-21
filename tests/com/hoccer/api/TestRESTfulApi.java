@@ -57,8 +57,11 @@ public class TestRESTfulApi {
     @Test(timeout = 1000)
     public void lonlyReceive() throws Exception {
 
-        HttpPut envUpdate = new HttpPut(ClientConfig.getLinccerBaseUri()
-                + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/environment");
+        String uri = ClientConfig.getLinccerBaseUri()
+                + "/clients/c278d820-d1f0-11df-bd3b-0800200c9a66/environment";
+
+        HttpPut envUpdate = new HttpPut(ApiSigningTools.sign(uri, TestApiKeySigning.demoKey,
+                TestApiKeySigning.demoSecret));
         envUpdate.setEntity(new StringEntity(
                 "{\"gps\": {\"longitude\": 13, \"latitude\": 50, \"accuracy\": 100} }"));
         HttpResponse response = mHttpClient.execute(envUpdate);

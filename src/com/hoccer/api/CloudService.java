@@ -29,14 +29,6 @@
 package com.hoccer.api;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -55,8 +47,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.hoccer.data.Base64;
 
 public class CloudService {
 
@@ -127,41 +117,6 @@ public class CloudService {
     }
 
     protected String sign(String url) {
-        Date date = new Date();
-        url = url + (url.contains("?") ? "&" : "?") + "api_key=" + mConfig.getApiKey()
-                + "&timestamp=" + date.getTime() / 1000;
-
-        String signature = digest(url, mConfig.getSharedSecret());
-
-        try {
-            return url + "&signature=" + URLEncoder.encode(signature, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "unsupported encoding"; // does not happen
-        }
-    }
-
-    protected String digest(String url, String secretKey) {
-
-        // get an hmac_sha1 key from the raw key bytes
-        SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA1");
-
-        // get an hmac_sha1 Mac instance and initialize with the signing key
-        Mac mac;
-        try {
-            mac = Mac.getInstance("HmacSHA1");
-            mac.init(signingKey);
-
-            // compute the hmac on input data bytes
-            byte[] rawHmac = mac.doFinal(url.getBytes());
-            // base64-encode the hmac
-            return Base64.encodeBytes(rawHmac);
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-
-        throw new RuntimeException("bad signing");
+        return ApiSigningTools.sign(url, mConfig.getApiKey(), mConfig.getSharedSecret());
     }
 }

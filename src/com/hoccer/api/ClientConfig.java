@@ -63,7 +63,7 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private final static String mLinccerUri   = "https://linccer.sandbox.hoccer.com";
+    private final static String mLinccerUri   = "https://linccer.hoccer.com";
     private final static String mFileCacheUri = "https://filecache.hoccer.com";
     private final String        mApplicationName;
     private final UUID          mClientId;

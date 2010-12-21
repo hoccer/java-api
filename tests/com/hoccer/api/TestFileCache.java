@@ -115,7 +115,8 @@ public class TestFileCache {
         String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID()
                 + "?expires_in=10000";
 
-        AsyncHttpPut storeRequest = new AsyncHttpPut(uri);
+        AsyncHttpPut storeRequest = new AsyncHttpPut(ApiSigningTools.sign(uri,
+                TestApiKeySigning.demoKey, TestApiKeySigning.demoSecret));
         storeRequest.setBody(new StreamableString("hello world"));
         storeRequest.start();
 
