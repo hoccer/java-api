@@ -100,8 +100,11 @@ public class CloudService {
     protected String convertResponseToString(HttpResponse response) throws IOException {
         if (response.getStatusLine().getStatusCode() != 200) {
             throw new ParseException("server respond with "
-                    + response.getStatusLine().getStatusCode() + ": "
-                    + EntityUtils.toString(response.getEntity(), "<unparsable body>"));
+                    + response.getStatusLine().getStatusCode()
+                    + ": "
+                    + EntityUtils.toString(response.getEntity(), response.getStatusLine()
+                            .getStatusCode()
+                            + ": <unparsable body>"));
         }
 
         HttpEntity entity = response.getEntity();
@@ -125,7 +128,8 @@ public class CloudService {
 
     protected String sign(String url) {
         Date date = new Date();
-        url = url + "?api_key=" + mConfig.getApiKey() + "&timestamp=" + date.getTime() / 1000;
+        url = url + (url.contains("?") ? "&" : "?") + "api_key=" + mConfig.getApiKey()
+                + "&timestamp=" + date.getTime() / 1000;
 
         String signature = digest(url, mConfig.getSharedSecret());
 
