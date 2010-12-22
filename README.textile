@@ -21,7 +21,7 @@ p. More examples can soon be found in the samples folder.
 
 h2. Install and try out
 
-* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-linccer-client-v0.2.2.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
+* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-linccer-client-v0.3.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
 * write some java code using the Linccer (get inspired by "samples":https://github.com/hoccer/java-api/tree/master/sample/com/hoccer/playground)
 * compile and run with JAR's in classpath
 
