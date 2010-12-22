@@ -42,9 +42,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -53,15 +51,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
 public class TestRESTfulApi {
 
-
     DefaultHttpClient mHttpClient;
+
     public TestRESTfulApi() {
         BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
@@ -77,47 +74,44 @@ public class TestRESTfulApi {
     @Test
     public void testPostingNonexistentClientId() throws Exception {
 
-        HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri()
-                + "clients/"+UUID.randomUUID().toString()+ "/environment");
+        HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri() + "clients/"
+                + UUID.randomUUID().toString() + "/environment");
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
-        assertEquals("should get error for bad operation on client uri", 404,
-                response.getStatusLine().getStatusCode());
+        assertEquals("should get error for bad operation on client uri", 404, response
+                .getStatusLine().getStatusCode());
     }
 
     @Test
     public void testSigningOffNonexistingClient() throws Exception {
 
-        String uri = ClientConfig.getLinccerBaseUri()
-        + "/clients/"+UUID.randomUUID().toString()+ "/environment";
-        
+        String uri = ClientConfig.getLinccerBaseUri() + "/clients/" + UUID.randomUUID().toString()
+                + "/environment";
+
         HttpDelete request = new HttpDelete(uri);
         HttpResponse response = mHttpClient.execute(request);
-        assertEquals("should be able to sign off noexisting client uri", 200,
-                response.getStatusLine().getStatusCode());
+        assertEquals("should be able to sign off noexisting client uri", 200, response
+                .getStatusLine().getStatusCode());
     }
 
     @Test(timeout = 4000)
     public void testSigningOffJustCreatedClient() throws Exception {
 
-        String client = ClientConfig.getLinccerBaseUri()
-        + "/clients/"+ UUID.randomUUID().toString();
-        
-       publishPosition(client + "/environment");
-        
+        String client = ClientConfig.getLinccerBaseUri() + "/clients/"
+                + UUID.randomUUID().toString();
+
+        publishPosition(client + "/environment");
+
         HttpResponse response = receiveOneToOne(client);
-        //response.getEntity().consumeContent();
+        // response.getEntity().consumeContent();
 
         HttpDelete request = new HttpDelete(client + "/environment");
-        System.out.println("starting delete");
         response = mHttpClient.execute(request);
-        System.out.println("delete completed");
         response.getEntity().consumeContent();
-        assertEquals("should be able to sign off client", 200,
-                response.getStatusLine().getStatusCode());
+        assertEquals("should be able to sign off client", 200, response.getStatusLine()
+                .getStatusCode());
     }
 
-    
     @Test(timeout = 1000)
     public void lonlyReceive() throws Exception {
 
@@ -143,12 +137,13 @@ public class TestRESTfulApi {
     }
 
     private int latitude = 13;
+
     private void publishPosition(String uri) throws UnsupportedEncodingException, IOException,
             ClientProtocolException {
         HttpPut envUpdate = new HttpPut(ApiSigningTools.sign(uri, TestApiKeySigning.demoKey,
                 TestApiKeySigning.demoSecret));
-        envUpdate.setEntity(new StringEntity(
-                "{\"gps\": {\"longitude\": "+ latitude++ + ", \"latitude\": 50, \"accuracy\": 100} }"));
+        envUpdate.setEntity(new StringEntity("{\"gps\": {\"longitude\": " + latitude++
+                + ", \"latitude\": 50, \"accuracy\": 100} }"));
         HttpResponse response = mHttpClient.execute(envUpdate);
         assertEquals("should have updated the environment but server said "
                 + EntityUtils.toString(response.getEntity()), 201, response.getStatusLine()
