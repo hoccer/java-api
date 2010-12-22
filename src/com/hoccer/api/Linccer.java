@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -161,6 +162,7 @@ public class Linccer extends CloudService {
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = getHttpClient().execute(request);
+            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
@@ -212,6 +214,7 @@ public class Linccer extends CloudService {
             String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
             HttpGet request = new HttpGet(sign(uri));
             HttpResponse response = getHttpClient().execute(request);
+            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
