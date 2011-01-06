@@ -60,11 +60,10 @@ public class TestEnvironment extends LinccerTestsBase {
         placeNearBy(linccerA);
 
         assertNull("should not receive something", linccerA.receive("one-to-one"));
-        
+
         disconnect(linccerA);
     }
 
-    
     @Test(timeout = 4000)
     public void gpsNotMatchingTest() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
@@ -110,6 +109,34 @@ public class TestEnvironment extends LinccerTestsBase {
 
         linccerA.onWifiChanged(new String[] { "00:22:3F:11:5A:2E", "4C:12:3F:11:5A:2C" });
         linccerB.onWifiChanged(new String[] { "00:22:3F:11:5A:2E", "5C:12:3F:11:5A:2C" });
+
+        assertConnectable(linccerA, linccerB);
+
+        linccerA.disconnect();
+        linccerB.disconnect();
+    }
+
+    @Test(timeout = 20000)
+    public void wifiWithShortendBssidsTest() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+        Linccer linccerB = new Linccer(createDescription());
+
+        linccerA.onWifiChanged(new String[] { "0:22:3F:1:50:E", "4C:12:3F:11:5A:2C" });
+        linccerB.onWifiChanged(new String[] { "00:22:3F:01:50:0E", "5C:12:3F:11:5A:2C" });
+
+        assertConnectable(linccerA, linccerB);
+
+        linccerA.disconnect();
+        linccerB.disconnect();
+    }
+
+    @Test(timeout = 20000)
+    public void wifiWithUpperLowerCaseBssidsTest() throws Exception {
+        final Linccer linccerA = new Linccer(createDescription());
+        Linccer linccerB = new Linccer(createDescription());
+
+        linccerA.onWifiChanged(new String[] { "00:22:3f:01:50:0e", "5c:12:3f:11:5a:2c" });
+        linccerB.onWifiChanged(new String[] { "00:22:3F:01:50:0E", "5C:12:3F:11:5A:2C" });
 
         assertConnectable(linccerA, linccerB);
 
