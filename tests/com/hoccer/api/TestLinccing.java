@@ -33,8 +33,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -103,7 +101,7 @@ public class TestLinccing extends LinccerTestsBase {
         boolean hadCollision = false;
         try {
             linccerC.receive("1:1");
-            assertFalse("should have got an exception", true);
+            assertFalse("should have got an exception for " + linccerC.getUri(), true);
         } catch (CollidingActionsException e) {
             hadCollision = true;
         }
@@ -163,7 +161,7 @@ public class TestLinccing extends LinccerTestsBase {
         threadedReceive.start();
 
         JSONObject receivedPayload = linccerC.receive("1:n");
-        assertNotNull("should have received something", receivedPayload);
+        assertNotNull("should have received something for " + linccerC.getUri(), receivedPayload);
         assertTrue("should have received a message", receivedPayload.has("message"));
         assertEquals("hello world", receivedPayload.get("message"));
 
@@ -206,7 +204,5 @@ public class TestLinccing extends LinccerTestsBase {
 
         disconnect(linccerA, linccerB);
     }
-
-    
 
 }

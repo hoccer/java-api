@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.json.*;
+import org.json.JSONObject;
 
 public class LinccerTestsBase {
 
@@ -68,18 +68,24 @@ public class LinccerTestsBase {
         }
 
         public JSONObject getResult() {
-            return mResult;
+            synchronized (mLinccer) {
+                return mResult;
+            }
         }
 
         public void assertNoExceptionsOccured() throws Exception {
-            if (mException != null) {
-                throw mException;
+            synchronized (mLinccer) {
+                if (mException != null) {
+                    throw mException;
+                }
             }
         }
 
         public void assertCollisionOccured() throws Exception {
-            if (!(mException instanceof CollidingActionsException)) {
-                throw new AssertionError("no collsion was detected");
+            synchronized (mLinccer) {
+                if (!(mException instanceof CollidingActionsException)) {
+                    throw new AssertionError("no collsion was detected for " + mLinccer.getUri());
+                }
             }
         }
     }
@@ -92,12 +98,14 @@ public class LinccerTestsBase {
 
         @Override
         public void run() {
-            try {
-                JSONObject payload = new JSONObject();
-                payload.put("message", "hello world");
-                mResult = getLinccer().share(mMode, payload);
-            } catch (Exception e) {
-                mException = e;
+            synchronized (getLinccer()) {
+                try {
+                    JSONObject payload = new JSONObject();
+                    payload.put("message", "hello world");
+                    mResult = getLinccer().share(mMode, payload);
+                } catch (Exception e) {
+                    mException = e;
+                }
             }
         };
     }
@@ -114,14 +122,16 @@ public class LinccerTestsBase {
 
         @Override
         public void run() {
-            try {
-                mResult = getLinccer().receive(mMode, mOptions);
-            } catch (Exception e) {
-                mException = e;
+            synchronized (getLinccer()) {
+                try {
+                    mResult = getLinccer().receive(mMode, mOptions);
+                } catch (Exception e) {
+                    mException = e;
+                }
             }
-        };
+        }
     }
-    
+
     static void placeNearBy(Linccer... linccers) throws UpdateException {
         Random rand = new Random(System.currentTimeMillis());
 
@@ -133,8 +143,8 @@ public class LinccerTestsBase {
                     + (rand.nextGaussian() / 1000.0), rand.nextInt(1000));
         }
     }
-    
-     static void disconnect(Linccer... linccers) throws UpdateException {
+
+    static void disconnect(Linccer... linccers) throws UpdateException {
         long startTime = System.currentTimeMillis();
         for (Linccer linccer : linccers) {
             linccer.disconnect();
