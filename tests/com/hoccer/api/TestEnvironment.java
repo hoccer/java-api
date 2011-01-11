@@ -28,9 +28,12 @@
  ******************************************************************************/
 package com.hoccer.api;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.json.JSONException;
@@ -39,7 +42,7 @@ import org.junit.Test;
 
 public class TestEnvironment extends LinccerTestsBase {
 
-    @Test(timeout = 20000)
+    @Test(timeout = 4000)
     public void gpsTest() throws Exception {
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
@@ -156,6 +159,22 @@ public class TestEnvironment extends LinccerTestsBase {
 
         linccerA.disconnect();
         linccerB.disconnect();
+    }
+
+    @Test(timeout = 2000)
+    public void gpsQualityTest() throws Exception {
+        final Linccer linccer = new Linccer(createDescription());
+
+        placeNearBy(linccer);
+        assertThat("devices", linccer.getEnvironmentStatus().getDevices(), is(equalTo(1)));
+        assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(2)));
+        linccer.onGpsChanged(22.012, 102.115, 10);
+        assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(2)));
+        linccer.onGpsChanged(22.012, 102.115, 10010);
+        assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(1)));
+        assertThat("devices", linccer.getEnvironmentStatus().getDevices(), is(equalTo(1)));
+
+        linccer.disconnect();
     }
 
     private void assertConnectable(final Linccer linccerA, Linccer linccerB)

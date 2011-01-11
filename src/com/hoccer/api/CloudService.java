@@ -74,8 +74,7 @@ public class CloudService {
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
     }
 
-    @SuppressWarnings("unused")
-    private JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
+    protected JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
         String body = convertResponseToString(response);
         return new JSONObject(body);
@@ -88,7 +87,8 @@ public class CloudService {
     }
 
     protected String convertResponseToString(HttpResponse response) throws IOException {
-        if (response.getStatusLine().getStatusCode() != 200) {
+        int statuscode = response.getStatusLine().getStatusCode();
+        if (statuscode != 200 && statuscode != 201) {
             throw new ParseException("server respond with "
                     + response.getStatusLine().getStatusCode()
                     + ": "

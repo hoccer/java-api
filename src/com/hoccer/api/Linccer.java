@@ -41,13 +41,13 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Linccer extends CloudService {
 
-    private Environment mEnvironment = new Environment();
+    private Environment       mEnvironment = new Environment();
+    private EnvironmentStatus mEnvironmentStatus;
 
     public Linccer(ClientConfig config) {
         super(config);
@@ -98,6 +98,8 @@ public class Linccer extends CloudService {
         } catch (Exception e) {
             throw new UpdateException("could not update gps measurement for "
                     + mConfig.getClientUri() + " because of " + e);
+        } finally {
+            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -105,14 +107,21 @@ public class Linccer extends CloudService {
                 throw new UpdateException(
                         "could not update environment because server responded with "
                                 + response.getStatusLine().getStatusCode() + ": "
-                                + EntityUtils.toString(response.getEntity()));
+                                + convertResponseToString(response));
             } catch (ParseException e) {
             } catch (IOException e) {
             }
             throw new UpdateException("could not update environment because server responded with "
                     + response.getStatusLine().getStatusCode() + " and an unparsable body");
-
         }
+        try {
+            mEnvironmentStatus = new EnvironmentStatus(convertResponseToJsonObject(response));
+        } catch (Exception e) {
+            throw new UpdateException("could not update environment because server responded with "
+                    + response.getStatusLine().getStatusCode() + " and an ill formed body: "
+                    + e.toString());
+        }
+
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
@@ -202,6 +211,8 @@ public class Linccer extends CloudService {
         } catch (UpdateException e) {
             throw new ClientActionException("could not share payload " + payload.toString()
                     + " because of " + e);
+        } finally {
+            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         throw new ClientActionException("could not share payload " + payload.toString()
@@ -250,6 +261,8 @@ public class Linccer extends CloudService {
             throw new ClientActionException("could not receive payload because of " + e);
         } catch (UpdateException e) {
             throw new ClientActionException("could not receive payload because of " + e);
+        } finally {
+            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         throw new ClientActionException(
@@ -258,6 +271,10 @@ public class Linccer extends CloudService {
 
     public String getUri() {
         return mConfig.getClientUri();
+    }
+
+    public EnvironmentStatus getEnvironmentStatus() {
+        return mEnvironmentStatus;
     }
 
     private String mapMode(String mode) throws BadModeException {

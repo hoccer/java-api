@@ -172,6 +172,7 @@ public class TestLinccing extends LinccerTestsBase {
 
         threadedReceive.join();
         threadedReceive.assertNoExceptionsOccured();
+        assertNotNull("should also have got some payload", threadedReceive.getResult());
         assertEquals("should also have got the payload", receivedPayload.toString(),
                 threadedReceive.getResult().toString());
 

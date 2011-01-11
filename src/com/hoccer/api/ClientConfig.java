@@ -35,8 +35,8 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private final static String mLinccerUri   = "https://linccer.sandbox.hoccer.com/v3";
-    private final static String mFileCacheUri = "https://filecache.sandbox.hoccer.com/v3";
+    private final static String mLinccerUri   = "https://linccer.beta.hoccer.com/v3";
+    private final static String mFileCacheUri = "https://filecache.beta.hoccer.com/v3";
     private final String        mApplicationName;
     private final UUID          mClientId;
 
