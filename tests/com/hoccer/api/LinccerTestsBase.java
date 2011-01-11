@@ -132,12 +132,22 @@ public class LinccerTestsBase {
         }
     }
 
-    static void placeNearBy(Linccer... linccers) throws UpdateException {
+    static double[] getUniqueLongLat() {
         Random rand = new Random(System.currentTimeMillis());
 
-        double latitude = 22.012 + rand.nextGaussian() * 10;
         double longitude = 102.112 + rand.nextGaussian() * 10;
+        double latitude = 22.012 + rand.nextGaussian() * 10;
 
+        double[] pair = { longitude, latitude };
+        return pair;
+    }
+
+    static void placeNearBy(Linccer... linccers) throws UpdateException {
+        double[] pair = getUniqueLongLat();
+        double latitude = pair[1];
+        double longitude = pair[0];
+
+        Random rand = new Random(System.currentTimeMillis());
         for (Linccer linccer : linccers) {
             linccer.onGpsChanged(latitude + (rand.nextGaussian() / 1000.0), longitude
                     + (rand.nextGaussian() / 1000.0), rand.nextInt(1000));

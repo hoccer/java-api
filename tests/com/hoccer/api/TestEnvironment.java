@@ -165,12 +165,13 @@ public class TestEnvironment extends LinccerTestsBase {
     public void gpsQualityTest() throws Exception {
         final Linccer linccer = new Linccer(createDescription());
 
-        placeNearBy(linccer);
+        double[] longlat = getUniqueLongLat();
+        linccer.onGpsChanged(longlat[1], longlat[0], 100);
         assertThat("devices", linccer.getEnvironmentStatus().getDevices(), is(equalTo(1)));
         assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(2)));
-        linccer.onGpsChanged(22.012, 102.115, 10);
+        linccer.onGpsChanged(longlat[1], longlat[0], 10);
         assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(2)));
-        linccer.onGpsChanged(22.012, 102.115, 10010);
+        linccer.onGpsChanged(longlat[1], longlat[0], 1010);
         assertThat(linccer.getEnvironmentStatus().getQuality(), is(equalTo(1)));
         assertThat("devices", linccer.getEnvironmentStatus().getDevices(), is(equalTo(1)));
 
