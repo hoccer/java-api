@@ -40,12 +40,17 @@ public class ShareSimpleMessage {
     public static void main(String[] args) {
 
         try {
-            final Linccer linccer = new Linccer(new ClientConfig("PlaygroundLinccer"));
+            final Linccer linccer = new Linccer(new ClientConfig("Playground Linccer"));
             linccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
 
             JSONObject payload = linccer.share("1:n", new JSONObject(
                     "{message : 'hello world', timestamp : '" + (new Date()).getTime() + "'}"));
-            System.out.println("shared content " + payload);
+
+            if (payload != null)
+                System.out.println("shared content " + payload);
+            else
+                System.out.println("no receiver");
+
         } catch (Exception e) {
             e.printStackTrace();
         }
