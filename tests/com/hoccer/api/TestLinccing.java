@@ -34,9 +34,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TestLinccing extends LinccerTestsBase {
+
+    @Before
+    public void setUp() throws Exception {
+        Thread.sleep(100); // TODO does this prevent flakyness...
+    }
 
     @Test(timeout = 20000)
     public void oneToOneSuccsess() throws Exception {
@@ -64,6 +70,7 @@ public class TestLinccing extends LinccerTestsBase {
 
     @Test(timeout = 6000)
     public void oneToOneSuccsessWithThreeClients() throws Exception {
+
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
@@ -87,6 +94,7 @@ public class TestLinccing extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void oneToOneReceiveCollision() throws Exception {
+
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
@@ -118,6 +126,7 @@ public class TestLinccing extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void oneToOneShareCollision() throws Exception {
+
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
@@ -149,6 +158,7 @@ public class TestLinccing extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void oneToManySuccess() throws Exception {
+
         final Linccer linccerA = new Linccer(createDescription());
         final Linccer linccerB = new Linccer(createDescription());
         final Linccer linccerC = new Linccer(createDescription());
