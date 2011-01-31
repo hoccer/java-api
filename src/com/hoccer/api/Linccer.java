@@ -114,12 +114,13 @@ public class Linccer extends CloudService {
             throw new UpdateException("could not update environment because server responded with "
                     + response.getStatusLine().getStatusCode() + " and an unparsable body");
         }
+
         try {
             mEnvironmentStatus = new EnvironmentStatus(convertResponseToJsonObject(response));
         } catch (Exception e) {
             throw new UpdateException("could not update environment because server responded with "
                     + response.getStatusLine().getStatusCode() + " and an ill formed body: "
-                    + e.toString());
+                    + e.getMessage());
         }
 
     }

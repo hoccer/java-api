@@ -77,7 +77,15 @@ public class CloudService {
     protected JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
         String body = convertResponseToString(response);
-        return new JSONObject(body);
+
+        JSONObject json = null;
+        try {
+            json = new JSONObject(body);
+        } catch (Exception e) {
+            throw new ParseException("could not parse the json '" + body + "'");
+        }
+
+        return json;
     }
 
     protected JSONArray convertResponseToJsonArray(HttpResponse response) throws ParseException,
