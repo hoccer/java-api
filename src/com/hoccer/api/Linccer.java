@@ -46,8 +46,9 @@ import org.json.JSONObject;
 
 public class Linccer extends CloudService {
 
-    private Environment       mEnvironment = new Environment();
+    private Environment       mEnvironment                  = new Environment();
     private EnvironmentStatus mEnvironmentStatus;
+    private boolean           mAutoSubmitEnvironmentChanges = true;
 
     public Linccer(ClientConfig config) {
         super(config);
@@ -88,6 +89,12 @@ public class Linccer extends CloudService {
     private void onEnvironmentChanged(Environment environment) throws UpdateException {
         mEnvironment = environment;
 
+        if (mAutoSubmitEnvironmentChanges) {
+            submitEnvironment();
+        }
+    }
+
+    public void submitEnvironment() throws UpdateException {
         HttpResponse response;
         try {
             resetHttpClient();
@@ -122,7 +129,6 @@ public class Linccer extends CloudService {
                     + response.getStatusLine().getStatusCode() + " and an ill formed body: "
                     + e.getMessage());
         }
-
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
@@ -290,4 +296,11 @@ public class Linccer extends CloudService {
         throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
     }
 
+    public boolean autoSubmitEnvironmentChanges() {
+        return mAutoSubmitEnvironmentChanges;
+    }
+
+    public void autoSubmitEnvironmentChanges(boolean flag) {
+        mAutoSubmitEnvironmentChanges = flag;
+    }
 }
