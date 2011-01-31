@@ -94,7 +94,7 @@ public class TestFileCache {
 
         blockUntilRequestIsDone(storeRequest);
 
-        assertThat(storeRequest.getStatusCode(), is(equalTo(200)));
+        assertThat(storeRequest.getStatusCode(), is(equalTo(201)));
         assertThat(storeRequest.getBodyAsString(), containsString("https://filecache"));
         assertThat(storeRequest.getBodyAsString(), containsString(".hoccer.com"));
     }
@@ -154,7 +154,7 @@ public class TestFileCache {
                     }
                 });
         assertThat(uri, containsString("https://filecache"));
-        assertThat(sink.getContentType(), is(equalTo("text/plain;charset=utf-8")));
+        assertThat(sink.getContentType(), is(equalTo("text/plain")));
         assertThat(handler.body.toString(), is(equalTo("hello file cache")));
 
     }

@@ -39,14 +39,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.InputStreamEntity;
 
 import com.hoccer.data.StreamableContent;
 import com.hoccer.http.AsyncHttpGet;
 import com.hoccer.http.AsyncHttpPut;
 import com.hoccer.http.AsyncHttpRequest;
 import com.hoccer.http.HttpResponseHandler;
-import com.hoccer.http.MultipartHttpEntity;
 
 public class FileCache extends CloudService {
 
@@ -63,11 +63,18 @@ public class FileCache extends CloudService {
     public String store(StreamableContent data, int secondsUntilExipred)
             throws ClientProtocolException, IOException {
 
-        MultipartHttpEntity multipart = new MultipartHttpEntity();
-        multipart.addPart("upload", data);
-        String url = ClientConfig.getFileCacheBaseUri() + "/?expires_in=" + secondsUntilExipred;
-        HttpPost request = new HttpPost(sign(url));
-        request.setEntity(multipart);
+        String url = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID() + "/?expires_in="
+                + secondsUntilExipred;
+        HttpPut request = new HttpPut(sign(url));
+
+        InputStreamEntity entity = new InputStreamEntity(data.openInputStream(), data
+                .getStreamLength());
+        request.addHeader("Content-Disposition", " attachment; filename=\"" + data.getFilename()
+                + "\"");
+        entity.setContentType(data.getContentType());
+        request.setEntity(entity);
+        request.addHeader("Content-Type", data.getContentType());
+
         HttpResponse response = getHttpClient().execute(request);
 
         return convertResponseToString(response);
