@@ -42,8 +42,10 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     public boolean              isReceiving                     = false;
     public boolean              wasSuccessful                   = false;
 
-    public double               progress                        = -1;
+    public double               sendProgress                    = -1;
+    public double               receiveProgress                 = -1;
     public StreamableContent    body                            = null;
+    public int                  statusCode                      = -1;
 
     @Override
     public void onHeaderAvailable(HashMap<String, String> headers) {
@@ -56,22 +58,26 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
     public void onError(int statusCode, StreamableContent body) {
         reset();
         hasError = true;
+        this.statusCode = statusCode;
         this.body = body;
     }
 
     @Override
-    public void onReceiving(double pProgress) {
-        progress = pProgress;
+    public void onReceiving(double progress) {
+        System.out.println("receiving: " + progress + "%");
+        receiveProgress = progress;
     }
 
     @Override
     public void onSending(double progress) {
-        this.progress = progress;
+        System.out.println("sending: " + progress + "%");
+        sendProgress = progress;
     }
 
     @Override
     public void onSuccess(int statusCode, StreamableContent body) {
         reset();
+        this.statusCode = statusCode;
         wasSuccessful = true;
         this.body = body;
     }

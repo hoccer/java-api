@@ -31,6 +31,7 @@ package com.hoccer.api;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
 import java.util.HashMap;
@@ -157,5 +158,70 @@ public class TestFileCache {
         assertThat(sink.getContentType(), is(equalTo("text/plain")));
         assertThat(handler.body.toString(), is(equalTo("hello file cache")));
 
+    }
+
+    @Test
+    public void storingLargerAmountOfData() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+
+        GenericStreamableContent data = new GenericStreamableContent();
+        data.setContentType("text/plain");
+        StringBuffer content = new StringBuffer();
+        for (int i = 0; i < 20000; i++) {
+            content.append('a');
+        }
+
+        data.openOutputStream().write(content.toString().getBytes(), 0,
+                content.toString().getBytes().length);
+
+        String uri = filecache.asyncStore(data, 10, handler);
+
+        TestHelper.blockUntilTrue("request should have been successful by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return handler.wasSuccessful;
+                    }
+                });
+
+        assertThat(handler.body.toString(), containsString("https://filecache"));
+        assertThat(HttpHelper.getAsString(uri), is(equalTo(content.toString())));
+    }
+
+    @Test
+    public void abortStoringIfNotAuthentificated() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test",
+                "invalid-api-key", "invalid-secret"));
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+
+        GenericStreamableContent data = new GenericStreamableContent();
+        data.setContentType("text/plain");
+        StringBuffer content = new StringBuffer();
+        for (int i = 0; i < 30000; i++) {
+            content.append('a');
+        }
+
+        data.openOutputStream().write(content.toString().getBytes(), 0,
+                content.toString().getBytes().length);
+
+        String uri = filecache.asyncStore(data, 10, handler);
+
+        TestHelper.blockUntilTrue("request should have been aborted by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return handler.hasError;
+                    }
+                });
+
+        assertThat(handler.statusCode, is(equalTo(401)));
+        assertThat(handler.body.toString(), is(equalTo("missing api key")));
+        // assertThat(HttpHelper.getStatusCode(uri), is(equalTo(404)));
+        assertTrue("should not have completed uplaod", handler.sendProgress < 90);
     }
 }
