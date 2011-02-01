@@ -45,6 +45,7 @@ import com.hoccer.data.StreamableString;
 import com.hoccer.http.AsyncHttpPut;
 import com.hoccer.http.AsyncHttpRequest;
 import com.hoccer.http.ResponseHandlerForTesting;
+import com.hoccer.tools.HttpClientException;
 import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
@@ -62,8 +63,6 @@ public class TestFileCache {
         filecache.fetch(locationUri, data);
 
         assertThat(data.toString(), is(equalTo("hello world")));
-
-        Thread.sleep(2000);
         filecache.fetch(locationUri, data);
     }
 
@@ -96,8 +95,8 @@ public class TestFileCache {
         blockUntilRequestIsDone(storeRequest);
 
         assertThat(storeRequest.getStatusCode(), is(equalTo(201)));
-        assertThat(storeRequest.getBodyAsString(), containsString("https://filecache"));
-        assertThat(storeRequest.getBodyAsString(), containsString(".hoccer.com"));
+        assertThat(storeRequest.getBodyAsString(), containsString(uri
+                .substring(0, uri.indexOf('?'))));
     }
 
     protected void blockUntilRequestIsDone(final AsyncHttpRequest pRequest) throws Exception {
@@ -127,7 +126,7 @@ public class TestFileCache {
                     }
                 });
 
-        assertThat(handler.body.toString(), containsString("https://filecache"));
+        assertThat(handler.body.toString(), containsString(uri));
         assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
     }
 
@@ -169,7 +168,7 @@ public class TestFileCache {
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/plain");
         StringBuffer content = new StringBuffer();
-        for (int i = 0; i < 20000; i++) {
+        for (int i = 0; i < 100000; i++) {
             content.append('a');
         }
 
@@ -178,7 +177,7 @@ public class TestFileCache {
 
         String uri = filecache.asyncStore(data, 10, handler);
 
-        TestHelper.blockUntilTrue("request should have been successful by now", 3000,
+        TestHelper.blockUntilTrue("request should have been successful by now", 6000,
                 new TestHelper.Condition() {
 
                     @Override
@@ -187,7 +186,7 @@ public class TestFileCache {
                     }
                 });
 
-        assertThat(handler.body.toString(), containsString("https://filecache"));
+        assertThat(handler.body.toString(), containsString(uri));
         assertThat(HttpHelper.getAsString(uri), is(equalTo(content.toString())));
     }
 
@@ -220,8 +219,16 @@ public class TestFileCache {
                 });
 
         assertThat(handler.statusCode, is(equalTo(401)));
+
+        boolean has404 = false;
+        try {
+            HttpHelper.getAsString(uri);
+        } catch (HttpClientException e) {
+            if (e.getStatusCode() == 404)
+                has404 = true;
+        }
+        assertTrue("should have got 404", has404);
+
         assertThat(handler.body.toString(), is(equalTo("missing api key")));
-        // assertThat(HttpHelper.getStatusCode(uri), is(equalTo(404)));
-        assertTrue("should not have completed uplaod", handler.sendProgress < 90);
     }
 }
