@@ -29,6 +29,7 @@
 package com.hoccer.api;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -86,7 +87,8 @@ public class Linccer extends CloudService {
         }
     }
 
-    private void onEnvironmentChanged(Environment environment) throws UpdateException {
+    private void onEnvironmentChanged(Environment environment) throws UpdateException,
+            ClientProtocolException, IOException {
         mEnvironment = environment;
 
         if (mAutoSubmitEnvironmentChanges) {
@@ -94,7 +96,7 @@ public class Linccer extends CloudService {
         }
     }
 
-    public void submitEnvironment() throws UpdateException {
+    public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
         HttpResponse response;
         try {
             resetHttpClient();
@@ -102,7 +104,12 @@ public class Linccer extends CloudService {
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
             response = getHttpClient().execute(request);
-        } catch (Exception e) {
+        } catch (JSONException e) {
+            mEnvironmentStatus = null;
+            throw new UpdateException("could not update gps measurement for "
+                    + mConfig.getClientUri() + " because of " + e);
+        } catch (UnsupportedEncodingException e) {
+            mEnvironmentStatus = null;
             throw new UpdateException("could not update gps measurement for "
                     + mConfig.getClientUri() + " because of " + e);
         } finally {
@@ -111,6 +118,7 @@ public class Linccer extends CloudService {
 
         if (response.getStatusLine().getStatusCode() != 201) {
             try {
+                mEnvironmentStatus = null;
                 throw new UpdateException(
                         "could not update environment because server responded with "
                                 + response.getStatusLine().getStatusCode() + ": "
@@ -125,6 +133,7 @@ public class Linccer extends CloudService {
         try {
             mEnvironmentStatus = new EnvironmentStatus(convertResponseToJsonObject(response));
         } catch (Exception e) {
+            mEnvironmentStatus = null;
             throw new UpdateException("could not update environment because server responded with "
                     + response.getStatusLine().getStatusCode() + " and an ill formed body: "
                     + e.getMessage());
@@ -132,43 +141,45 @@ public class Linccer extends CloudService {
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         onGpsChanged(latitude, longitude, accuracy, new Date());
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy, Date date)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, date);
         onEnvironmentChanged(mEnvironment);
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy, long time)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         onGpsChanged(latitude, longitude, accuracy, new Date(time));
     }
 
     public void onNetworkChanged(double latitude, double longitude, int accuracy)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         onNetworkChanged(latitude, longitude, accuracy, new Date());
     }
 
     public void onNetworkChanged(double latitude, double longitude, int accuracy, Date date)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, date);
         onEnvironmentChanged(mEnvironment);
     }
 
     public void onNetworkChanged(double latitude, double longitude, int accuracy, long time)
-            throws UpdateException {
+            throws UpdateException, ClientProtocolException, IOException {
         onNetworkChanged(latitude, longitude, accuracy, new Date(time));
     }
 
-    public void onWifiChanged(List<String> bssids) throws UpdateException {
+    public void onWifiChanged(List<String> bssids) throws UpdateException, ClientProtocolException,
+            IOException {
         mEnvironment.setWifiMeasurement(bssids, new Date());
         onEnvironmentChanged(mEnvironment);
     }
 
-    public void onWifiChanged(String[] bssids) throws UpdateException {
+    public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,
+            IOException {
         onWifiChanged(Arrays.asList(bssids));
     }
 
