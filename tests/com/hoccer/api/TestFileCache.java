@@ -34,6 +34,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -165,15 +166,7 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent data = new GenericStreamableContent();
-        data.setContentType("text/plain");
-        StringBuffer content = new StringBuffer();
-        for (int i = 0; i < 100000; i++) {
-            content.append('a');
-        }
-
-        data.openOutputStream().write(content.toString().getBytes(), 0,
-                content.toString().getBytes().length);
+        GenericStreamableContent data = getLargeDataObject();
 
         String uri = filecache.asyncStore(data, 10, handler);
 
@@ -187,7 +180,7 @@ public class TestFileCache {
                 });
 
         assertThat(handler.body.toString(), containsString(uri));
-        assertThat(HttpHelper.getAsString(uri), is(equalTo(content.toString())));
+        assertThat(HttpHelper.getAsString(uri), is(equalTo(data.toString())));
     }
 
     @Test
@@ -197,15 +190,7 @@ public class TestFileCache {
                 "invalid-api-key", "invalid-secret"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent data = new GenericStreamableContent();
-        data.setContentType("text/plain");
-        StringBuffer content = new StringBuffer();
-        for (int i = 0; i < 30000; i++) {
-            content.append('a');
-        }
-
-        data.openOutputStream().write(content.toString().getBytes(), 0,
-                content.toString().getBytes().length);
+        GenericStreamableContent data = getLargeDataObject();
 
         String uri = filecache.asyncStore(data, 10, handler);
 
@@ -230,5 +215,78 @@ public class TestFileCache {
         assertTrue("should have got 404", has404);
 
         assertThat(handler.body.toString(), is(equalTo("missing api key")));
+    }
+
+    @Test
+    public void simultaneousStoreAndFetch() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        final ResponseHandlerForTesting storeHandler = new ResponseHandlerForTesting();
+        final ResponseHandlerForTesting fetchHandler = new ResponseHandlerForTesting();
+
+        GenericStreamableContent source = getLargeDataObject();
+        String uri = filecache.asyncStore(source, 10, storeHandler);
+        Thread.sleep(100);
+
+        GenericStreamableContent sink = new GenericStreamableContent();
+        filecache.asyncFetch(uri, sink, fetchHandler);
+
+        TestHelper.blockUntilTrue("request should have been successful by now", 2000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return fetchHandler.receiveProgress > 10;
+                    }
+                });
+
+        assertTrue("should not have fully received the data", fetchHandler.receiveProgress < 70);
+        // assertTrue(, is(greauri));
+
+        TestHelper.blockUntilTrue("request should have been successful by now", 2000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return fetchHandler.wasSuccessful;
+                    }
+                });
+
+        assertThat(sink.toString(), is(equalTo(source.toString())));
+    }
+
+    @Test
+    public void cachelStoringWhileUploading() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test",
+                "invalid-api-key", "invalid-secret"));
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+
+        GenericStreamableContent data = getLargeDataObject();
+        String uri = filecache.asyncStore(data, 10, handler);
+        Thread.sleep(200);
+        filecache.cancel(uri);
+
+        TestHelper.blockUntilTrue("request should have been aborted by now", 3000,
+                new TestHelper.Condition() {
+
+                    @Override
+                    public boolean isSatisfied() throws Exception {
+                        return handler.hasError;
+                    }
+                });
+    }
+
+    private GenericStreamableContent getLargeDataObject() throws IOException {
+        GenericStreamableContent data = new GenericStreamableContent();
+        data.setContentType("text/plain");
+        StringBuffer content = new StringBuffer();
+        for (int i = 0; i < 100000; i++) {
+            content.append('a');
+        }
+
+        data.openOutputStream().write(content.toString().getBytes(), 0,
+                content.toString().getBytes().length);
+        return data;
     }
 }
