@@ -64,6 +64,7 @@ public class TestFileCache {
         filecache.fetch(locationUri, data);
 
         assertThat(data.toString(), is(equalTo("hello world")));
+        assertThat(data.getContentType(), is(equalTo("text/plain")));
         filecache.fetch(locationUri, data);
     }
 
@@ -226,7 +227,7 @@ public class TestFileCache {
 
         GenericStreamableContent source = getLargeDataObject(1000000);
         String uri = filecache.asyncStore(source, 10, storeHandler);
-        Thread.sleep(400);
+        Thread.sleep(200);
 
         GenericStreamableContent sink = new GenericStreamableContent();
         filecache.asyncFetch(uri, sink, fetchHandler);
@@ -242,9 +243,9 @@ public class TestFileCache {
 
         assertTrue("should not have fully received the data", fetchHandler.receiveProgress < 70);
         assertTrue("should still be uploading data", storeHandler.sendProgress > 10
-                && storeHandler.sendProgress < 70);
+                && storeHandler.sendProgress < 95);
 
-        TestHelper.blockUntilTrue("request should have been successful by now", 2000,
+        TestHelper.blockUntilTrue("request should have been successful by now", 6000,
                 new TestHelper.Condition() {
 
                     @Override
