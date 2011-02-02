@@ -142,7 +142,7 @@ public class LinccerTestsBase {
         return pair;
     }
 
-    static void placeNearBy(Linccer... linccers) throws UpdateException {
+    static void placeNearBy(Linccer... linccers) throws Exception {
         double[] pair = getUniqueLongLat();
         double latitude = pair[1];
         double longitude = pair[0];
