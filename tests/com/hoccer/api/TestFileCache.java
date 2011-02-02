@@ -166,7 +166,7 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent data = getLargeDataObject();
+        GenericStreamableContent data = getLargeDataObject(1000000);
 
         String uri = filecache.asyncStore(data, 10, handler);
 
@@ -190,7 +190,7 @@ public class TestFileCache {
                 "invalid-api-key", "invalid-secret"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent data = getLargeDataObject();
+        GenericStreamableContent data = getLargeDataObject(1000000);
 
         String uri = filecache.asyncStore(data, 10, handler);
 
@@ -224,14 +224,14 @@ public class TestFileCache {
         final ResponseHandlerForTesting storeHandler = new ResponseHandlerForTesting();
         final ResponseHandlerForTesting fetchHandler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent source = getLargeDataObject();
+        GenericStreamableContent source = getLargeDataObject(1000000);
         String uri = filecache.asyncStore(source, 10, storeHandler);
-        Thread.sleep(100);
+        Thread.sleep(400);
 
         GenericStreamableContent sink = new GenericStreamableContent();
         filecache.asyncFetch(uri, sink, fetchHandler);
 
-        TestHelper.blockUntilTrue("request should have been successful by now", 2000,
+        TestHelper.blockUntilTrue("request should have been successful by now", 20000,
                 new TestHelper.Condition() {
 
                     @Override
@@ -241,7 +241,8 @@ public class TestFileCache {
                 });
 
         assertTrue("should not have fully received the data", fetchHandler.receiveProgress < 70);
-        // assertTrue(, is(greauri));
+        assertTrue("should still be uploading data", storeHandler.sendProgress > 10
+                && storeHandler.sendProgress < 70);
 
         TestHelper.blockUntilTrue("request should have been successful by now", 2000,
                 new TestHelper.Condition() {
@@ -252,7 +253,8 @@ public class TestFileCache {
                     }
                 });
 
-        assertThat(sink.toString(), is(equalTo(source.toString())));
+        assertThat(sink.openOutputStream().toString(), is(equalTo(source.openOutputStream()
+                .toString())));
     }
 
     @Test
@@ -262,7 +264,7 @@ public class TestFileCache {
                 "invalid-api-key", "invalid-secret"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
 
-        GenericStreamableContent data = getLargeDataObject();
+        GenericStreamableContent data = getLargeDataObject(100000);
         String uri = filecache.asyncStore(data, 10, handler);
         Thread.sleep(200);
         filecache.cancel(uri);
@@ -277,11 +279,11 @@ public class TestFileCache {
                 });
     }
 
-    private GenericStreamableContent getLargeDataObject() throws IOException {
+    private GenericStreamableContent getLargeDataObject(int size) throws IOException {
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/plain");
         StringBuffer content = new StringBuffer();
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < size; i++) {
             content.append('a');
         }
 

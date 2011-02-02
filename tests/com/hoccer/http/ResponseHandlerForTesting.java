@@ -64,13 +64,11 @@ public class ResponseHandlerForTesting implements HttpResponseHandler {
 
     @Override
     public void onReceiving(double progress) {
-        // System.out.println("receiving: " + progress + "%");
         receiveProgress = progress;
     }
 
     @Override
     public void onSending(double progress) {
-        // System.out.println("sending: " + progress + "%");
         sendProgress = progress;
     }
 
