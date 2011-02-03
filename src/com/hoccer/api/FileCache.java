@@ -58,9 +58,12 @@ public class FileCache extends CloudService {
     }
 
     public HashMap<String, AsyncHttpRequest> getOngoingRequests() {
-        for (String uri : mOngoingRequests.keySet()) {
-            if (mOngoingRequests.get(uri).isTaskCompleted()) {
-                mOngoingRequests.remove(uri);
+
+        synchronized (mOngoingRequests) {
+            for (String uri : mOngoingRequests.keySet()) {
+                if (mOngoingRequests.get(uri).isTaskCompleted()) {
+                    mOngoingRequests.remove(uri);
+                }
             }
         }
 
@@ -127,7 +130,9 @@ public class FileCache extends CloudService {
         storeRequest.registerResponseHandler(responseHandler);
         storeRequest.setBody(data);
         storeRequest.start();
-        mOngoingRequests.put(uri, storeRequest);
+        synchronized (mOngoingRequests) {
+            mOngoingRequests.put(uri, storeRequest);
+        }
 
         return uri;
     }
@@ -137,13 +142,29 @@ public class FileCache extends CloudService {
         fetchRequest.registerResponseHandler(responseHandler);
         fetchRequest.setStreamableContent(sink);
         fetchRequest.start();
-        mOngoingRequests.put(uri, fetchRequest);
+        synchronized (mOngoingRequests) {
+            mOngoingRequests.put(uri, fetchRequest);
+        }
     }
 
     public void cancel(String uri) {
-        AsyncHttpRequest request = mOngoingRequests.remove(uri);
-        if (request != null) {
-            request.interrupt();
+        synchronized (mOngoingRequests) {
+            AsyncHttpRequest request = mOngoingRequests.remove(uri);
+            if (request != null) {
+                request.interrupt();
+            }
+        }
+    }
+
+    public boolean isOngoing(String uri) {
+        synchronized (mOngoingRequests) {
+            return mOngoingRequests.get(uri) == null ? false : true;
+        }
+    }
+
+    public boolean hasOngoingRequests() {
+        synchronized (mOngoingRequests) {
+            return mOngoingRequests.size() != 0;
         }
     }
 }
