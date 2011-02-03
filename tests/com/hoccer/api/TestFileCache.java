@@ -117,7 +117,14 @@ public class TestFileCache {
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
         final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
         String uri = filecache.asyncStore(new StreamableString("hello world 12 11"), 10, handler);
+        blockUntilRequestWasSuccsessful(handler);
 
+        assertThat(handler.body.toString(), containsString(uri));
+        assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
+    }
+
+    private void blockUntilRequestWasSuccsessful(final ResponseHandlerForTesting handler)
+            throws Exception {
         TestHelper.blockUntilTrue("request should have been successful by now", 3000,
                 new TestHelper.Condition() {
 
@@ -126,9 +133,6 @@ public class TestFileCache {
                         return handler.wasSuccessful;
                     }
                 });
-
-        assertThat(handler.body.toString(), containsString(uri));
-        assertThat(HttpHelper.getAsString(uri), is(equalTo("hello world 12 11")));
     }
 
     @Test
@@ -277,6 +281,8 @@ public class TestFileCache {
                         return handler.hasError;
                     }
                 });
+
+        filecache.cancel(uri);
     }
 
     private GenericStreamableContent getLargeDataObject(int size) throws IOException {
@@ -290,5 +296,20 @@ public class TestFileCache {
         data.openOutputStream().write(content.toString().getBytes(), 0,
                 content.toString().getBytes().length);
         return data;
+    }
+
+    @Test
+    public void ongoingRequestHandling() throws Exception {
+
+        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        assertThat(filecache.getOngoingRequests().size(), is(equalTo(0)));
+
+        final ResponseHandlerForTesting handler = new ResponseHandlerForTesting();
+        String uri = filecache.asyncStore(getLargeDataObject(10000), 10, handler);
+        assertThat(filecache.getOngoingRequests().size(), is(equalTo(1)));
+
+        blockUntilRequestWasSuccsessful(handler);
+
+        assertThat(filecache.getOngoingRequests().size(), is(equalTo(0)));
     }
 }

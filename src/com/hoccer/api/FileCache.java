@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.apache.http.Header;
@@ -59,6 +58,12 @@ public class FileCache extends CloudService {
     }
 
     public HashMap<String, AsyncHttpRequest> getOngoingRequests() {
+        for (String uri : mOngoingRequests.keySet()) {
+            if (mOngoingRequests.get(uri).isTaskCompleted()) {
+                mOngoingRequests.remove(uri);
+            }
+        }
+
         return mOngoingRequests;
     }
 
@@ -135,12 +140,10 @@ public class FileCache extends CloudService {
         mOngoingRequests.put(uri, fetchRequest);
     }
 
-    public void cancel(String uri) throws NoSuchElementException {
+    public void cancel(String uri) {
         AsyncHttpRequest request = mOngoingRequests.remove(uri);
         if (request != null) {
             request.interrupt();
-        } else
-            throw new NoSuchElementException(uri
-                    + " could not be found in ongoing request with size " + mOngoingRequests.size());
+        }
     }
 }
