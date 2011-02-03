@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpResponseException;
@@ -42,6 +43,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
 
+import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.http.AsyncHttpGet;
 import com.hoccer.http.AsyncHttpPut;
@@ -97,6 +99,16 @@ public class FileCache extends CloudService {
         int len;
         while ((len = is.read(buffer)) != -1) {
             storageStream.write(buffer, 0, len);
+        }
+
+        if (data instanceof GenericStreamableContent) {
+            Header[] headers = response.getAllHeaders();
+            HashMap<String, String> headermap = new HashMap<String, String>();
+            for (int i = 0; i < headers.length; i++) {
+                headermap.put(headers[i].getName(), headers[i].getValue());
+            }
+            AsyncHttpRequest.setTypeAndFilename((GenericStreamableContent) data, headermap,
+                    locationUri);
         }
     }
 

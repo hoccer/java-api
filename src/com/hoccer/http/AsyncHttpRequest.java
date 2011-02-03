@@ -298,9 +298,11 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         if (mResponseContent == null) {
             GenericStreamableContent contentReceiver = new GenericStreamableContent();
-            setTypeAndFilename(contentReceiver, headers, getUri());
-
             mResponseContent = contentReceiver;
+        }
+
+        if (mResponseContent instanceof GenericStreamableContent) {
+            setTypeAndFilename((GenericStreamableContent) mResponseContent, headers, getUri());
         }
     }
 
