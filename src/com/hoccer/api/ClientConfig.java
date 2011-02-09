@@ -35,13 +35,17 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private final static String mLinccerUri   = "https://linccer-beta.hoccer.com/v3";
-    private final static String mFileCacheUri = "https://filecache-beta.hoccer.com/v3";
-    private final String        mApplicationName;
-    private final UUID          mClientId;
+    private static String mLinccerUri;
+    private static String mFileCacheUri;
+    private final String  mApplicationName;
+    private final UUID    mClientId;
 
-    private String              mApiKey;
-    private String              mSharedSecret;
+    private String        mApiKey;
+    private String        mSharedSecret;
+
+    static {
+        useSandboxServers();
+    }
 
     public ClientConfig(String applicatioName) {
         mApplicationName = applicatioName;
@@ -71,6 +75,21 @@ public class ClientConfig {
 
         mApiKey = apiKey;
         mSharedSecret = sharedSecret;
+    }
+
+    public static void useBetaServers() {
+        mLinccerUri = "https://linccer-beta.hoccer.com/v3";
+        mFileCacheUri = "https://filecache-beta.hoccer.com/v3";
+    }
+
+    public static void useSandboxServers() {
+        mLinccerUri = "https://linccer-sandbox.hoccer.com/v3";
+        mFileCacheUri = "https://filecache-sandbox.hoccer.com/v3";
+    }
+
+    public static void useProductionServers() {
+        mLinccerUri = "https://linccer.hoccer.com/v3";
+        mFileCacheUri = "https://filecache.hoccer.com/v3";
     }
 
     private void useDemoApiKey() {
