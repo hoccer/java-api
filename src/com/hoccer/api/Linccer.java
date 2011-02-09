@@ -33,7 +33,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -113,8 +112,6 @@ public class Linccer extends CloudService {
             mEnvironmentStatus = null;
             throw new UpdateException("could not update gps measurement for "
                     + mConfig.getClientUri() + " because of " + e);
-        } finally {
-            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         if (response.getStatusLine().getStatusCode() != 201) {
@@ -141,6 +138,9 @@ public class Linccer extends CloudService {
         }
     }
 
+    /**
+     * checks network latency in milliseconds and writes it to the environment
+     */
     public int measureNetworkLatency() {
         resetHttpClient();
         String uri = mConfig.getClientUri();
@@ -222,7 +222,6 @@ public class Linccer extends CloudService {
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(payload.toString()));
             HttpResponse response = getHttpClient().execute(request);
-            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
@@ -252,8 +251,6 @@ public class Linccer extends CloudService {
         } catch (UpdateException e) {
             throw new ClientActionException("could not share payload " + payload.toString()
                     + " because of " + e);
-        } finally {
-            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         throw new ClientActionException("could not share payload " + payload.toString()
@@ -277,7 +274,6 @@ public class Linccer extends CloudService {
             String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
             HttpGet request = new HttpGet(sign(uri));
             HttpResponse response = getHttpClient().execute(request);
-            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
 
             statusCode = response.getStatusLine().getStatusCode();
             switch (statusCode) {
@@ -302,8 +298,6 @@ public class Linccer extends CloudService {
             throw new ClientActionException("could not receive payload because of " + e);
         } catch (UpdateException e) {
             throw new ClientActionException("could not receive payload because of " + e);
-        } finally {
-            getHttpClient().getConnectionManager().closeIdleConnections(1, TimeUnit.MICROSECONDS);
         }
 
         throw new ClientActionException(
