@@ -41,6 +41,7 @@ public class Environment {
     private LocationMeasurement mGpsMeasurement;
     private LocationMeasurement mNetworkMeasurement;
     private WifiMeasurement     mWifiMeasurement;
+    private int                 mNetworkLatency;
 
     /**
      * Save location which is obtained from the gps unit.
@@ -71,6 +72,9 @@ public class Environment {
         }
         if (mWifiMeasurement != null) {
             environment.put("wifi", mWifiMeasurement.toJson());
+        }
+        if (mNetworkLatency > 0) {
+            environment.put("latency", mNetworkLatency);
         }
         return environment;
     }
@@ -114,5 +118,9 @@ public class Environment {
             json.put("timestamp", timestamp.getTime() / 1000L);
             return json;
         }
+    }
+
+    public void setNetworkLatency(int latency) {
+        mNetworkLatency = latency;
     }
 }

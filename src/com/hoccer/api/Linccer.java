@@ -40,6 +40,7 @@ import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
@@ -138,6 +139,28 @@ public class Linccer extends CloudService {
                     + response.getStatusLine().getStatusCode() + " and an ill formed body: "
                     + e.getMessage());
         }
+    }
+
+    public int measureNetworkLatency() {
+        resetHttpClient();
+        String uri = mConfig.getClientUri();
+        HttpHead request = new HttpHead(sign(uri));
+        long startTime = System.currentTimeMillis();
+        try {
+            HttpResponse response = getHttpClient().execute(request);
+            if (response == null || response.getStatusLine().getStatusCode() != 200) {
+                return -1;
+            }
+        } catch (ClientProtocolException e) {
+            return -2;
+        } catch (IOException e) {
+            return -3;
+        }
+
+        int latency = (int) (System.currentTimeMillis() - startTime);
+        mEnvironment.setNetworkLatency(latency);
+
+        return latency;
     }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
