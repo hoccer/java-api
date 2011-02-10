@@ -78,8 +78,7 @@ public class ClientConfig {
     }
 
     public static void useBetaServers() {
-        // mLinccerUri = "https://linccer-beta.hoccer.com/v3";
-        mLinccerUri = "http://wolke.hoccer.com:9210/v3";
+        mLinccerUri = "https://linccer-beta.hoccer.com/v3";
         mFileCacheUri = "https://filecache-beta.hoccer.com/v3";
     }
 

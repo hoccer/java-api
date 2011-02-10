@@ -62,17 +62,9 @@ public class Linccer extends CloudService {
         super.finalize();
     }
 
-    // hacky workaround to make sure the connection manager does not wait for a free connection for
-    // ever
-    private void resetHttpClient() {
-        getHttpClient().getConnectionManager().shutdown();
-        setupHttpClient();
-    }
-
     public void disconnect() throws UpdateException {
         HttpResponse response;
         try {
-            resetHttpClient();
             String uri = mConfig.getClientUri() + "/environment";
             HttpDelete request = new HttpDelete(sign(uri));
             response = getHttpClient().execute(request);
@@ -100,7 +92,6 @@ public class Linccer extends CloudService {
     public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
         HttpResponse response;
         try {
-            resetHttpClient();
             String uri = mConfig.getClientUri() + "/environment";
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
@@ -145,7 +136,6 @@ public class Linccer extends CloudService {
      * checks network latency in milliseconds writes it to the environment
      */
     public int measureNetworkLatency() {
-        resetHttpClient();
         String uri = mConfig.getClientUri();
         HttpHead request = new HttpHead(sign(uri));
         long startTime = System.currentTimeMillis();
@@ -222,7 +212,6 @@ public class Linccer extends CloudService {
         mode = mapMode(mode);
         int statusCode;
         try {
-            resetHttpClient();
             String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(payload.toString()));
@@ -272,7 +261,6 @@ public class Linccer extends CloudService {
         int statusCode;
 
         try {
-            resetHttpClient();
             String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
             HttpGet request = new HttpGet(sign(uri));
             HttpResponse response = getHttpClient().execute(request);
