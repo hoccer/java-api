@@ -33,8 +33,9 @@ import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.conn.params.ConnPerRoute;
+import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -42,6 +43,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -56,6 +58,20 @@ public class CloudService {
     public CloudService(ClientConfig config) {
         mConfig = config;
         setupHttpClient();
+
+        java.util.logging.Logger.getLogger("org.apache.http.wire").setLevel(
+                java.util.logging.Level.FINEST);
+        java.util.logging.Logger.getLogger("org.apache.http.headers").setLevel(
+                java.util.logging.Level.FINEST);
+
+        System.setProperty("org.apache.commons.logging.Log",
+                "org.apache.commons.logging.impl.SimpleLog");
+        System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+        System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire", "debug");
+        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http", "debug");
+        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.headers",
+                "debug");
+
     }
 
     public ClientConfig getClientConfig() {
@@ -65,13 +81,17 @@ public class CloudService {
     protected void setupHttpClient() {
         BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
-        ConnManagerParams.setMaxTotalConnections(httpParams, 100);
+        ConnManagerParams.setMaxTotalConnections(httpParams, 200);
+        ConnPerRoute connPerRoute = new ConnPerRouteBean(20);
+        ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
         SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-        ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
+        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
         mHttpClient = new DefaultHttpClient(cm, httpParams);
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
+
+        mHttpClient.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
     }
 
     protected JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,

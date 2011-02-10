@@ -158,6 +158,8 @@ public class Linccer extends CloudService {
             return -2;
         } catch (IOException e) {
             return -3;
+        } catch (Exception e) {
+            return -4;
         }
 
         int latency = (int) (System.currentTimeMillis() - startTime);
