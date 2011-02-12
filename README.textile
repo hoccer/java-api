@@ -21,7 +21,7 @@ p. More examples can soon be found in the samples folder.
 
 h2. Install and try out
 
-* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-linccer-client-v0.3.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
+* download our "prebuild JAR":https://github.com/downloads/hoccer/java-api/java-linccer-client-v0.4.jar and "dependency zip":https://github.com/downloads/hoccer/java-api/java-flavored-api-dependencies.zip containing JAR files for Apache HttpClient and JSON
 * write some java code using the Linccer (get inspired by "samples":https://github.com/hoccer/java-api/tree/master/sample/com/hoccer/playground)
 * compile and run with JAR's in classpath
 
@@ -33,8 +33,9 @@ h2. Deployment
 
 h2. Remarks
 
-* The environment updates (gps, network, bssid's,...) must be updated regular (at least every two minutes).
+* The environment updates (gps, network, bssid's,...) must be updated regular (at least every ten seconds).
 * To transfer data between two partners their share and receive must use the same mode (eg. one-to-one or one-to-many)
+* use linccer.measureNetworkLatency() to gain performance in fast networks and enhance linccing in slow networks
 
 h2. Additional Features
 
@@ -43,6 +44,9 @@ h3. Environment Updates
 Make sure the Linccer has as much environment data of the client as possible. Use all available sensors. If you implement for a stationary devices, you could read gps, wifi bssids and the like from a config file.
 
 bc.. 
+// compute current network latency for optimal performance
+linccer.measureNetworkLatency();
+
 // publish gps position (lat, long, accuracy)
 linccer.onGpsChanged(23.44, 102.13, 100);
 
