@@ -79,7 +79,7 @@ public class CloudService {
 
     protected void setupHttpClient() {
         BasicHttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 30 * 1000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 200);
         ConnPerRoute connPerRoute = new ConnPerRouteBean(20);
         ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
