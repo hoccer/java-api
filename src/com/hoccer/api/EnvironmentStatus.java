@@ -5,14 +5,15 @@ import org.json.JSONObject;
 
 public class EnvironmentStatus {
 
-    private int    mQuality           = 0;
-    private int    mDevices           = 0;
+    private int        mQuality           = 0;
+    private int        mDevices           = 0;
 
-    private int    mCoordinateQuality = 0;
-    private String mCoordinateInfo    = "no_data";
+    private int        mCoordinateQuality = 0;
+    private String     mCoordinateInfo    = "no_data";
 
-    private int    mWifiQuality       = 0;
-    private String mWifiInfo          = "no_data";
+    private int        mWifiQuality       = 0;
+    private String     mWifiInfo          = "no_data";
+    private final long mCreatedAt;
 
     public EnvironmentStatus(JSONObject statusResponse) throws JSONException {
         mQuality = statusResponse.getInt("quality");
@@ -23,6 +24,12 @@ public class EnvironmentStatus {
 
         mWifiQuality = statusResponse.getJSONObject("wifi").getInt("quality");
         mWifiInfo = statusResponse.getJSONObject("wifi").getString("info");
+
+        mCreatedAt = System.currentTimeMillis();
+    }
+
+    public long getCreationTime() {
+        return mCreatedAt;
     }
 
     public int getQuality() {
