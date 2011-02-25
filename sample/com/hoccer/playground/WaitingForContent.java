@@ -37,17 +37,19 @@ public class WaitingForContent {
 
     public static void main(String[] args) {
 
-        try {
-            final Linccer linccer = new Linccer(new ClientConfig("Playground Linccer"));
-            new Thread(new EnvironmentUpdater(linccer)).start();
+        ClientConfig config = new ClientConfig("Playground Linccer");
+        config.useBetaServers();
+        final Linccer linccer = new Linccer(config);
+        new Thread(new EnvironmentUpdater(linccer)).start();
 
-            while (true) {
+        while (true) {
+            try {
                 System.out.println("waiting for content");
                 JSONObject payload = linccer.receive("1:n", "waiting=true");
                 System.out.println("received " + payload);
+            } catch (Exception e) {
+                System.out.println("Error while receiving: " + e);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -59,13 +61,13 @@ public class WaitingForContent {
         }
 
         public void run() {
-            try {
-                while (true) {
+            while (true) {
+                try {
                     mLinccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
                     Thread.sleep(10 * 1000);
+                } catch (Exception e) {
+                    System.out.println("Error while updateing: " + e);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }

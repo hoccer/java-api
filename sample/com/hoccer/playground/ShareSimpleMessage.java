@@ -40,7 +40,9 @@ public class ShareSimpleMessage {
     public static void main(String[] args) {
 
         try {
-            final Linccer linccer = new Linccer(new ClientConfig("Playground Linccer"));
+            ClientConfig config = new ClientConfig("Playground Linccer");
+            config.useBetaServers();
+            final Linccer linccer = new Linccer(config);
             linccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
 
             JSONObject payload = linccer.share("1:n", new JSONObject(
