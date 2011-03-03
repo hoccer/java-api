@@ -138,7 +138,8 @@ public class TestFileCache {
     @Test
     public void asyncFetchingOfTextViaFileCache() throws Exception {
 
-        FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
+        ClientConfig config = new ClientConfig("File Cache Unit Test");
+        FileCache filecache = new FileCache(config);
         final String uri = filecache.store(new StreamableString("hello file cache"), 10);
 
         final GenericStreamableContent sink = new GenericStreamableContent();

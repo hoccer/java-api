@@ -30,13 +30,18 @@ package com.hoccer.http;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 public class AsyncHttpPut extends AsyncHttpRequestWithBody {
-    
+
     public AsyncHttpPut(String pUrl) {
         super(pUrl);
     }
-    
+
+    public AsyncHttpPut(String pUrl, DefaultHttpClient pHttpClient) {
+        super(pUrl, pHttpClient);
+    }
+
     @Override
     protected HttpEntityEnclosingRequestBase createRequest(String pUrl) {
         HttpPut request = new HttpPut(pUrl);

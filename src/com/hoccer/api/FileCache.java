@@ -126,7 +126,7 @@ public class FileCache extends CloudService {
         String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID();
 
         AsyncHttpPut storeRequest = new AsyncHttpPut(sign(uri + "?expires_in="
-                + secondsUntilExipred));
+                + secondsUntilExipred), getHttpClient());
         storeRequest.registerResponseHandler(responseHandler);
         storeRequest.setBody(data);
         storeRequest.start();
@@ -138,7 +138,7 @@ public class FileCache extends CloudService {
     }
 
     public void asyncFetch(String uri, StreamableContent sink, HttpResponseHandler responseHandler) {
-        AsyncHttpGet fetchRequest = new AsyncHttpGet(uri);
+        AsyncHttpGet fetchRequest = new AsyncHttpGet(uri, getHttpClient());
         fetchRequest.registerResponseHandler(responseHandler);
         fetchRequest.setStreamableContent(sink);
         fetchRequest.start();
