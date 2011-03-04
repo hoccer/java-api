@@ -209,23 +209,25 @@ public class Linccer extends CloudService {
         mode = mapMode(mode);
         int statusCode;
         try {
-            String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
-            HttpPut request = new HttpPut(sign(uri));
-            request.setEntity(new StringEntity(payload.toString()));
-            HttpResponse response = getHttpClient().execute(request);
+            do {
+                String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
+                HttpPut request = new HttpPut(sign(uri));
+                request.setEntity(new StringEntity(payload.toString()));
+                HttpResponse response = getHttpClient().execute(request);
 
-            statusCode = response.getStatusLine().getStatusCode();
-            switch (statusCode) {
-                case 204:
-                    return null;
-                case 200:
-                    return (JSONObject) convertResponseToJsonArray(response).get(0);
-                case 409:
-                    throw new CollidingActionsException("The constrains of '" + mode
-                            + "' were violated. Try again.");
-                default:
-                    // handled at the end of the method
-            }
+                statusCode = response.getStatusLine().getStatusCode();
+                switch (statusCode) {
+                    case 204:
+                        return null;
+                    case 200:
+                        return (JSONObject) convertResponseToJsonArray(response).get(0);
+                    case 409:
+                        throw new CollidingActionsException("The constrains of '" + mode
+                                + "' were violated. Try again.");
+                    default:
+                        // handled at the end of the method
+                }
+            } while (statusCode == 504);
 
         } catch (JSONException e) {
             throw new ClientActionException("Data Error. Could not share.", e);
@@ -255,22 +257,24 @@ public class Linccer extends CloudService {
         int statusCode;
 
         try {
-            String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
-            HttpGet request = new HttpGet(sign(uri));
-            HttpResponse response = getHttpClient().execute(request);
+            do {
+                String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
+                HttpGet request = new HttpGet(sign(uri));
+                HttpResponse response = getHttpClient().execute(request);
 
-            statusCode = response.getStatusLine().getStatusCode();
-            switch (statusCode) {
-                case 204:
-                    return null;
-                case 200:
-                    return convertResponseToJsonArray(response).getJSONObject(0);
-                case 409:
-                    throw new CollidingActionsException("The constrains of '" + mode
-                            + "' were violated. Try again.");
-                default:
-                    // handled at the end of the method
-            }
+                statusCode = response.getStatusLine().getStatusCode();
+                switch (statusCode) {
+                    case 204:
+                        return null;
+                    case 200:
+                        return convertResponseToJsonArray(response).getJSONObject(0);
+                    case 409:
+                        throw new CollidingActionsException("The constrains of '" + mode
+                                + "' were violated. Try again.");
+                    default:
+                        // handled at the end of the method
+                }
+            } while (statusCode == 504);
 
         } catch (JSONException e) {
             throw new ClientActionException("Data Error. Could not receive.", e);
