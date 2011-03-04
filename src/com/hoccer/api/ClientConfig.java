@@ -78,8 +78,8 @@ public class ClientConfig {
     }
 
     public static void useBetaServers() {
-        mLinccerUri = "https://linccer-beta.hoccer.com/v3";
-        mFileCacheUri = "https://filecache-beta.hoccer.com/v3";
+        mLinccerUri = "http://linccer-beta.hoccer.com/v3";
+        mFileCacheUri = "http://filecache-beta.hoccer.com/v3";
     }
 
     public static void useSandboxServers() {

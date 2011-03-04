@@ -40,6 +40,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -79,6 +80,7 @@ public class CloudService {
 
     protected void setupHttpClient() {
         BasicHttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setSoTimeout(httpParams, 200 * 1000);
         HttpConnectionParams.setConnectionTimeout(httpParams, 30 * 1000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 200);
         ConnPerRoute connPerRoute = new ConnPerRouteBean(20);
@@ -89,8 +91,8 @@ public class CloudService {
         ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
         mHttpClient = new DefaultHttpClient(cm, httpParams);
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
-
         mHttpClient.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
+        mHttpClient.setReuseStrategy(new NoConnectionReuseStrategy());
     }
 
     protected JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,

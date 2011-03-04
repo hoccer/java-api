@@ -30,23 +30,27 @@ package com.hoccer.playground;
 
 import org.json.JSONObject;
 
+import com.hoccer.api.ClientActionException;
 import com.hoccer.api.ClientConfig;
 import com.hoccer.api.Linccer;
 
 public class WaitingForContent {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         ClientConfig config = new ClientConfig("Playground Linccer");
         config.useBetaServers();
         final Linccer linccer = new Linccer(config);
         new Thread(new EnvironmentUpdater(linccer)).start();
-
+        Thread.sleep(300);
         while (true) {
             try {
                 System.out.println("waiting for content");
                 JSONObject payload = linccer.receive("1:n", "waiting=true");
                 System.out.println("received " + payload);
+            } catch (ClientActionException e) {
+                System.out.println("Error while receiving: " + e + " caused by "
+                        + e.getCausingError());
             } catch (Exception e) {
                 System.out.println("Error while receiving: " + e);
             }
@@ -64,9 +68,14 @@ public class WaitingForContent {
             while (true) {
                 try {
                     mLinccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
-                    Thread.sleep(10 * 1000);
+                    System.out.println("  refreshing environment on server");
                 } catch (Exception e) {
                     System.out.println("Error while updateing: " + e);
+                }
+                try {
+                    Thread.sleep(20 * 1000);
+                } catch (InterruptedException e) {
+                    //
                 }
             }
         }
