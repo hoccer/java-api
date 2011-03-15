@@ -68,10 +68,11 @@ public class WaitingForContent {
             while (true) {
                 try {
                     mLinccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
-                    System.out.println("  refreshing environment on server");
+                    System.out.println("  refreshed environment on server");
                 } catch (Exception e) {
-                    System.out.println("Error while updateing: " + e);
+                    System.out.println("  Error while updateing: " + e);
                 }
+
                 try {
                     Thread.sleep(20 * 1000);
                 } catch (InterruptedException e) {

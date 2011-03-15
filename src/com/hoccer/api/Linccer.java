@@ -150,6 +150,7 @@ public class Linccer extends CloudService {
         }
 
         int latency = (int) (System.currentTimeMillis() - startTime);
+
         mEnvironment.setNetworkLatency(latency);
 
         return latency;

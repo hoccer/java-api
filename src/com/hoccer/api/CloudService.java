@@ -80,10 +80,10 @@ public class CloudService {
 
     protected void setupHttpClient() {
         BasicHttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setSoTimeout(httpParams, 200 * 1000);
-        HttpConnectionParams.setConnectionTimeout(httpParams, 30 * 1000);
+        HttpConnectionParams.setSoTimeout(httpParams, 40 * 1000);
+        HttpConnectionParams.setConnectionTimeout(httpParams, 40 * 1000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 200);
-        ConnPerRoute connPerRoute = new ConnPerRouteBean(20);
+        ConnPerRoute connPerRoute = new ConnPerRouteBean(40);
         ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
         SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
