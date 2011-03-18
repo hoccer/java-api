@@ -127,7 +127,10 @@ public class FileCache extends CloudService {
 
         AsyncHttpPut storeRequest = new AsyncHttpPut(sign(uri + "?expires_in="
                 + secondsUntilExipred), getHttpClient());
-        storeRequest.registerResponseHandler(responseHandler);
+
+        if (responseHandler != null) {
+            storeRequest.registerResponseHandler(responseHandler);
+        }
         storeRequest.setBody(data);
         storeRequest.start();
         synchronized (mOngoingRequests) {

@@ -38,7 +38,7 @@ public class GenericStreamableContent implements StreamableContent {
 
     String                              mFilename     = "filename.unkonwn";
     String                              mContentType;
-    private final ByteArrayOutputStream mResultStream = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream mDataStream = new ByteArrayOutputStream();
 
     public void setContentType(String pContentType) {
         mContentType = pContentType;
@@ -59,24 +59,24 @@ public class GenericStreamableContent implements StreamableContent {
 
     @Override
     public InputStream openInputStream() throws IOException {
-        return new ByteArrayInputStream(mResultStream.toByteArray());
+        return new ByteArrayInputStream(mDataStream.toByteArray());
     }
 
     @Override
     public long getStreamLength() throws IOException {
-        return mResultStream.size();
+        return mDataStream.size();
     }
 
     @Override
     public OutputStream openOutputStream() throws IOException {
-        return mResultStream;
+        return mDataStream;
     }
 
     @Override
     public String toString() {
         if (mContentType != null
                 && (mContentType.contains("text") || mContentType.contains("json"))) {
-            return mResultStream.toString();
+            return mDataStream.toString();
         }
 
         return mFilename + " (" + mContentType + ")";
