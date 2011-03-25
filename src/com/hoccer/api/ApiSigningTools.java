@@ -27,7 +27,7 @@ public class ApiSigningTools {
         }
     }
 
-    static String digest(String url, String secretKey) {
+    public static String digest(String url, String secretKey) {
 
         // get an hmac_sha1 key from the raw key bytes
         SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA1");
