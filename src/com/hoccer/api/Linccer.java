@@ -1,30 +1,16 @@
 /*******************************************************************************
- * Copyright (C) 2009, 2010, Hoccer GmbH Berlin, Germany <www.hoccer.com>
- * 
- * These coded instructions, statements, and computer programs contain
- * proprietary information of Hoccer GmbH Berlin, and are copy protected
- * by law. They may be used, modified and redistributed under the terms
- * of GNU General Public License referenced below. 
- *    
- * Alternative licensing without the obligations of the GPL is
- * available upon request.
- * 
- * GPL v3 Licensing:
- * 
- * This file is part of the "Linccer Java-API".
- * 
- * Linccer Java-API is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * Linccer Java-API is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with Linccer Java-API. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2009, 2010, Hoccer GmbH Berlin, Germany <www.hoccer.com> These coded instructions,
+ * statements, and computer programs contain proprietary information of Hoccer GmbH Berlin, and are
+ * copy protected by law. They may be used, modified and redistributed under the terms of GNU
+ * General Public License referenced below. Alternative licensing without the obligations of the GPL
+ * is available upon request. GPL v3 Licensing: This file is part of the "Linccer Java-API". Linccer
+ * Java-API is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. Linccer Java-API is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You
+ * should have received a copy of the GNU General Public License along with Linccer Java-API. If
+ * not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 package com.hoccer.api;
 
@@ -39,11 +25,12 @@ import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.util.Log;
 
 public class Linccer extends CloudService {
 
@@ -90,10 +77,14 @@ public class Linccer extends CloudService {
 
     public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
         HttpResponse response;
+        long startTime = 0;
         try {
             String uri = mConfig.getClientUri() + "/environment";
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
+            startTime = System.currentTimeMillis();
+            Log.v("Linncer", "submit environment uri = " + uri);
+            Log.v("Linncer", "submit environment = " + mEnvironment.toJson().toString());
             response = getHttpClient().execute(request);
         } catch (JSONException e) {
             mEnvironmentStatus = null;
@@ -127,34 +118,37 @@ public class Linccer extends CloudService {
                     + response.getStatusLine().getStatusCode() + " and an ill formed body: "
                     + e.getMessage());
         }
+        int latency = (int) (System.currentTimeMillis() - startTime);
+
+        mEnvironment.setNetworkLatency(latency);
     }
 
     /**
      * checks network latency in milliseconds writes it to the environment
      */
-    public int measureNetworkLatency() {
-        String uri = mConfig.getClientUri();
-        HttpHead request = new HttpHead(sign(uri));
-        long startTime = System.currentTimeMillis();
-        try {
-            HttpResponse response = getHttpClient().execute(request);
-            if (response == null || response.getStatusLine().getStatusCode() != 200) {
-                return -1;
-            }
-        } catch (ClientProtocolException e) {
-            return -2;
-        } catch (IOException e) {
-            return -3;
-        } catch (Exception e) {
-            return -4;
-        }
-
-        int latency = (int) (System.currentTimeMillis() - startTime);
-
-        mEnvironment.setNetworkLatency(latency);
-
-        return latency;
-    }
+    // public int measureNetworkLatency() {
+    // String uri = mConfig.getClientUri();
+    // HttpHead request = new HttpHead(sign(uri));
+    // long startTime = System.currentTimeMillis();
+    // try {
+    // HttpResponse response = getHttpClient().execute(request);
+    // if (response == null || response.getStatusLine().getStatusCode() != 200) {
+    // return -1;
+    // }
+    // } catch (ClientProtocolException e) {
+    // return -2;
+    // } catch (IOException e) {
+    // return -3;
+    // } catch (Exception e) {
+    // return -4;
+    // }
+    //
+    // int latency = (int) (System.currentTimeMillis() - startTime);
+    //
+    // mEnvironment.setNetworkLatency(latency);
+    //
+    // return latency;
+    // }
 
     public void onGpsChanged(double latitude, double longitude, int accuracy)
             throws UpdateException, ClientProtocolException, IOException {
@@ -192,6 +186,16 @@ public class Linccer extends CloudService {
             IOException {
         mEnvironment.setWifiMeasurement(bssids, new Date());
         onEnvironmentChanged(mEnvironment);
+    }
+
+    public void onClientNameChanged(String newClientName) throws UpdateException,
+            ClientProtocolException, IOException {
+        mEnvironment.setClientName(newClientName);
+        onEnvironmentChanged(mEnvironment);
+    }
+
+    public String getClientName() {
+        return mEnvironment.getClientName();
     }
 
     public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,
@@ -290,6 +294,57 @@ public class Linccer extends CloudService {
         }
 
         throw new ClientActionException("Server Error " + statusCode + ". Could not receive data.");
+    }
+
+    public JSONObject peek(String groupID) throws ClientActionException {
+
+        int statusCode;
+
+        try {
+            do {
+                String uri = mConfig.getClientUri() + "/peek"; // https://<server>/v3/clients/<uuid>
+                if (groupID != null) {
+                    uri += "?group_id=" + groupID;
+                }
+                // uri = sign(uri);
+
+                Log.v("Linncer", "peeking uri = " + uri);
+
+                HttpGet request = new HttpGet(uri);
+                HttpResponse response = getHttpClient().execute(request);
+
+                statusCode = response.getStatusLine().getStatusCode();
+                String body = convertResponseToString(response);
+                switch (statusCode) {
+                    case 200:
+                        Log.v("Linncer", "peek response = " + body);
+                        JSONObject json = null;
+                        try {
+                            json = new JSONObject(body);
+                        } catch (Exception e) {
+                            throw new ParseException("could not parse the json '" + body + "'");
+                        }
+
+                        return json;
+                        // return convertResponseToJsonObject(response);
+                    default:
+                        // handled at the end of the method
+                }
+            } while (statusCode == 504);
+
+            // } catch (JSONException e) {
+            // throw new ClientActionException("JSON Data Format Error. Could not peek.", e);
+        } catch (ClientProtocolException e) {
+            throw new ClientActionException("HTTP Error. Could not peek data.", e);
+        } catch (IOException e) {
+            throw new ClientActionException("Network Error. Could not peek data.", e);
+        } catch (ParseException e) {
+            throw new ClientActionException("Parsing failed. Could not peek data.", e);
+            // } catch (UpdateException e) {
+            // throw new ClientActionException("Update failed. Could not peek data. ", e);
+        }
+
+        throw new ClientActionException("Server Error " + statusCode + ". Could not peek.");
     }
 
     public String getUri() {
