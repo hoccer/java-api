@@ -344,6 +344,8 @@ public class Linccer extends CloudService {
         } catch (ClientProtocolException e) {
             throw new ClientActionException("HTTP Error. Could not peek data.", e);
         } catch (IOException e) {
+            // Log.v("Linncer", "peek IOException, what=" + e.getMessage());
+            // e.printStackTrace();
             throw new ClientActionException("Network Error. Could not peek data.", e);
         } catch (ParseException e) {
             throw new ClientActionException("Parsing failed. Could not peek data.", e);
