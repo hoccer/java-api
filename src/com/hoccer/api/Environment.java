@@ -14,6 +14,7 @@
  ******************************************************************************/
 package com.hoccer.api;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +30,7 @@ public class Environment {
     private WifiMeasurement     mWifiMeasurement;
     private int                 mNetworkLatency;
     private String              mClientName;
+    private ArrayList<String>   mSelectedClients;
 
     /**
      * Save location which is obtained from the gps unit.
@@ -53,6 +55,10 @@ public class Environment {
         mClientName = name;
     }
 
+    public void setSelectedClients(ArrayList<String> selectedClients) {
+        mSelectedClients = selectedClients;
+    }
+
     public String getClientName() {
         return mClientName;
     }
@@ -73,6 +79,9 @@ public class Environment {
         }
         if (mClientName != null) {
             environment.put("client_name", mClientName);
+        }
+        if (mSelectedClients != null) {
+            environment.put("selected_clients", new JSONArray(mSelectedClients));
         }
         return environment;
     }

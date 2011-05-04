@@ -16,6 +16,7 @@ package com.hoccer.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -201,6 +202,12 @@ public class Linccer extends CloudService {
     public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,
             IOException {
         onWifiChanged(Arrays.asList(bssids));
+    }
+
+    public void onSelectedClientsChanged(ArrayList<String> selectedClients) throws UpdateException,
+            ClientProtocolException, IOException {
+        mEnvironment.setSelectedClients(selectedClients);
+        onEnvironmentChanged(mEnvironment);
     }
 
     public JSONObject share(String mode, JSONObject payload) throws BadModeException,
