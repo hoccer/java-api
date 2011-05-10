@@ -81,6 +81,11 @@ public class ClientConfig {
         mFileCacheUri = "https://filecache.hoccer.com/v3";
     }
 
+    public static void useSpecialServers() {
+        mLinccerUri = "http://192.168.2.150:9292/v3";
+        mFileCacheUri = "http://192.168.2.150:9292/v3";
+    }
+
     private void useDemoApiKey() {
         mApiKey = "e101e890ea97012d6b6f00163e001ab0";
         mSharedSecret = "JofbFD6w6xtNYdaDgp4KOXf/k/s=";

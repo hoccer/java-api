@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -86,7 +87,7 @@ public class Linccer extends CloudService {
         try {
             String uri = mConfig.getClientUri() + "/environment";
             HttpPut request = new HttpPut(sign(uri));
-            request.setEntity(new StringEntity(mEnvironment.toJson().toString()));
+            request.setEntity(new StringEntity(mEnvironment.toJson().toString(), HTTP.UTF_8));
             startTime = System.currentTimeMillis();
             Log.v("Linncer", "submit environment uri = " + uri);
             Log.v("Linncer", "submit environment = " + mEnvironment.toJson().toString());
@@ -228,7 +229,7 @@ public class Linccer extends CloudService {
             do {
                 String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
                 HttpPut request = new HttpPut(sign(uri));
-                request.setEntity(new StringEntity(payload.toString()));
+                request.setEntity(new StringEntity(payload.toString(), HTTP.UTF_8));
                 HttpResponse response = getHttpClient().execute(request);
 
                 statusCode = response.getStatusLine().getStatusCode();

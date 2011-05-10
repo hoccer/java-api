@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.ParseException;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
@@ -32,6 +33,8 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,6 +78,8 @@ public class CloudService {
         schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
         ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
+        HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
+        HttpProtocolParams.setContentCharset(httpParams, "utf-8");
         mHttpClient = new DefaultHttpClient(cm, httpParams);
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
         mHttpClient.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
@@ -122,7 +127,7 @@ public class CloudService {
                             + " byte)");
         }
 
-        String body = EntityUtils.toString(entity);
+        String body = EntityUtils.toString(entity, HTTP.UTF_8);
         return body;
     }
 
