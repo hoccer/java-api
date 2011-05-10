@@ -35,9 +35,13 @@ import android.util.Log;
 
 public class Linccer extends CloudService {
 
-    private Environment       mEnvironment                  = new Environment();
-    private EnvironmentStatus mEnvironmentStatus;
-    private boolean           mAutoSubmitEnvironmentChanges = true;
+    private Environment        mEnvironment                  = new Environment();
+    private EnvironmentStatus  mEnvironmentStatus;
+    private boolean            mAutoSubmitEnvironmentChanges = true;
+
+    private HttpGet            mPeekRequest                  = null;
+    protected volatile boolean mPeekStopped                  = false;
+    private Object             mPeekLock                     = new Object();
 
     public Linccer(ClientConfig config) {
         super(config);
@@ -303,10 +307,22 @@ public class Linccer extends CloudService {
         throw new ClientActionException("Server Error " + statusCode + ". Could not receive data.");
     }
 
+    public void abortPeek() {
+        if (mPeekStopped == true) {
+            return;
+        }
+        mPeekStopped = true;
+        synchronized (mPeekLock) {
+            if (mPeekRequest != null)
+                mPeekRequest.abort();
+        }
+    }
+
     public JSONObject peek(String groupID) throws ClientActionException {
 
         int statusCode;
 
+        mPeekStopped = false;
         try {
             do {
                 String uri = mConfig.getClientUri() + "/peek"; // https://<server>/v3/clients/<uuid>
@@ -318,6 +334,12 @@ public class Linccer extends CloudService {
                 Log.v("Linncer", "peeking uri = " + uri);
 
                 HttpGet request = new HttpGet(uri);
+                if (mPeekStopped == true)
+                    return null;
+
+                synchronized (mPeekLock) {
+                    mPeekRequest = request;
+                }
                 HttpResponse response = getHttpClient().execute(request);
 
                 statusCode = response.getStatusLine().getStatusCode();
@@ -344,8 +366,11 @@ public class Linccer extends CloudService {
         } catch (ClientProtocolException e) {
             throw new ClientActionException("HTTP Error. Could not peek data.", e);
         } catch (IOException e) {
-            // Log.v("Linncer", "peek IOException, what=" + e.getMessage());
+            Log.v("Linncer", "peek IOException, what=" + e.getMessage());
             // e.printStackTrace();
+            if (mPeekStopped) {
+                throw new ClientActionException("Peek aborted.", e);
+            }
             throw new ClientActionException("Network Error. Could not peek data.", e);
         } catch (ParseException e) {
             throw new ClientActionException("Parsing failed. Could not peek data.", e);
