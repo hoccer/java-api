@@ -19,6 +19,9 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 public class ClientConfig {
 
     private static String mLinccerUri;
@@ -81,9 +84,34 @@ public class ClientConfig {
         mFileCacheUri = "https://filecache.hoccer.com/v3";
     }
 
-    public static void useSpecialServers() {
-        mLinccerUri = "http://192.168.2.150:9292/v3";
-        mFileCacheUri = "http://192.168.2.150:9292/v3";
+    public static void useExperimentalServers() {
+        mLinccerUri = "https://experimental.hoccer.com/v3";
+        mFileCacheUri = "https://experimental.hoccer.com/v3";
+    }
+
+    public static void useSpecialServers(String ip, String port) {
+        mLinccerUri = "http://" + ip + ":" + port + "/v3";
+        mFileCacheUri = "http://" + ip + ":" + port + "/v3";
+    }
+
+    public static String getServerNameFromSharedPreferences(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences("com.artcom.hoccer_preferences",
+                Context.MODE_WORLD_READABLE | Context.MODE_WORLD_WRITEABLE);
+
+        String tmpServerName = "https://linccer.hoccer.com/v3";
+        String serverName = prefs.getString("hoccer_server", tmpServerName);
+
+        if (tmpServerName.equals(serverName)) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString("hoccer_server", tmpServerName);
+            editor.commit();
+        }
+        return serverName;
+    }
+
+    public static void useSettingsServers(Context context) {
+        mLinccerUri = getServerNameFromSharedPreferences(context);
+        mFileCacheUri = mLinccerUri;
     }
 
     private void useDemoApiKey() {
