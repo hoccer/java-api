@@ -26,6 +26,10 @@ public interface StreamableContent {
 
     public OutputStream openNewOutputStream() throws IOException, Exception;
 
+    public InputStream openRawInputStream() throws IOException, Exception;
+
+    public OutputStream openRawOutputStream() throws IOException, Exception;
+
     public String getContentType();
 
     public String getFilename();

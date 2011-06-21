@@ -34,11 +34,21 @@ public class StreamableString implements StreamableContent {
 
     @Override
     public InputStream openNewInputStream() {
-        return new ByteArrayInputStream(mData.toByteArray());
+        return openRawInputStream();
     }
 
     @Override
     public OutputStream openNewOutputStream() {
+        return openRawOutputStream();
+    }
+
+    @Override
+    public InputStream openRawInputStream() {
+        return new ByteArrayInputStream(mData.toByteArray());
+    }
+
+    @Override
+    public OutputStream openRawOutputStream() {
         return mData;
     }
 
