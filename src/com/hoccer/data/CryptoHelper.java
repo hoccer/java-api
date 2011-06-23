@@ -74,18 +74,50 @@ public class CryptoHelper {
         return result;
     }
 
+    public static int getDefaultKeySize() {
+        // return 128;
+        return 256;
+    }
+
+    public static String getDefaultCrypto() {
+        return "AES";
+    }
+
+    public static String getDefaultMode() {
+        return "CBC";
+    }
+
+    public static String getDefaultPadding() {
+        return "PKCS7Padding";
+    }
+
+    public static String getDefaultHash() {
+        return "SHA256";
+        // return "SHA-1";
+    }
+
     public static void testRSA() {
         try {
-            byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            // byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            // 19, 20 ,21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
+            int keybytes = getDefaultKeySize() / 8;
+            byte[] testsalt = new byte[keybytes];
+            for (byte i = 0; i < keybytes; ++i) {
+                testsalt[i] = (byte) (i + 1);
+            }
+
             Log.v(MOD, "testRSA-AES Key Generator Testing:");
             Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
             Log.v(MOD, "salt=" + toHex(testsalt));
+            Log.v(MOD, "random_salt=" + toHex(makeRandomSalt(getDefaultKeySize())));
             // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
-            Cipher c = makeCipher(testsalt, "password", Cipher.ENCRYPT_MODE, "AES", 128, "SHA1PRNG");
+            Cipher c = makeCipher(testsalt, "password", Cipher.ENCRYPT_MODE, getDefaultCrypto(),
+                    getDefaultKeySize(), getDefaultHash());
             byte[] encrypted = crypt(c, "test".getBytes());
             Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
             Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
-            Cipher d = makeCipher(testsalt, "password", Cipher.DECRYPT_MODE, "AES", 128, "SHA1PRNG");
+            Cipher d = makeCipher(testsalt, "password", Cipher.DECRYPT_MODE, getDefaultCrypto(),
+                    getDefaultKeySize(), getDefaultHash());
             byte[] decrypted = crypt(d, encrypted);
             Log.v(MOD, "AES-decrypted=" + new String(decrypted));
             Log.v(MOD, "done test");
@@ -143,7 +175,7 @@ public class CryptoHelper {
 
     public static byte[] md(byte[] bytes, String algorithm) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance("SHA-1"); // Or any other algorithm.
+        MessageDigest md = MessageDigest.getInstance(algorithm); // SHA-1 and SHA256 tested
         md.update(bytes);
         byte[] digest = md.digest();
         return digest;
@@ -152,6 +184,11 @@ public class CryptoHelper {
     public static byte[] md_sha1(byte[] bytes) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
         return md(bytes, "SHA-1");
+    }
+
+    public static byte[] md_sha256(byte[] bytes) throws UnsupportedEncodingException,
+            NoSuchAlgorithmException {
+        return md(bytes, "SHA256");
     }
 
     public static byte[] md(String raw, String algorithm) throws UnsupportedEncodingException,
@@ -221,15 +258,17 @@ public class CryptoHelper {
     // return raw;
     // }
 
-    private static byte[] getRawKey2(byte[] salt, byte[] password, String transformation,
-            int keysize, String random_algorithm) throws NoSuchAlgorithmException,
+    public static byte[] getRawKey(byte[] salt, byte[] password, String transformation,
+            int keysize, String hash_algorithm) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
         byte[] key = concat(password, salt);
-        byte[] raw = shorten(md(key, "SHA-1"), keysize / 8);
+        byte[] hash = md(key, hash_algorithm);
+        byte[] raw = shorten(hash, keysize / 8);
         Log.v(MOD, "getRawKey2: salt=" + toHex(salt));
         Log.v(MOD, "getRawKey2: pass=" + toHex(password));
         Log.v(MOD, "getRawKey2: pre-key" + toHex(key));
-        Log.v(MOD, "getRawKey2: SHA1-key:" + toHex(raw));
+        Log.v(MOD, "getRawKey2: hash:(" + hash_algorithm + "):" + toHex(hash));
+        Log.v(MOD, "getRawKey2: hashed-key:(" + hash_algorithm + "):" + toHex(raw));
         return raw;
     }
 
@@ -256,7 +295,7 @@ public class CryptoHelper {
     }
 
     public static Cipher makeCipher(byte[] salt, String password, int mode, String transformation,
-            int keysize, String random_algorithm) throws NoSuchAlgorithmException,
+            int keysize, String hash_algorithm) throws NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException,
             InvalidAlgorithmParameterException {
         Log.v(MOD, "makeCipher: salt=" + toHex(salt));
@@ -264,53 +303,35 @@ public class CryptoHelper {
         Log.v(MOD, "makeCipher: mode=" + mode);
         Log.v(MOD, "makeCipher: transformation: " + transformation);
         Log.v(MOD, "makeCipher: keysize: " + keysize);
-        Log.v(MOD, "makeCipher: random_algorithm: " + random_algorithm);
-        byte[] rawKey = getRawKey2(salt, password.getBytes("UTF-8"), transformation, keysize,
-                random_algorithm);
+        Log.v(MOD, "makeCipher: random_algorithm: " + hash_algorithm);
+        byte[] rawKey = getRawKey(salt, password.getBytes("UTF-8"), transformation, keysize,
+                hash_algorithm);
         SecretKeySpec skeySpec = new SecretKeySpec(rawKey, transformation);
-        Cipher cipher = Cipher.getInstance(transformation + "/CBC/PKCS7Padding");
+        Cipher cipher = Cipher.getInstance(transformation + "/CBC/" + getDefaultPadding());
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         cipher.init(mode, skeySpec, new IvParameterSpec(nulliv));
         return cipher;
     }
 
     public static Cipher makeCipherECB(byte[] salt, String password, int mode,
-            String transformation, int keysize, String random_algorithm)
+            String transformation, int keysize, String hash_algorithm)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        byte[] rawKey = getRawKey2(salt, password.getBytes("UTF-8"), transformation, keysize,
-                random_algorithm);
+        byte[] rawKey = getRawKey(salt, password.getBytes("UTF-8"), transformation, keysize,
+                hash_algorithm);
         SecretKeySpec skeySpec = new SecretKeySpec(rawKey, transformation);
-        Cipher cipher = Cipher.getInstance(transformation + "/ECB/PKCS7Padding");
+        Cipher cipher = Cipher.getInstance(transformation + "/ECB/" + getDefaultPadding());
         cipher.init(mode, skeySpec);
         return cipher;
     }
-
-    // public static Cipher makeDefaultCipher(String seed, int mode) throws
-    // NoSuchAlgorithmException,
-    // NoSuchPaddingException, InvalidKeyException {
-    // return makeCipher(seed, mode, "AES", 128, "SHA1PRNG"); // 192 and 256 bits may not be
-    // // available
-    // }
-    //
-    // public static Cipher makeDefaultEncryptionCipher(String seed) throws
-    // NoSuchAlgorithmException,
-    // NoSuchPaddingException, InvalidKeyException {
-    // return makeDefaultCipher(seed, Cipher.ENCRYPT_MODE);
-    // }
-    //
-    // public static Cipher makeDefaultDecryptionCipher(String seed) throws
-    // NoSuchAlgorithmException,
-    // NoSuchPaddingException, InvalidKeyException {
-    // return makeDefaultCipher(seed, Cipher.DECRYPT_MODE);
-    // }
 
     public static String encrypt(byte[] salt, String password, String cleartext)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException,
             InvalidAlgorithmParameterException {
 
-        Cipher c = makeCipher(salt, password, Cipher.ENCRYPT_MODE, "AES", 128, "SHA1PRNG");
+        Cipher c = makeCipher(salt, password, Cipher.ENCRYPT_MODE, getDefaultCrypto(),
+                getDefaultKeySize(), getDefaultHash());
         byte[] result = crypt(c, cleartext.getBytes());
         return Base64.encodeBytes(result);
     }
@@ -319,29 +340,13 @@ public class CryptoHelper {
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException, IOException,
             InvalidAlgorithmParameterException {
-        Cipher c = makeCipher(salt, password, Cipher.DECRYPT_MODE, "AES", 128, "SHA1PRNG");
+        Cipher c = makeCipher(salt, password, Cipher.DECRYPT_MODE, getDefaultCrypto(),
+                getDefaultKeySize(), getDefaultHash());
         byte[] enrypted = Base64.decode(encrypted_b64);
         byte[] result = crypt(c, enrypted);
         return Base64.encodeBytes(result);
 
     }
-
-    // private static byte[] getRawKey(byte[] seed) throws NoSuchAlgorithmException {
-    // return getRawKey(seed, "AES", 128, "SHA1PRNG");
-    //
-    // }
-
-    // private static byte[] getRawKey(byte[] seed, String transformation, int keysize,
-    // String random_algorithm) throws NoSuchAlgorithmException {
-    // KeyGenerator kgen = KeyGenerator.getInstance(transformation);
-    // SecureRandom sr = SecureRandom.getInstance(random_algorithm);
-    // sr.setSeed(seed);
-    // kgen.init(keysize, sr);
-    // SecretKey skey = kgen.generateKey();
-    // byte[] raw = skey.getEncoded();
-    // Log.v("SHA1-key:", toHex(raw));
-    // return raw;
-    // }
 
     public static byte[] crypt(Cipher cipher, byte[] clear) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
@@ -350,16 +355,7 @@ public class CryptoHelper {
         return encrypted;
     }
 
-    // private static byte[] decrypt(byte[] raw, byte[] encrypted) throws NoSuchPaddingException,
-    // NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
-    // IllegalBlockSizeException {
-    // SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-    // Cipher cipher = Cipher.getInstance("AES");
-    // cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-    // byte[] decrypted = cipher.doFinal(encrypted);
-    // return decrypted;
-    // }
-
+    // String conversion
     public static String toHex(String txt) {
         return toHex(txt.getBytes());
     }

@@ -45,14 +45,14 @@ public class GenericStreamableContent implements StreamableContent {
 
     private final ByteArrayOutputStream mDataStream       = new ByteArrayOutputStream();
 
-    private String                      mCryptoMethod     = null;
-    private String                      mCryptoPassphrase = null;
+    private boolean                     mCryptoEnabled    = false;
+    private String                      mCryptoMethod     = CryptoHelper.getDefaultCrypto();
     private byte[]                      mCryptoSalt       = null;
-    // private String mCryptoMethod = "AES";
-    // private String mCryptoKey = "Hallo";
-    // private String mCryptoKey = "Hallo2";
+    private String                      mCryptoPassphrase = null;
 
-    private int                         mCryptoKeySize    = 128;
+    private int                         mCryptoKeySize    = CryptoHelper.getDefaultKeySize();
+    private String                      mCryptoHash       = CryptoHelper.getDefaultHash();
+
     private OutputStream                mNewOutputStream  = null;
     private InputStream                 mNewInputStream   = null;
     private Cipher                      mEncryptionCipher = null;
@@ -124,7 +124,7 @@ public class GenericStreamableContent implements StreamableContent {
         return mFilename + " (" + mContentType + ")";
     }
 
-    public void setEncryption(String method, String key, int keysize, byte[] salt) {
+    public void setEncryption(String method, String key, int keysize, byte[] salt, String hash) {
         Log.v(LOG_TAG, "setEncryption method=" + method);
         Log.v(LOG_TAG, "setEncryption key=" + key);
         Log.v(LOG_TAG, "setEncryption keysize=" + keysize);
@@ -132,19 +132,29 @@ public class GenericStreamableContent implements StreamableContent {
         mCryptoMethod = method;
         mCryptoPassphrase = key;
         mCryptoSalt = salt;
+        mCryptoHash = hash;
+        mCryptoEnabled = true;
+    }
+
+    public void setEncryption(JSONObject data, String key) throws IOException, JSONException {
+        byte[] salt = Base64.decode(data.getString("salt"));
+        setEncryption(data.getString("method"), key, data.getInt("keysize"), salt,
+                data.getString("hash"));
     }
 
     public void setEncryption(String key) {
         Log.v(LOG_TAG, "setEncryption key=" + key);
-        mCryptoMethod = "AES";
+        mCryptoMethod = CryptoHelper.getDefaultCrypto();
         mCryptoPassphrase = key;
-        mCryptoKeySize = 128;
+        mCryptoKeySize = CryptoHelper.getDefaultKeySize();
+        mCryptoHash = CryptoHelper.getDefaultHash();
         try {
             mCryptoSalt = CryptoHelper.makeRandomSalt(mCryptoKeySize);
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        mCryptoEnabled = true;
     }
 
     public void setEncryption(GenericStreamableContent likeThis) {
@@ -152,17 +162,22 @@ public class GenericStreamableContent implements StreamableContent {
         mCryptoPassphrase = likeThis.mCryptoPassphrase;
         mCryptoKeySize = likeThis.mCryptoKeySize;
         mCryptoSalt = likeThis.mCryptoSalt;
+        mCryptoHash = likeThis.mCryptoHash;
+        mCryptoEnabled = likeThis.mCryptoEnabled;
+        ;
         Log.v(LOG_TAG, "setEncryption like:" + likeThis.toString());
         Log.v(LOG_TAG, "setEncryption method=" + mCryptoMethod);
         Log.v(LOG_TAG, "setEncryption key=" + mCryptoPassphrase);
         Log.v(LOG_TAG, "setEncryption keysize=" + mCryptoKeySize);
+        Log.v(LOG_TAG, "setEncryption hash=" + mCryptoHash);
         Log.v(LOG_TAG, "setEncryption salt=" + Base64.encodeBytes(mCryptoSalt));
+        Log.v(LOG_TAG, "setEncryption enabled=" + mCryptoEnabled);
     }
 
     public void disableEncryption() throws IOException {
         Log.v(LOG_TAG, "wrapOutputStream disableEncryption(), this:" + this.toString());
         Thread.dumpStack();
-        mCryptoMethod = null;
+        mCryptoEnabled = false;
         if (mNewOutputStream != null) {
             mNewOutputStream.close();
             mNewOutputStream = null;
@@ -176,17 +191,31 @@ public class GenericStreamableContent implements StreamableContent {
 
     public Cipher getCipher(int mode) throws Exception {
         return CryptoHelper.makeCipher(mCryptoSalt, mCryptoPassphrase, mode, mCryptoMethod,
-                mCryptoKeySize, "SHA1PRNG");
+                mCryptoKeySize, mCryptoHash);
     }
 
-    public boolean encryption() {
-        return mCryptoMethod != null;
+    public byte[] getRawKey() {
+        try {
+            return CryptoHelper.getRawKey(mCryptoSalt, mCryptoPassphrase.getBytes("UTF-8"),
+                    mCryptoMethod, mCryptoKeySize, mCryptoHash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean encryptionEnabled() {
+        return mCryptoEnabled;
     }
 
     public InputStream wrapInputStream(InputStream is) throws Exception {
-        Log.v(LOG_TAG, "wrapInputStream encryption=" + encryption() + ", this:" + this.toString());
+        Log.v(LOG_TAG,
+                "wrapInputStream encryption=" + encryptionEnabled() + ", this:" + this.toString());
         Thread.dumpStack();
-        if (encryption()) {
+        if (encryptionEnabled()) {
             mEncryptionCipher = getCipher(Cipher.ENCRYPT_MODE);
             return new CipherInputStream(is, mEncryptionCipher);
         }
@@ -202,9 +231,10 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     public OutputStream wrapOutputStream(OutputStream os) throws Exception {
-        Log.v(LOG_TAG, "wrapOutputStream encryption=" + encryption() + ", this:" + this.toString());
+        Log.v(LOG_TAG,
+                "wrapOutputStream encryption=" + encryptionEnabled() + ", this:" + this.toString());
         Thread.dumpStack();
-        if (encryption()) {
+        if (encryptionEnabled()) {
             mDecryptionCipher = getCipher(Cipher.DECRYPT_MODE);
             return new CipherOutputStream(os, mDecryptionCipher);
         }
@@ -215,7 +245,7 @@ public class GenericStreamableContent implements StreamableContent {
     public String encrypt(String data) throws InvalidKeyException, NoSuchPaddingException,
             NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException,
             UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        if (encryption()) {
+        if (encryptionEnabled()) {
             return CryptoHelper.encrypt(mCryptoSalt, mCryptoPassphrase, data);
         }
         return data;
@@ -224,18 +254,30 @@ public class GenericStreamableContent implements StreamableContent {
     public String decrypt(String data) throws InvalidKeyException, NoSuchPaddingException,
             NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, IOException,
             InvalidAlgorithmParameterException {
-        if (encryption()) {
+        if (encryptionEnabled()) {
             return CryptoHelper.decrypt(mCryptoSalt, mCryptoPassphrase, data);
         }
         return data;
     }
 
-    public void addEncryptionInfo(JSONObject data) throws JSONException {
-        if (encryption()) {
-            data.put("encryption", mCryptoMethod);
-            data.put("keysize", mCryptoKeySize);
-            data.put("salt", Base64.encodeBytes(mCryptoSalt));
+    public void addEncryptionInfoIfNeccessary(JSONObject data) throws JSONException {
+        if (encryptionEnabled()) {
+            JSONObject encr = new JSONObject();
+            encr.put("method", mCryptoMethod);
+            encr.put("keysize", mCryptoKeySize);
+            encr.put("salt", Base64.encodeBytes(mCryptoSalt));
+            encr.put("hash", mCryptoHash);
+            data.put("encryption", encr);
         }
+    }
+
+    public void putEncryptionInfo(JSONObject data) throws JSONException {
+        JSONObject encr = new JSONObject();
+        encr.put("method", mCryptoMethod);
+        encr.put("keysize", mCryptoKeySize);
+        encr.put("salt", Base64.encodeBytes(mCryptoSalt));
+        encr.put("hash", mCryptoHash);
+        data.put("encryption", encr);
     }
 
 }
