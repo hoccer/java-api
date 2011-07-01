@@ -13,8 +13,10 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -41,24 +43,38 @@ import android.util.Log;
 public class CryptoHelper {
     static String MOD = "CryptoHelper";
 
-    public static KeyPair generateRSAKeyPair() throws NoSuchAlgorithmException {
+    public static KeyPair generateRSAKeyPair(int len) throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-        kpg.initialize(2048);
+        kpg.initialize(len);
         KeyPair kp = kpg.genKeyPair();
         return kp;
     }
 
-    public static RSAPublicKeySpec getPublicKey(KeyPair kp) throws NoSuchAlgorithmException,
+    public static RSAPublicKeySpec getPublicKeySpec(KeyPair kp) throws NoSuchAlgorithmException,
             InvalidKeySpecException {
         KeyFactory fact = KeyFactory.getInstance("RSA");
         RSAPublicKeySpec pub = fact.getKeySpec(kp.getPublic(), RSAPublicKeySpec.class);
         return pub;
     }
 
-    public static RSAPrivateKeySpec getPrivateKey(KeyPair kp) throws NoSuchAlgorithmException,
+    public static RSAPublicKeySpec getPublicKeySpec(PublicKey pubkey)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory fact = KeyFactory.getInstance("RSA");
+        RSAPublicKeySpec pub = fact.getKeySpec(pubkey, RSAPublicKeySpec.class);
+        return pub;
+    }
+
+    public static RSAPrivateKeySpec getPrivateKeySpec(KeyPair kp) throws NoSuchAlgorithmException,
             InvalidKeySpecException {
         KeyFactory fact = KeyFactory.getInstance("RSA");
         RSAPrivateKeySpec priv = fact.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
+        return priv;
+    }
+
+    public static RSAPrivateKeySpec getPrivateKeySpec(PrivateKey privkey)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory fact = KeyFactory.getInstance("RSA");
+        RSAPrivateKeySpec priv = fact.getKeySpec(privkey, RSAPrivateKeySpec.class);
         return priv;
     }
 
@@ -96,6 +112,56 @@ public class CryptoHelper {
         // return "SHA-1";
     }
 
+    public static byte[] wrapRSA1024_X509(byte[] pure_DER_rsa_pub_key) throws InvalidKeyException {
+        if (pure_DER_rsa_pub_key.length > 150) {
+            throw new InvalidKeyException("Key too long, not RSA1024");
+        }
+        byte[] header = toByte("30819f300d06092a864886f70d010101050003818d00");
+        byte seq1LenIndex = 2;
+        byte seq2LenIndex = 20;
+
+        byte seq2Len = (byte) (pure_DER_rsa_pub_key.length + 1);
+        byte seq1Len = (byte) (seq2Len + 18);
+
+        header[seq1LenIndex] = seq1Len;
+        header[seq2LenIndex] = seq2Len;
+
+        return concat(header, pure_DER_rsa_pub_key);
+    }
+
+    public static byte[] unwrapRSA1024_X509(byte[] X509_rsa_pub_key) throws InvalidKeyException {
+        if (X509_rsa_pub_key.length > 150 + 21) {
+            throw new InvalidKeyException("Key too long");
+        }
+        return skip(X509_rsa_pub_key, 21);
+    }
+
+    public static byte[] wrapRSA1024_PKCS8(byte[] pure_DER_rsa_priv_key) throws InvalidKeyException {
+        if (pure_DER_rsa_priv_key.length > 650) {
+            throw new InvalidKeyException("Key too long, not RSA1024");
+        }
+        byte[] header = toByte("30820278020100300d06092a864886f70d010101050004820262");
+        byte seq1LenIndex = 2;
+        byte seq2LenIndex = 24;
+
+        int seq2Len = pure_DER_rsa_priv_key.length - 2;
+        int seq1Len = seq2Len + 22;
+
+        header[seq1LenIndex] = (byte) (seq1Len / 255);
+        header[seq1LenIndex + 1] = (byte) (seq1Len % 255);
+        header[seq2LenIndex] = (byte) (seq2Len / 255);
+        header[seq2LenIndex + 1] = (byte) (seq2Len % 255);
+
+        return concat(header, pure_DER_rsa_priv_key);
+    }
+
+    public static byte[] unwrapRSA1024_PKCS8(byte[] PKCS8_rsa_priv_key) throws InvalidKeyException {
+        if (PKCS8_rsa_priv_key.length > 650 + 25) {
+            throw new InvalidKeyException("Key too long");
+        }
+        return skip(PKCS8_rsa_priv_key, 25);
+    }
+
     public static void testRSA() {
         try {
             // byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
@@ -106,31 +172,69 @@ public class CryptoHelper {
                 testsalt[i] = (byte) (i + 1);
             }
 
-            Log.v(MOD, "testRSA-AES Key Generator Testing:");
-            Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
-            Log.v(MOD, "salt=" + toHex(testsalt));
-            Log.v(MOD, "random_salt=" + toHex(makeRandomSalt(getDefaultKeySize())));
-            // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
-            Cipher c = makeCipher(testsalt, "password", Cipher.ENCRYPT_MODE, getDefaultCrypto(),
-                    getDefaultKeySize(), getDefaultHash());
-            byte[] encrypted = crypt(c, "test".getBytes());
-            Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
-            Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
-            Cipher d = makeCipher(testsalt, "password", Cipher.DECRYPT_MODE, getDefaultCrypto(),
-                    getDefaultKeySize(), getDefaultHash());
-            byte[] decrypted = crypt(d, encrypted);
-            Log.v(MOD, "AES-decrypted=" + new String(decrypted));
-            Log.v(MOD, "done test");
+            // Log.v(MOD, "testRSA-AES Key Generator Testing:");
+            // Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
+            // Log.v(MOD, "salt=" + toHex(testsalt));
+            // Log.v(MOD, "random_salt=" + toHex(makeRandomSalt(getDefaultKeySize())));
+            // // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
+            // Cipher c = makeCipher(testsalt, "password", Cipher.ENCRYPT_MODE, getDefaultCrypto(),
+            // getDefaultKeySize(), getDefaultHash());
+            // byte[] encrypted = crypt(c, "test".getBytes());
+            // Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
+            // Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
+            // Cipher d = makeCipher(testsalt, "password", Cipher.DECRYPT_MODE, getDefaultCrypto(),
+            // getDefaultKeySize(), getDefaultHash());
+            // byte[] decrypted = crypt(d, encrypted);
+            // Log.v(MOD, "AES-decrypted=" + new String(decrypted));
+            // Log.v(MOD, "done test");
 
-            KeyPair kp = generateRSAKeyPair();
-            Log.v(MOD, "RSA" + toString(getPrivateKey(kp)));
-            Log.v(MOD, "RSA" + toString(getPublicKey(kp)));
+            KeyPair kp = generateRSAKeyPair(1024);
+            // Log.v(MOD, "RSA" + toString(getPrivateKeySpec(kp)));
+            // Log.v(MOD, "RSA" + toString(getPublicKeySpec(kp)));
             String encr = encryptRSA(kp.getPublic(), "blafasel12345678");
-            Log.v(MOD, "RSA-encrypted:" + encr);
+            // Log.v(MOD, "RSA-encrypted:" + encr);
             String decr = decryptRSA(kp.getPrivate(), encr);
             Log.v(MOD, "RSA-decrypted:" + decr);
-            Log.v(MOD, "RSA-pub-ts:" + Base64.encodeBytes(kp.getPublic().getEncoded()));
-            Log.v(MOD, "RSA-priv-ts:" + Base64.encodeBytes(kp.getPrivate().getEncoded()));
+
+            byte[] pubenc = kp.getPublic().getEncoded();
+            byte[] privenc = kp.getPrivate().getEncoded();
+            Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + Base64.encodeBytes(pubenc));
+            Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
+            Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + Base64.encodeBytes(privenc));
+            Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + toHex(privenc));
+
+            String myPubKey = "MIGJAoGBAMSvNQyQdJtrsg54RIgb5P6eo8w/VZZoq2QsQbjo/ayqGUp03EDJk31C8aFuq2PLz2FLueC5e+1/IquJKlEXJE7iMN2vORLVna8Mck3C8PN0vEaYKqxM5bq9wyYkzQAg6MJ8jn8Xw7natgE9dtEvpZMcHtzbqiDnLKFAVRAUDgxbAgMBAAE=";
+            String myPrivKey = "MIICWwIBAAKBgGxE9LQ//NX+i7IDQOD1OZd73R8fk1bIEEvIuGtYuoGMw4u+0eVJYZt4z+njOpJ/H1JMRUQO6PgBIlAsgxhD6SIkjo8vowr9u/R59D+F0t7UzHISZsuxiF6Vh4791tXtqER+9AgsAwaU496OfhmZdnNMinJz5SN7bz0s6XqAV4EhAgMBAAECgYAVzHBkVjnGsCBaL/OBF36H9GVZ3dahc1hsmbYfztaGPNwmJ75E5thjIBjkY16onjWlMTwE7ueS/090SvH+EbY/XG8/7cmZu6GvB4d54Sl07s+IV69wqGKPKl/1SSu1utPD0KlQzdWkaejByz+JoCFJw7m+zYWjSZxgm9G3y1DWQQJBATQOXHBVP3pHk8gM9uukiWNVUhDHqavaM+C2IYVPiyoT4pjXFE4OR/w+9060QDeX+8kSfQF37EKFs7l+HUO8T4kCQFn5Rk2VKYcTFjqJc3d8JoaVlQLjDNbhVjSNwzPeDnlIUSC9wsdiOJ6ixmIfUHRXOPap3jfsVi6T7yYKbGhr5tkCQQDBXTZW6Ju0tJMlokWnuhrm+BpQIBP3pDqmFYzK8hgHbH3ytCaxrDMxOZDgnTIl80d/ehRvRIhPZT9f8rKJ3v0JAkAVQkXvPOhUBxmAeUu0FryPnjZYOUemWhXhUwGldrlaxNCOeOfV7opMSU+wjY+X/afy+E4OTqRKWx/tkBbvUVd5AkEAuNaeJaJ0zq6mwngEhVIfjyntFF31rL4no5FKa7ePQ4TdcqWzlYHq6vdxmAZRhlQuN+48L3gjd6XHxkx+g78qkA==";
+
+            byte[] pubBytes = Base64.decode(myPubKey);
+            Log.v(MOD, "RSA-pub-ios[" + pubBytes.length + "]:" + toHex(pubBytes));
+            pubBytes = wrapRSA1024_X509(pubBytes);
+
+            byte[] privBytes = Base64.decode(myPrivKey);
+            privBytes = wrapRSA1024_PKCS8(privBytes);
+
+            Log.v(MOD, "RSA-pub-ts-mod[" + pubenc.length + "]:" + Base64.encodeBytes(pubBytes));
+            Log.v(MOD, "RSA-priv-ts-mod[" + privenc.length + "]:" + Base64.encodeBytes(privBytes));
+            Log.v(MOD, "RSA-pub-ts-mod[" + pubenc.length + "]:" + toHex(pubBytes));
+            Log.v(MOD, "RSA-priv-ts-mod[" + privenc.length + "]:" + toHex(privBytes));
+
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(pubBytes);
+            PublicKey publicKey = kf.generatePublic(pubSpec);
+
+            PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privBytes);
+            PrivateKey privateKey = kf.generatePrivate(privSpec);
+
+            Log.v(MOD, "RSA" + toString(getPrivateKeySpec(privateKey)));
+            Log.v(MOD, "RSA" + toString(getPublicKeySpec(publicKey)));
+            String encr2 = encryptRSA(publicKey, "blafasel12345678");
+            Log.v(MOD, "RSA-encrypted:" + encr2);
+            String decr2 = decryptRSA(privateKey, encr2);
+            Log.v(MOD, "RSA-decrypted:" + decr2);
+            Log.v(MOD, "RSA-pub-ts:" + Base64.encodeBytes(publicKey.getEncoded()));
+            Log.v(MOD, "RSA-priv-ts:" + Base64.encodeBytes(privateKey.getEncoded()));
+
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -152,7 +256,10 @@ public class CryptoHelper {
         } catch (UnsupportedEncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
+            // } catch (InvalidAlgorithmParameterException e) {
+            // // TODO Auto-generated catch block
+            // e.printStackTrace();
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -248,6 +355,19 @@ public class CryptoHelper {
     public static byte[] shorten(byte[] array, int length) {
         byte[] result = new byte[length];
         System.arraycopy(array, 0, result, 0, length);
+        return result;
+    }
+
+    public static byte[] skip(byte[] array, int skiplength) {
+        byte[] result = new byte[array.length - skiplength];
+        System.arraycopy(array, skiplength, result, 0, result.length);
+        return result;
+    }
+
+    public static byte[] overwrite(byte[] array, byte[] into, int offset) {
+        byte[] result = new byte[into.length];
+        System.arraycopy(into, 0, result, 0, into.length);
+        System.arraycopy(array, 0, result, offset, array.length);
         return result;
     }
 
