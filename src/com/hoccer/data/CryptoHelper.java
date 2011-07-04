@@ -17,6 +17,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -133,7 +134,7 @@ public class CryptoHelper {
         if (X509_rsa_pub_key.length > 150 + 21) {
             throw new InvalidKeyException("Key too long");
         }
-        return skip(X509_rsa_pub_key, 21);
+        return skip(X509_rsa_pub_key, 22);
     }
 
     public static byte[] wrapRSA1024_PKCS8(byte[] pure_DER_rsa_priv_key) throws InvalidKeyException {
@@ -159,7 +160,7 @@ public class CryptoHelper {
         if (PKCS8_rsa_priv_key.length > 650 + 25) {
             throw new InvalidKeyException("Key too long");
         }
-        return skip(PKCS8_rsa_priv_key, 25);
+        return skip(PKCS8_rsa_priv_key, 26);
     }
 
     public static void testRSA() {
@@ -192,6 +193,9 @@ public class CryptoHelper {
             // Log.v(MOD, "RSA" + toString(getPrivateKeySpec(kp)));
             // Log.v(MOD, "RSA" + toString(getPublicKeySpec(kp)));
             String encr = encryptRSA(kp.getPublic(), "blafasel12345678");
+            byte[] encrIOS = encryptRSA(kp.getPublic(), "blafasel12345678".getBytes("UTF-8"));
+            Log.v(MOD, "RSA-encrypted-iOS:" + Base64.encodeBytes(encrIOS));
+
             // Log.v(MOD, "RSA-encrypted:" + encr);
             String decr = decryptRSA(kp.getPrivate(), encr);
             Log.v(MOD, "RSA-decrypted:" + decr);
@@ -199,15 +203,38 @@ public class CryptoHelper {
             byte[] pubenc = kp.getPublic().getEncoded();
             byte[] privenc = kp.getPrivate().getEncoded();
             Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + Base64.encodeBytes(pubenc));
-            Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
+            // Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
             Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + Base64.encodeBytes(privenc));
-            Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + toHex(privenc));
+            // Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + toHex(privenc));
 
-            String myPubKey = "MIGJAoGBAMSvNQyQdJtrsg54RIgb5P6eo8w/VZZoq2QsQbjo/ayqGUp03EDJk31C8aFuq2PLz2FLueC5e+1/IquJKlEXJE7iMN2vORLVna8Mck3C8PN0vEaYKqxM5bq9wyYkzQAg6MJ8jn8Xw7natgE9dtEvpZMcHtzbqiDnLKFAVRAUDgxbAgMBAAE=";
-            String myPrivKey = "MIICWwIBAAKBgGxE9LQ//NX+i7IDQOD1OZd73R8fk1bIEEvIuGtYuoGMw4u+0eVJYZt4z+njOpJ/H1JMRUQO6PgBIlAsgxhD6SIkjo8vowr9u/R59D+F0t7UzHISZsuxiF6Vh4791tXtqER+9AgsAwaU496OfhmZdnNMinJz5SN7bz0s6XqAV4EhAgMBAAECgYAVzHBkVjnGsCBaL/OBF36H9GVZ3dahc1hsmbYfztaGPNwmJ75E5thjIBjkY16onjWlMTwE7ueS/090SvH+EbY/XG8/7cmZu6GvB4d54Sl07s+IV69wqGKPKl/1SSu1utPD0KlQzdWkaejByz+JoCFJw7m+zYWjSZxgm9G3y1DWQQJBATQOXHBVP3pHk8gM9uukiWNVUhDHqavaM+C2IYVPiyoT4pjXFE4OR/w+9060QDeX+8kSfQF37EKFs7l+HUO8T4kCQFn5Rk2VKYcTFjqJc3d8JoaVlQLjDNbhVjSNwzPeDnlIUSC9wsdiOJ6ixmIfUHRXOPap3jfsVi6T7yYKbGhr5tkCQQDBXTZW6Ju0tJMlokWnuhrm+BpQIBP3pDqmFYzK8hgHbH3ytCaxrDMxOZDgnTIl80d/ehRvRIhPZT9f8rKJ3v0JAkAVQkXvPOhUBxmAeUu0FryPnjZYOUemWhXhUwGldrlaxNCOeOfV7opMSU+wjY+X/afy+E4OTqRKWx/tkBbvUVd5AkEAuNaeJaJ0zq6mwngEhVIfjyntFF31rL4no5FKa7ePQ4TdcqWzlYHq6vdxmAZRhlQuN+48L3gjd6XHxkx+g78qkA==";
+            byte[] pubencIOS = unwrapRSA1024_X509(pubenc);
+            Log.v(MOD, "RSA-pub-IOS[" + pubencIOS.length + ":" + Base64.encodeBytes(pubencIOS));
+            byte[] privencIOS = unwrapRSA1024_PKCS8(privenc);
+            Log.v(MOD, "RSA-priv-IOS[" + privencIOS.length + "]:" + Base64.encodeBytes(privencIOS));
+
+            byte[] pubWrapped = wrapRSA1024_X509(pubencIOS);
+            byte[] privWrapped = wrapRSA1024_PKCS8(privencIOS);
+            Log.v(MOD,
+                    "RSA-pubWrapped-ts[" + pubWrapped.length + "]:"
+                            + Base64.encodeBytes(pubWrapped));
+            // Log.v(MOD, "RSA-pub-ts[" + pubWrapped + "]:" + toHex(pubWrapped));
+            Log.v(MOD,
+                    "RSA-privWrapped-ts[" + privWrapped.length + "]:"
+                            + Base64.encodeBytes(privWrapped));
+            // Log.v(MOD, "RSA-priv-ts[" + privWrapped + "]:" + toHex(privWrapped));
+            boolean pubOK = Arrays.equals(pubWrapped, pubenc);
+            boolean privOK = Arrays.equals(privWrapped, privenc);
+            Log.v(MOD, "RSA-wrapper-OK priv:[" + privOK + "]:" + " pub:[" + pubOK + "]:");
+
+            String myPubKey2 = "MIGJAoGBAMSvNQyQdJtrsg54RIgb5P6eo8w/VZZoq2QsQbjo/ayqGUp03EDJk31C8aFuq2PLz2FLueC5e+1/IquJKlEXJE7iMN2vORLVna8Mck3C8PN0vEaYKqxM5bq9wyYkzQAg6MJ8jn8Xw7natgE9dtEvpZMcHtzbqiDnLKFAVRAUDgxbAgMBAAE=";
+            String myPrivKey2 = "MIICWwIBAAKBgGxE9LQ//NX+i7IDQOD1OZd73R8fk1bIEEvIuGtYuoGMw4u+0eVJYZt4z+njOpJ/H1JMRUQO6PgBIlAsgxhD6SIkjo8vowr9u/R59D+F0t7UzHISZsuxiF6Vh4791tXtqER+9AgsAwaU496OfhmZdnNMinJz5SN7bz0s6XqAV4EhAgMBAAECgYAVzHBkVjnGsCBaL/OBF36H9GVZ3dahc1hsmbYfztaGPNwmJ75E5thjIBjkY16onjWlMTwE7ueS/090SvH+EbY/XG8/7cmZu6GvB4d54Sl07s+IV69wqGKPKl/1SSu1utPD0KlQzdWkaejByz+JoCFJw7m+zYWjSZxgm9G3y1DWQQJBATQOXHBVP3pHk8gM9uukiWNVUhDHqavaM+C2IYVPiyoT4pjXFE4OR/w+9060QDeX+8kSfQF37EKFs7l+HUO8T4kCQFn5Rk2VKYcTFjqJc3d8JoaVlQLjDNbhVjSNwzPeDnlIUSC9wsdiOJ6ixmIfUHRXOPap3jfsVi6T7yYKbGhr5tkCQQDBXTZW6Ju0tJMlokWnuhrm+BpQIBP3pDqmFYzK8hgHbH3ytCaxrDMxOZDgnTIl80d/ehRvRIhPZT9f8rKJ3v0JAkAVQkXvPOhUBxmAeUu0FryPnjZYOUemWhXhUwGldrlaxNCOeOfV7opMSU+wjY+X/afy+E4OTqRKWx/tkBbvUVd5AkEAuNaeJaJ0zq6mwngEhVIfjyntFF31rL4no5FKa7ePQ4TdcqWzlYHq6vdxmAZRhlQuN+48L3gjd6XHxkx+g78qkA==";
+
+            String myPubKey = "MIGJAoGBALr4jEVZIw+hWUWXcCYw1aXqeSuJnda7YupliMaIdRvVVyrvTE7bHCHpgG6Q961hvFa5a38Jn5lnb/lerLj6n6NRtGhdqNXIsgZ+tQKkBIW4PaHxn5Gni7jw8ZfKbN/D437K2wjNPxS0E6Av1wWgeOmUkqUBjeBHb/rexRnqO3eVAgMBAAE=";
+            String myPrivKey = "MIICWwIBAAKBgQC6+IxFWSMPoVlFl3AmMNWl6nkriZ3Wu2LqZYjGiHUb1Vcq70xO2xwh6YBukPetYbxWuWt/CZ+ZZ2/5Xqy4+p+jUbRoXajVyLIGfrUCpASFuD2h8Z+Rp4u48PGXymzfw+N+ytsIzT8UtBOgL9cFoHjplJKlAY3gR2/63sUZ6jt3lQIDAQABAoGAYHTtWLF9pwikV4Si9PDop6npTQ64ARm3FBnBkDrBv9Q2Hg5KHbxoLQ6blW7wd+AeG9eYn3dFgQyd9dZj4SJazAKJ5G0eWjga6jwDDI6+0SIQnlHmsCYPoI2ZTBHWQEyBbGiGenGcqKbVyvL9StbrJ9HFENj+PE3GHJ08qxeXExkCQQGg0CKWkiYz223Vtd3GjmHQFqWIrWmw0Zn1RDuXJAmRkNlrVikmsv/T/kFgItelmXbXoOH/CJdALTOmdPeW0+c/AkBy1aberRxac6GeOE5j1YO+ONJxii5JvsAR4O0VkhWkUydpCZ0f7cE6DB6NQKbK9YGxWlpWf32bOW6HnAuzFGArAkAO8ierWoZAKcggd6sCKazcN1OsOPunOXzZzJ6OZt5o99a0AJztJFIEGgPiHJ269GvMg5pW+MnjpTtK5rrSD7slAkBUgzjUGMMNLpx7PSU0BCd5D4iRVwjJ7UCd59OUVHbpAOm4PAMPRIM4nUK+4h3esOBKDhz+G8XtP09BLm7N1OkRAkEA/FHUOFYfhEczDCI4tuh3lbA34HzGlmFPpXkQqTKutQeVcZ7ER/M1f8uSDrYym5LrjM1GEOU6j02gyMBOCO0pvg==";
+            String mySecretNoPadding = "m4n8SOqu8Z6amloq8tg9hS/fhguhyNOrikBhyJIwQxHJLF00yfw7mSYapYkT71edyrZWZBWzVUUCjYhC40To7u8YFuqSQkdSDF1ALWtXtGYlBOtZPFRxSqVDgo/jb7mZXgyxjtbqIi5W7TQoqBFLts5o5wXXk2BY=";
+            String mySecretPCKS1 = "I5dIaAiB9OScIs2zqvGCVh2J26gX6fE/ggT5qEizhS4gfrmG3y/M1lLMR0Y8H1nyGFkerjRLgiHPAbS0OawEJbWaA2qtSzTa2Jlo6yuOx3ZAjwr4ojlPZDmkwn6sy1As2il+9twNtPyQmN0fk7c7j3Ni1plY1y5mf8lMJooHfSk=";
 
             byte[] pubBytes = Base64.decode(myPubKey);
-            Log.v(MOD, "RSA-pub-ios[" + pubBytes.length + "]:" + toHex(pubBytes));
             pubBytes = wrapRSA1024_X509(pubBytes);
 
             byte[] privBytes = Base64.decode(myPrivKey);
@@ -234,6 +261,10 @@ public class CryptoHelper {
             Log.v(MOD, "RSA-decrypted:" + decr2);
             Log.v(MOD, "RSA-pub-ts:" + Base64.encodeBytes(publicKey.getEncoded()));
             Log.v(MOD, "RSA-priv-ts:" + Base64.encodeBytes(privateKey.getEncoded()));
+
+            byte[] iosBytes = Base64.decode(mySecretPCKS1);
+            byte[] decr3 = decryptRSA(privateKey, iosBytes);
+            Log.v(MOD, "RSA-decrypted-sec:" + new String(decr3));
 
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
@@ -307,7 +338,8 @@ public class CryptoHelper {
     public static byte[] decryptRSA(PrivateKey priv, byte[] encrypted)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        // Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
         cipher.init(Cipher.DECRYPT_MODE, priv);
         byte[] decrypted = cipher.doFinal(encrypted);
         return decrypted;
@@ -316,7 +348,8 @@ public class CryptoHelper {
     public static byte[] encryptRSA(PublicKey pub, byte[] clear) throws NoSuchPaddingException,
             NoSuchAlgorithmException, InvalidKeyException, BadPaddingException,
             IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("RSA");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        // Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, pub);
         byte[] encrypted = cipher.doFinal(clear);
         return encrypted;
