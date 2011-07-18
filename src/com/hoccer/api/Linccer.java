@@ -34,6 +34,8 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.hoccer.data.Base64;
+
 public class Linccer extends CloudService {
 
     private Environment        mEnvironment                  = new Environment();
@@ -197,6 +199,12 @@ public class Linccer extends CloudService {
     public void onClientNameChanged(String newClientName) throws UpdateException,
             ClientProtocolException, IOException {
         mEnvironment.setClientName(newClientName);
+        onEnvironmentChanged(mEnvironment);
+    }
+
+    public void onPublicKeyChanged(String newPublicKey) throws UpdateException,
+            ClientProtocolException, IOException {
+        mEnvironment.setPublicKey(newPublicKey);
         onEnvironmentChanged(mEnvironment);
     }
 
@@ -380,6 +388,49 @@ public class Linccer extends CloudService {
         }
 
         throw new ClientActionException("Server Error " + statusCode + ". Could not peek.");
+    }
+
+    public byte[] getPublicKey(String hash) throws ClientActionException {
+
+        int statusCode;
+
+        mPeekStopped = false;
+        try {
+            do {
+                String uri = mConfig.getClientUri() + "/" + hash + "/publickey"; // https://<server>/v3/clients/<uuid>/<hash>/publickey
+
+                // uri = sign(uri);
+
+                Log.v("Linncer", "getPublicKey uri = " + uri);
+
+                HttpGet request = new HttpGet(uri);
+
+                HttpResponse response = getHttpClient().execute(request);
+
+                statusCode = response.getStatusLine().getStatusCode();
+                String body = convertResponseToString(response);
+                switch (statusCode) {
+                    case 200:
+                        Log.v("Linncer", "getPublicKey response = " + body);
+                        byte[] key = Base64.decode(body);
+                        return key;
+                        // return convertResponseToJsonObject(response);
+                    default:
+                        // handled at the end of the method
+                }
+            } while (statusCode == 504);
+
+        } catch (ClientProtocolException e) {
+            throw new ClientActionException("HTTP Error. Could not get public key.", e);
+        } catch (IOException e) {
+            Log.v("Linncer", "getPublicKey IOException, what=" + e.getMessage());
+            // e.printStackTrace();
+            throw new ClientActionException("Network Error. Could not getPublicKey.", e);
+        } catch (ParseException e) {
+            throw new ClientActionException("Parsing failed. Could not getPublicKey.", e);
+        }
+
+        throw new ClientActionException("Server Error " + statusCode + ". Could not getPublicKey.");
     }
 
     public String getUri() {

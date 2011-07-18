@@ -31,6 +31,7 @@ public class Environment {
     private int                 mNetworkLatency;
     private String              mClientName;
     private ArrayList<String>   mSelectedClients;
+    private String              mPublicKey;
 
     /**
      * Save location which is obtained from the gps unit.
@@ -55,12 +56,20 @@ public class Environment {
         mClientName = name;
     }
 
-    public void setSelectedClients(ArrayList<String> selectedClients) {
-        mSelectedClients = selectedClients;
-    }
-
     public String getClientName() {
         return mClientName;
+    }
+
+    public void setPublicKey(String key) {
+        mPublicKey = key;
+    }
+
+    public String getPublicKey() {
+        return mPublicKey;
+    }
+
+    public void setSelectedClients(ArrayList<String> selectedClients) {
+        mSelectedClients = selectedClients;
     }
 
     public JSONObject toJson() throws JSONException {
@@ -82,6 +91,9 @@ public class Environment {
         }
         if (mSelectedClients != null) {
             environment.put("selected_clients", new JSONArray(mSelectedClients));
+        }
+        if (mPublicKey != null && mPublicKey.length() > 0) {
+            environment.put("pubkey", mPublicKey);
         }
         return environment;
     }

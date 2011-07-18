@@ -32,6 +32,7 @@ public class ClientConfig {
 
     private String        mApiKey;
     private String        mSharedSecret;
+    private String        mPublicKey;
 
     static {
         useSandboxServers();
@@ -60,13 +61,14 @@ public class ClientConfig {
     }
 
     public ClientConfig(String applicatioName, String apiKey, String sharedSecret, UUID clientId,
-            String clientName) {
+            String clientName, String publicKey) {
         mApplicationName = applicatioName;
         mClientId = clientId;
         mClientName = clientName;
 
         mApiKey = apiKey;
         mSharedSecret = sharedSecret;
+        mPublicKey = publicKey;
     }
 
     public static void useBetaServers() {
@@ -177,6 +179,14 @@ public class ClientConfig {
 
     public UUID getClientId() {
         return mClientId;
+    }
+
+    public String getPublicKeyString() {
+        return mPublicKey;
+    }
+
+    public void setPublicKeyString(String thePublicKeyString) {
+        mPublicKey = thePublicKeyString;
     }
 
     public static String getFileCacheBaseUri() {

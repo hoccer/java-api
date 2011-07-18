@@ -386,6 +386,9 @@ public class CryptoHelper {
     }
 
     public static byte[] shorten(byte[] array, int length) {
+        if (length == array.length) {
+            return array;
+        }
         byte[] result = new byte[length];
         System.arraycopy(array, 0, result, 0, length);
         return result;
