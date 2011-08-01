@@ -163,6 +163,25 @@ public class CryptoHelper {
         return skip(PKCS8_rsa_priv_key, 26);
     }
 
+    public static PublicKey makePublicRSA1024Key(byte[] pure_DER_rsa_pub_key)
+            throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        X509EncodedKeySpec pubSpec = new X509EncodedKeySpec(wrapRSA1024_X509(pure_DER_rsa_pub_key));
+        PublicKey myPublicKey = kf.generatePublic(pubSpec);
+        return myPublicKey;
+    }
+
+    public static PrivateKey makePrivateRSA1024Key(byte[] pure_DER_rsa_priv_key)
+            throws NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(
+                CryptoHelper.wrapRSA1024_PKCS8(pure_DER_rsa_priv_key));
+        PrivateKey myPrivateKey = kf.generatePrivate(privSpec);
+        return myPrivateKey;
+    }
+
     public static void testRSA() {
         try {
             // byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
@@ -440,28 +459,33 @@ public class CryptoHelper {
     // return raw;
     // }
 
-    public static byte[] makeRandomSalt(int bits) throws NoSuchAlgorithmException {
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        // sr.setSeed(System.nanoTime());
-
-        byte[] salt = new byte[bits / 8];
-        sr.nextBytes(salt);
-        // byte[] salt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        return salt;
+    public static byte[] makeRandomBytes(int bytes) {
+        SecureRandom sr;
+        try {
+            sr = SecureRandom.getInstance("SHA1PRNG");
+            // sr.setSeed(System.nanoTime());
+            byte[] salt = new byte[bytes];
+            sr.nextBytes(salt);
+            // byte[] salt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            return salt;
+        } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public static Cipher makeCipher(byte[] salt, String password, int mode, String transformation,
-            int keysize, String hash_algorithm) throws NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException, UnsupportedEncodingException,
-            InvalidAlgorithmParameterException {
+    public static Cipher makeCipher(byte[] salt, byte[] passphrase, int mode,
+            String transformation, int keysize, String hash_algorithm)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+            UnsupportedEncodingException, InvalidAlgorithmParameterException {
         Log.v(MOD, "makeCipher: salt=" + toHex(salt));
-        Log.v(MOD, "makeCipher: password:" + password);
+        Log.v(MOD, "makeCipher: password:" + Base64.encodeBytes(passphrase));
         Log.v(MOD, "makeCipher: mode=" + mode);
         Log.v(MOD, "makeCipher: transformation: " + transformation);
         Log.v(MOD, "makeCipher: keysize: " + keysize);
         Log.v(MOD, "makeCipher: random_algorithm: " + hash_algorithm);
-        byte[] rawKey = getRawKey(salt, password.getBytes("UTF-8"), transformation, keysize,
-                hash_algorithm);
+        byte[] rawKey = getRawKey(salt, passphrase, transformation, keysize, hash_algorithm);
         SecretKeySpec skeySpec = new SecretKeySpec(rawKey, transformation);
         Cipher cipher = Cipher.getInstance(transformation + "/CBC/" + getDefaultPadding());
         byte[] nulliv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -481,22 +505,22 @@ public class CryptoHelper {
         return cipher;
     }
 
-    public static String encrypt(byte[] salt, String password, String cleartext)
+    public static String encrypt(byte[] salt, byte[] passphrase, String cleartext)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException, UnsupportedEncodingException,
             InvalidAlgorithmParameterException {
 
-        Cipher c = makeCipher(salt, password, Cipher.ENCRYPT_MODE, getDefaultCrypto(),
+        Cipher c = makeCipher(salt, passphrase, Cipher.ENCRYPT_MODE, getDefaultCrypto(),
                 getDefaultKeySize(), getDefaultHash());
         byte[] result = crypt(c, cleartext.getBytes());
         return Base64.encodeBytes(result);
     }
 
-    public static String decrypt(byte[] salt, String password, String encrypted_b64)
+    public static String decrypt(byte[] salt, byte[] passphrase, String encrypted_b64)
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException, IOException,
             InvalidAlgorithmParameterException {
-        Cipher c = makeCipher(salt, password, Cipher.DECRYPT_MODE, getDefaultCrypto(),
+        Cipher c = makeCipher(salt, passphrase, Cipher.DECRYPT_MODE, getDefaultCrypto(),
                 getDefaultKeySize(), getDefaultHash());
         byte[] enrypted = Base64.decode(encrypted_b64);
         byte[] result = crypt(c, enrypted);
