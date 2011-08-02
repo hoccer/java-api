@@ -184,29 +184,29 @@ public class CryptoHelper {
 
     public static void testRSA() {
         try {
-            // byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-            // 19, 20 ,21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
-            int keybytes = getDefaultKeySize() / 8;
-            byte[] testsalt = new byte[keybytes];
-            for (byte i = 0; i < keybytes; ++i) {
-                testsalt[i] = (byte) (i + 1);
-            }
+            byte[] testsalt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
+            // int keybytes = getDefaultKeySize() / 8;
+            // byte[] testsalt = new byte[keybytes];
+            // for (byte i = 0; i < keybytes; ++i) {
+            // testsalt[i] = (byte) (i + 1);
+            // }
 
-            // Log.v(MOD, "testRSA-AES Key Generator Testing:");
-            // Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
-            // Log.v(MOD, "salt=" + toHex(testsalt));
-            // Log.v(MOD, "random_salt=" + toHex(makeRandomSalt(getDefaultKeySize())));
-            // // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
-            // Cipher c = makeCipher(testsalt, "password", Cipher.ENCRYPT_MODE, getDefaultCrypto(),
-            // getDefaultKeySize(), getDefaultHash());
-            // byte[] encrypted = crypt(c, "test".getBytes());
-            // Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
-            // Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
-            // Cipher d = makeCipher(testsalt, "password", Cipher.DECRYPT_MODE, getDefaultCrypto(),
-            // getDefaultKeySize(), getDefaultHash());
-            // byte[] decrypted = crypt(d, encrypted);
-            // Log.v(MOD, "AES-decrypted=" + new String(decrypted));
-            // Log.v(MOD, "done test");
+            Log.v(MOD, "testRSA-AES Key Generator Testing:");
+            Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
+            Log.v(MOD, "salt=" + toHex(testsalt));
+            // Log.v(MOD, "random_salt=" + toHex(makeRandomBytes(getDefaultKeySize()/8)));
+            // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
+            Cipher c = makeCipher(testsalt, new String("password").getBytes("UTF-8"),
+                    Cipher.ENCRYPT_MODE, getDefaultCrypto(), getDefaultKeySize(), getDefaultHash());
+            byte[] encrypted = crypt(c, new String("test").getBytes("UTF-8"));
+            Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
+            Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
+            Cipher d = makeCipher(testsalt, new String("password").getBytes("UTF-8"),
+                    Cipher.DECRYPT_MODE, getDefaultCrypto(), getDefaultKeySize(), getDefaultHash());
+            byte[] decrypted = crypt(d, encrypted);
+            Log.v(MOD, "AES-decrypted=" + new String(decrypted));
+            Log.v(MOD, "done test");
 
             KeyPair kp = generateRSAKeyPair(1024);
             // Log.v(MOD, "RSA" + toString(getPrivateKeySpec(kp)));
@@ -310,6 +310,9 @@ public class CryptoHelper {
             // // TODO Auto-generated catch block
             // e.printStackTrace();
         } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
