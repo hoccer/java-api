@@ -48,7 +48,7 @@ public class GenericStreamableContent implements StreamableContent {
     private boolean                     mCryptoEnabled    = false;
     private String                      mCryptoMethod     = CryptoHelper.getDefaultCrypto();
     private byte[]                      mCryptoSalt       = null;
-    private byte[]                      mCryptoPassphrase = null;
+    private byte[]                      mCryptoKeyphrase  = null;
 
     private int                         mCryptoKeySize    = CryptoHelper.getDefaultKeySize();
     private String                      mCryptoHash       = CryptoHelper.getDefaultHash();
@@ -73,6 +73,10 @@ public class GenericStreamableContent implements StreamableContent {
 
     public void setFilename(String mFilename) {
         this.mFilename = mFilename;
+    }
+
+    public byte[] getCryptoKeyphrase() {
+        return mCryptoKeyphrase;
     }
 
     @Override
@@ -131,7 +135,7 @@ public class GenericStreamableContent implements StreamableContent {
         Log.v(LOG_TAG, "setEncryption keysize=" + keysize);
         Log.v(LOG_TAG, "setEncryption salt=" + Base64.encodeBytes(salt));
         mCryptoMethod = method;
-        mCryptoPassphrase = passphrase;
+        mCryptoKeyphrase = passphrase;
         mCryptoSalt = salt;
         mCryptoHash = hash;
         mCryptoEnabled = true;
@@ -146,7 +150,7 @@ public class GenericStreamableContent implements StreamableContent {
     public void setEncryption(byte[] passphrase) {
         Log.v(LOG_TAG, "setEncryption key=" + Base64.encodeBytes(passphrase));
         mCryptoMethod = CryptoHelper.getDefaultCrypto();
-        mCryptoPassphrase = passphrase;
+        mCryptoKeyphrase = passphrase;
         mCryptoKeySize = CryptoHelper.getDefaultKeySize();
         mCryptoHash = CryptoHelper.getDefaultHash();
         mCryptoSalt = CryptoHelper.makeRandomBytes(mCryptoKeySize / 8);
@@ -155,7 +159,7 @@ public class GenericStreamableContent implements StreamableContent {
 
     public void setEncryption(GenericStreamableContent likeThis) {
         mCryptoMethod = likeThis.mCryptoMethod;
-        mCryptoPassphrase = likeThis.mCryptoPassphrase;
+        mCryptoKeyphrase = likeThis.mCryptoKeyphrase;
         mCryptoKeySize = likeThis.mCryptoKeySize;
         mCryptoSalt = likeThis.mCryptoSalt;
         mCryptoHash = likeThis.mCryptoHash;
@@ -163,7 +167,7 @@ public class GenericStreamableContent implements StreamableContent {
 
         Log.v(LOG_TAG, "setEncryption like:" + likeThis.toString());
         Log.v(LOG_TAG, "setEncryption method=" + mCryptoMethod);
-        Log.v(LOG_TAG, "setEncryption key=" + Base64.encodeBytes(mCryptoPassphrase));
+        Log.v(LOG_TAG, "setEncryption key=" + Base64.encodeBytes(mCryptoKeyphrase));
         Log.v(LOG_TAG, "setEncryption keysize=" + mCryptoKeySize);
         Log.v(LOG_TAG, "setEncryption hash=" + mCryptoHash);
         Log.v(LOG_TAG,
@@ -188,13 +192,13 @@ public class GenericStreamableContent implements StreamableContent {
     }
 
     public Cipher getCipher(int mode) throws Exception {
-        return CryptoHelper.makeCipher(mCryptoSalt, mCryptoPassphrase, mode, mCryptoMethod,
+        return CryptoHelper.makeCipher(mCryptoSalt, mCryptoKeyphrase, mode, mCryptoMethod,
                 mCryptoKeySize, mCryptoHash);
     }
 
     public byte[] getRawKey() {
         try {
-            return CryptoHelper.getRawKey(mCryptoSalt, mCryptoPassphrase, mCryptoMethod,
+            return CryptoHelper.getRawKey(mCryptoSalt, mCryptoKeyphrase, mCryptoMethod,
                     mCryptoKeySize, mCryptoHash);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -244,7 +248,7 @@ public class GenericStreamableContent implements StreamableContent {
             NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException,
             UnsupportedEncodingException, InvalidAlgorithmParameterException {
         if (encryptionEnabled()) {
-            return CryptoHelper.encrypt(mCryptoSalt, mCryptoPassphrase, data);
+            return CryptoHelper.encrypt(mCryptoSalt, mCryptoKeyphrase, data);
         }
         return data;
     }
@@ -253,7 +257,7 @@ public class GenericStreamableContent implements StreamableContent {
             NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, IOException,
             InvalidAlgorithmParameterException {
         if (encryptionEnabled()) {
-            return CryptoHelper.decrypt(mCryptoSalt, mCryptoPassphrase, data);
+            return CryptoHelper.decrypt(mCryptoSalt, mCryptoKeyphrase, data);
         }
         return data;
     }
