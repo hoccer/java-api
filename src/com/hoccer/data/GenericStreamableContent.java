@@ -167,7 +167,11 @@ public class GenericStreamableContent implements StreamableContent {
 
         Log.v(LOG_TAG, "setEncryption like:" + likeThis.toString());
         Log.v(LOG_TAG, "setEncryption method=" + mCryptoMethod);
-        Log.v(LOG_TAG, "setEncryption key=" + Base64.encodeBytes(mCryptoKeyphrase));
+        Log.v(LOG_TAG,
+                "setEncryption key="
+                        + ((mCryptoKeyphrase != null) ? Base64.encodeBytes(mCryptoKeyphrase)
+                                : "<null>"));
+
         Log.v(LOG_TAG, "setEncryption keysize=" + mCryptoKeySize);
         Log.v(LOG_TAG, "setEncryption hash=" + mCryptoHash);
         Log.v(LOG_TAG,
