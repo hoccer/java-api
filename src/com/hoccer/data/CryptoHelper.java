@@ -439,6 +439,8 @@ public class CryptoHelper {
     public static byte[] getRawKey(byte[] salt, byte[] password, String transformation,
             int keysize, String hash_algorithm) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
+        Log.v(MOD, "getRawKey2: called from:");
+        Thread.dumpStack();
         byte[] key = concat(password, salt);
         byte[] hash = md(key, hash_algorithm);
         byte[] raw = shorten(hash, keysize / 8);
