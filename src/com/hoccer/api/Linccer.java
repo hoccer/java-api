@@ -412,9 +412,16 @@ public class Linccer extends CloudService {
                 switch (statusCode) {
                     case 200:
                         Log.v("Linncer", "getPublicKey response = " + body);
-                        byte[] key = Base64.decode(body);
+                        JSONObject json = null;
+                        String theKeyString = null;
+                        try {
+                            json = new JSONObject(body);
+                            theKeyString = json.getString("pubkey");
+                        } catch (Exception e) {
+                            throw new ParseException("could not parse the json '" + body + "'");
+                        }
+                        byte[] key = Base64.decode(theKeyString);
                         return key;
-                        // return convertResponseToJsonObject(response);
                     default:
                         // handled at the end of the method
                 }
