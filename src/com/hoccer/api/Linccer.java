@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -32,19 +33,23 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import com.hoccer.data.Base64;
 
 public class Linccer extends CloudService {
 
-    private Environment        mEnvironment                  = new Environment();
-    private EnvironmentStatus  mEnvironmentStatus;
-    private boolean            mAutoSubmitEnvironmentChanges = true;
+    // Constants ---------------------------------------------------------
 
-    private HttpGet            mPeekRequest                  = null;
-    protected volatile boolean mPeekStopped                  = false;
-    private Object             mPeekLock                     = new Object();
+    private static final String LOG_TAG                       = Linccer.class.getSimpleName();
+
+    private static final Logger LOG                           = Logger.getLogger(LOG_TAG);
+
+    private Environment         mEnvironment                  = new Environment();
+    private EnvironmentStatus   mEnvironmentStatus;
+    private boolean             mAutoSubmitEnvironmentChanges = true;
+
+    private HttpGet             mPeekRequest                  = null;
+    protected volatile boolean  mPeekStopped                  = false;
+    private Object              mPeekLock                     = new Object();
 
     public Linccer(ClientConfig config) {
         super(config);
@@ -91,8 +96,8 @@ public class Linccer extends CloudService {
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString(), HTTP.UTF_8));
             startTime = System.currentTimeMillis();
-            Log.v("Linncer", "submit environment uri = " + uri);
-            Log.v("Linncer", "submit environment = " + mEnvironment.toJson().toString());
+            LOG.finest("submit environment uri = " + uri);
+            LOG.finest("submit environment = " + mEnvironment.toJson().toString());
             response = getHttpClient().execute(request);
         } catch (JSONException e) {
             mEnvironmentStatus = null;
@@ -340,7 +345,7 @@ public class Linccer extends CloudService {
                 }
                 // uri = sign(uri);
 
-                Log.v("Linncer", "peeking uri = " + uri);
+                LOG.finest("peeking uri = " + uri);
 
                 HttpGet request = new HttpGet(uri);
                 if (mPeekStopped == true)
@@ -355,7 +360,7 @@ public class Linccer extends CloudService {
                 String body = convertResponseToString(response);
                 switch (statusCode) {
                     case 200:
-                        Log.v("Linncer", "peek response = " + body);
+                        LOG.finest("peek response = " + body);
                         JSONObject json = null;
                         try {
                             json = new JSONObject(body);
@@ -375,7 +380,7 @@ public class Linccer extends CloudService {
         } catch (ClientProtocolException e) {
             throw new ClientActionException("HTTP Error. Could not peek data.", e);
         } catch (IOException e) {
-            Log.v("Linncer", "peek IOException, what=" + e.getMessage());
+            LOG.finest("peek IOException, what=" + e.getMessage());
             // e.printStackTrace();
             if (mPeekStopped) {
                 throw new ClientActionException("Peek aborted.", e);
@@ -401,7 +406,7 @@ public class Linccer extends CloudService {
 
                 // uri = sign(uri);
 
-                Log.v("Linncer", "getPublicKey uri = " + uri);
+                LOG.finest("getPublicKey uri = " + uri);
 
                 HttpGet request = new HttpGet(uri);
 
@@ -411,7 +416,7 @@ public class Linccer extends CloudService {
                 String body = convertResponseToString(response);
                 switch (statusCode) {
                     case 200:
-                        Log.v("Linncer", "getPublicKey response = " + body);
+                        LOG.finest("getPublicKey response = " + body);
                         JSONObject json = null;
                         String theKeyString = null;
                         try {
@@ -430,7 +435,7 @@ public class Linccer extends CloudService {
         } catch (ClientProtocolException e) {
             throw new ClientActionException("HTTP Error. Could not get public key.", e);
         } catch (IOException e) {
-            Log.v("Linncer", "getPublicKey IOException, what=" + e.getMessage());
+            LOG.finest("getPublicKey IOException, what=" + e.getMessage());
             // e.printStackTrace();
             throw new ClientActionException("Network Error. Could not getPublicKey.", e);
         } catch (ParseException e) {

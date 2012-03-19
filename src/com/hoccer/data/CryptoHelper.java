@@ -18,6 +18,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -26,8 +27,6 @@ import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import android.util.Log;
 
 /**
  * Usage:
@@ -42,7 +41,16 @@ import android.util.Log;
  */
 
 public class CryptoHelper {
-    static String MOD = "CryptoHelper";
+
+    // Constants ---------------------------------------------------------
+
+    private static final String LOG_TAG = CryptoHelper.class.getSimpleName();
+
+    private static final Logger LOG     = Logger.getLogger(LOG_TAG);
+
+    static String               MOD     = "CryptoHelper";
+
+    // Static Methods ----------------------------------------------------
 
     public static KeyPair generateRSAKeyPair(int len) throws NoSuchAlgorithmException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -192,58 +200,56 @@ public class CryptoHelper {
             // testsalt[i] = (byte) (i + 1);
             // }
 
-            Log.v(MOD, "testRSA-AES Key Generator Testing:");
-            Log.v(MOD, "salt=" + Base64.encodeBytes(testsalt));
-            Log.v(MOD, "salt=" + toHex(testsalt));
-            // Log.v(MOD, "random_salt=" + toHex(makeRandomBytes(getDefaultKeySize()/8)));
+            LOG.finest("testRSA-AES Key Generator Testing:");
+            LOG.finest("salt=" + Base64.encodeBytes(testsalt));
+            LOG.finest("salt=" + toHex(testsalt));
+            // LOG.finest("random_salt=" + toHex(makeRandomBytes(getDefaultKeySize()/8)));
             // Log.v("SHA1(password)=", toHex(md("password", "SHA-1")));
             Cipher c = makeCipher(testsalt, new String("password").getBytes("UTF-8"),
                     Cipher.ENCRYPT_MODE, getDefaultCrypto(), getDefaultKeySize(), getDefaultHash());
             byte[] encrypted = crypt(c, new String("test").getBytes("UTF-8"));
-            Log.v(MOD, "AES-encrypted=" + Base64.encodeBytes(encrypted));
-            Log.v(MOD, "AES-encrypted=" + toHex(encrypted));
+            LOG.finest("AES-encrypted=" + Base64.encodeBytes(encrypted));
+            LOG.finest("AES-encrypted=" + toHex(encrypted));
             Cipher d = makeCipher(testsalt, new String("password").getBytes("UTF-8"),
                     Cipher.DECRYPT_MODE, getDefaultCrypto(), getDefaultKeySize(), getDefaultHash());
             byte[] decrypted = crypt(d, encrypted);
-            Log.v(MOD, "AES-decrypted=" + new String(decrypted));
-            Log.v(MOD, "done test");
+            LOG.finest("AES-decrypted=" + new String(decrypted));
+            LOG.finest("done test");
 
             KeyPair kp = generateRSAKeyPair(1024);
-            // Log.v(MOD, "RSA" + toString(getPrivateKeySpec(kp)));
-            // Log.v(MOD, "RSA" + toString(getPublicKeySpec(kp)));
+            // LOG.finest("RSA" + toString(getPrivateKeySpec(kp)));
+            // LOG.finest("RSA" + toString(getPublicKeySpec(kp)));
             String encr = encryptRSA(kp.getPublic(), "blafasel12345678");
             byte[] encrIOS = encryptRSA(kp.getPublic(), "blafasel12345678".getBytes("UTF-8"));
-            Log.v(MOD, "RSA-encrypted-iOS:" + Base64.encodeBytes(encrIOS));
+            LOG.finest("RSA-encrypted-iOS:" + Base64.encodeBytes(encrIOS));
 
-            // Log.v(MOD, "RSA-encrypted:" + encr);
+            // LOG.finest("RSA-encrypted:" + encr);
             String decr = decryptRSA(kp.getPrivate(), encr);
-            Log.v(MOD, "RSA-decrypted:" + decr);
+            LOG.finest("RSA-decrypted:" + decr);
 
             byte[] pubenc = kp.getPublic().getEncoded();
             byte[] privenc = kp.getPrivate().getEncoded();
-            Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + Base64.encodeBytes(pubenc));
-            // Log.v(MOD, "RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
-            Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + Base64.encodeBytes(privenc));
-            // Log.v(MOD, "RSA-priv-ts[" + privenc.length + "]:" + toHex(privenc));
+            LOG.finest("RSA-pub-ts[" + pubenc.length + "]:" + Base64.encodeBytes(pubenc));
+            // LOG.finest("RSA-pub-ts[" + pubenc.length + "]:" + toHex(pubenc));
+            LOG.finest("RSA-priv-ts[" + privenc.length + "]:" + Base64.encodeBytes(privenc));
+            // LOG.finest("RSA-priv-ts[" + privenc.length + "]:" + toHex(privenc));
 
             byte[] pubencIOS = unwrapRSA1024_X509(pubenc);
-            Log.v(MOD, "RSA-pub-IOS[" + pubencIOS.length + ":" + Base64.encodeBytes(pubencIOS));
+            LOG.finest("RSA-pub-IOS[" + pubencIOS.length + ":" + Base64.encodeBytes(pubencIOS));
             byte[] privencIOS = unwrapRSA1024_PKCS8(privenc);
-            Log.v(MOD, "RSA-priv-IOS[" + privencIOS.length + "]:" + Base64.encodeBytes(privencIOS));
+            LOG.finest("RSA-priv-IOS[" + privencIOS.length + "]:" + Base64.encodeBytes(privencIOS));
 
             byte[] pubWrapped = wrapRSA1024_X509(pubencIOS);
             byte[] privWrapped = wrapRSA1024_PKCS8(privencIOS);
-            Log.v(MOD,
-                    "RSA-pubWrapped-ts[" + pubWrapped.length + "]:"
-                            + Base64.encodeBytes(pubWrapped));
-            // Log.v(MOD, "RSA-pub-ts[" + pubWrapped + "]:" + toHex(pubWrapped));
-            Log.v(MOD,
-                    "RSA-privWrapped-ts[" + privWrapped.length + "]:"
-                            + Base64.encodeBytes(privWrapped));
-            // Log.v(MOD, "RSA-priv-ts[" + privWrapped + "]:" + toHex(privWrapped));
+            LOG.finest("RSA-pubWrapped-ts[" + pubWrapped.length + "]:"
+                    + Base64.encodeBytes(pubWrapped));
+            // LOG.finest("RSA-pub-ts[" + pubWrapped + "]:" + toHex(pubWrapped));
+            LOG.finest("RSA-privWrapped-ts[" + privWrapped.length + "]:"
+                    + Base64.encodeBytes(privWrapped));
+            // LOG.finest("RSA-priv-ts[" + privWrapped + "]:" + toHex(privWrapped));
             boolean pubOK = Arrays.equals(pubWrapped, pubenc);
             boolean privOK = Arrays.equals(privWrapped, privenc);
-            Log.v(MOD, "RSA-wrapper-OK priv:[" + privOK + "]:" + " pub:[" + pubOK + "]:");
+            LOG.finest("RSA-wrapper-OK priv:[" + privOK + "]:" + " pub:[" + pubOK + "]:");
 
             String myPubKey2 = "MIGJAoGBAMSvNQyQdJtrsg54RIgb5P6eo8w/VZZoq2QsQbjo/ayqGUp03EDJk31C8aFuq2PLz2FLueC5e+1/IquJKlEXJE7iMN2vORLVna8Mck3C8PN0vEaYKqxM5bq9wyYkzQAg6MJ8jn8Xw7natgE9dtEvpZMcHtzbqiDnLKFAVRAUDgxbAgMBAAE=";
             String myPrivKey2 = "MIICWwIBAAKBgGxE9LQ//NX+i7IDQOD1OZd73R8fk1bIEEvIuGtYuoGMw4u+0eVJYZt4z+njOpJ/H1JMRUQO6PgBIlAsgxhD6SIkjo8vowr9u/R59D+F0t7UzHISZsuxiF6Vh4791tXtqER+9AgsAwaU496OfhmZdnNMinJz5SN7bz0s6XqAV4EhAgMBAAECgYAVzHBkVjnGsCBaL/OBF36H9GVZ3dahc1hsmbYfztaGPNwmJ75E5thjIBjkY16onjWlMTwE7ueS/090SvH+EbY/XG8/7cmZu6GvB4d54Sl07s+IV69wqGKPKl/1SSu1utPD0KlQzdWkaejByz+JoCFJw7m+zYWjSZxgm9G3y1DWQQJBATQOXHBVP3pHk8gM9uukiWNVUhDHqavaM+C2IYVPiyoT4pjXFE4OR/w+9060QDeX+8kSfQF37EKFs7l+HUO8T4kCQFn5Rk2VKYcTFjqJc3d8JoaVlQLjDNbhVjSNwzPeDnlIUSC9wsdiOJ6ixmIfUHRXOPap3jfsVi6T7yYKbGhr5tkCQQDBXTZW6Ju0tJMlokWnuhrm+BpQIBP3pDqmFYzK8hgHbH3ytCaxrDMxOZDgnTIl80d/ehRvRIhPZT9f8rKJ3v0JAkAVQkXvPOhUBxmAeUu0FryPnjZYOUemWhXhUwGldrlaxNCOeOfV7opMSU+wjY+X/afy+E4OTqRKWx/tkBbvUVd5AkEAuNaeJaJ0zq6mwngEhVIfjyntFF31rL4no5FKa7ePQ4TdcqWzlYHq6vdxmAZRhlQuN+48L3gjd6XHxkx+g78qkA==";
@@ -259,10 +265,10 @@ public class CryptoHelper {
             byte[] privBytes = Base64.decode(myPrivKey);
             privBytes = wrapRSA1024_PKCS8(privBytes);
 
-            Log.v(MOD, "RSA-pub-ts-mod[" + pubenc.length + "]:" + Base64.encodeBytes(pubBytes));
-            Log.v(MOD, "RSA-priv-ts-mod[" + privenc.length + "]:" + Base64.encodeBytes(privBytes));
-            Log.v(MOD, "RSA-pub-ts-mod[" + pubenc.length + "]:" + toHex(pubBytes));
-            Log.v(MOD, "RSA-priv-ts-mod[" + privenc.length + "]:" + toHex(privBytes));
+            LOG.finest("RSA-pub-ts-mod[" + pubenc.length + "]:" + Base64.encodeBytes(pubBytes));
+            LOG.finest("RSA-priv-ts-mod[" + privenc.length + "]:" + Base64.encodeBytes(privBytes));
+            LOG.finest("RSA-pub-ts-mod[" + pubenc.length + "]:" + toHex(pubBytes));
+            LOG.finest("RSA-priv-ts-mod[" + privenc.length + "]:" + toHex(privBytes));
 
             KeyFactory kf = KeyFactory.getInstance("RSA");
 
@@ -272,18 +278,18 @@ public class CryptoHelper {
             PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privBytes);
             PrivateKey privateKey = kf.generatePrivate(privSpec);
 
-            Log.v(MOD, "RSA" + toString(getPrivateKeySpec(privateKey)));
-            Log.v(MOD, "RSA" + toString(getPublicKeySpec(publicKey)));
+            LOG.finest("RSA" + toString(getPrivateKeySpec(privateKey)));
+            LOG.finest("RSA" + toString(getPublicKeySpec(publicKey)));
             String encr2 = encryptRSA(publicKey, "blafasel12345678");
-            Log.v(MOD, "RSA-encrypted:" + encr2);
+            LOG.finest("RSA-encrypted:" + encr2);
             String decr2 = decryptRSA(privateKey, encr2);
-            Log.v(MOD, "RSA-decrypted:" + decr2);
-            Log.v(MOD, "RSA-pub-ts:" + Base64.encodeBytes(publicKey.getEncoded()));
-            Log.v(MOD, "RSA-priv-ts:" + Base64.encodeBytes(privateKey.getEncoded()));
+            LOG.finest("RSA-decrypted:" + decr2);
+            LOG.finest("RSA-pub-ts:" + Base64.encodeBytes(publicKey.getEncoded()));
+            LOG.finest("RSA-priv-ts:" + Base64.encodeBytes(privateKey.getEncoded()));
 
             byte[] iosBytes = Base64.decode(mySecretPCKS1);
             byte[] decr3 = decryptRSA(privateKey, iosBytes);
-            Log.v(MOD, "RSA-decrypted-sec:" + new String(decr3));
+            LOG.finest("RSA-decrypted-sec:" + new String(decr3));
 
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
@@ -439,16 +445,16 @@ public class CryptoHelper {
     public static byte[] getRawKey(byte[] salt, byte[] password, String transformation,
             int keysize, String hash_algorithm) throws NoSuchAlgorithmException,
             UnsupportedEncodingException {
-        Log.v(MOD, "getRawKey2: called from:");
+        LOG.finest("getRawKey2: called from:");
         Thread.dumpStack();
         byte[] key = concat(password, salt);
         byte[] hash = md(key, hash_algorithm);
         byte[] raw = shorten(hash, keysize / 8);
-        Log.v(MOD, "getRawKey2: salt=" + toHex(salt));
-        Log.v(MOD, "getRawKey2: pass=" + toHex(password));
-        Log.v(MOD, "getRawKey2: pre-key" + toHex(key));
-        Log.v(MOD, "getRawKey2: hash:(" + hash_algorithm + "):" + toHex(hash));
-        Log.v(MOD, "getRawKey2: hashed-key:(" + hash_algorithm + "):" + toHex(raw));
+        LOG.finest("getRawKey2: salt=" + toHex(salt));
+        LOG.finest("getRawKey2: pass=" + toHex(password));
+        LOG.finest("getRawKey2: pre-key" + toHex(key));
+        LOG.finest("getRawKey2: hash:(" + hash_algorithm + "):" + toHex(hash));
+        LOG.finest("getRawKey2: hashed-key:(" + hash_algorithm + "):" + toHex(raw));
         return raw;
     }
 
@@ -484,12 +490,12 @@ public class CryptoHelper {
             String transformation, int keysize, String hash_algorithm)
             throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             UnsupportedEncodingException, InvalidAlgorithmParameterException {
-        Log.v(MOD, "makeCipher: salt=" + toHex(salt));
-        Log.v(MOD, "makeCipher: password:" + Base64.encodeBytes(passphrase));
-        Log.v(MOD, "makeCipher: mode=" + mode);
-        Log.v(MOD, "makeCipher: transformation: " + transformation);
-        Log.v(MOD, "makeCipher: keysize: " + keysize);
-        Log.v(MOD, "makeCipher: random_algorithm: " + hash_algorithm);
+        LOG.finest("makeCipher: salt=" + toHex(salt));
+        LOG.finest("makeCipher: password:" + Base64.encodeBytes(passphrase));
+        LOG.finest("makeCipher: mode=" + mode);
+        LOG.finest("makeCipher: transformation: " + transformation);
+        LOG.finest("makeCipher: keysize: " + keysize);
+        LOG.finest("makeCipher: random_algorithm: " + hash_algorithm);
         byte[] rawKey = getRawKey(salt, passphrase, transformation, keysize, hash_algorithm);
         SecretKeySpec skeySpec = new SecretKeySpec(rawKey, transformation);
         Cipher cipher = Cipher.getInstance(transformation + "/CBC/" + getDefaultPadding());

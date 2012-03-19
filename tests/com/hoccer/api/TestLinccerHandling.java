@@ -70,11 +70,11 @@ public class TestLinccerHandling {
     public void usingKnownLinccer() throws Exception {
         Linccer linccer = new Linccer(createNewDefaultDescription());
         ClientConfig description = new ClientConfig("java-api unit test", linccer.getClientConfig()
-                .getClientId());
+                .getClientId(), "java-api unit test");
         Linccer reusedLinccer = new Linccer(description);
 
-        assertThat("reused linker should have same id", reusedLinccer.getUri(), is(equalTo(linccer
-                .getUri())));
+        assertThat("reused linker should have same id", reusedLinccer.getUri(),
+                is(equalTo(linccer.getUri())));
     }
 
     @Test

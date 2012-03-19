@@ -48,7 +48,8 @@ public class PassHoccerCompatibleData {
 
         try {
             final Linccer linccer = new Linccer(new ClientConfig("Simple Hoccer Bookmark Drag Out",
-                    UUID.fromString("452eaa4f-640e-4779-aad5-57bae107edd8")));
+                    UUID.fromString("452eaa4f-640e-4779-aad5-57bae107edd8"),
+                    "Simple Hoccer Bookmark Drag Out"));
 
             linccer.onGpsChanged(52.5167780325, 13.409039925, 10000);
 

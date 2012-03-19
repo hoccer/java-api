@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -28,8 +29,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.InputStreamEntity;
 
-import android.util.Log;
-
 import com.hoccer.data.GenericStreamableContent;
 import com.hoccer.data.StreamableContent;
 import com.hoccer.http.AsyncHttpGet;
@@ -38,6 +37,10 @@ import com.hoccer.http.AsyncHttpRequest;
 import com.hoccer.http.HttpResponseHandler;
 
 public class FileCache extends CloudService {
+
+    public static final String                      LOG_TAG          = FileCache.class.getSimpleName();
+
+    private static final Logger                     LOG           = Logger.getLogger(LOG_TAG);
 
     private final HashMap<String, AsyncHttpRequest> mOngoingRequests = new HashMap<String, AsyncHttpRequest>();
 
@@ -63,7 +66,7 @@ public class FileCache extends CloudService {
 
         String url = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID() + "/?expires_in="
                 + secondsUntilExipred;
-        Log.v("Filecache store()", "put uri = " + url);
+        LOG.finest("put uri = " + url);
         HttpPut request = new HttpPut(sign(url));
 
         InputStreamEntity entity = new InputStreamEntity(data.openNewInputStream(),
@@ -77,7 +80,7 @@ public class FileCache extends CloudService {
         HttpResponse response = getHttpClient().execute(request);
 
         String responseString = convertResponseToString(response);
-        Log.v("Filecache store()", "response = " + responseString);
+        LOG.finest("response = " + responseString);
 
         return responseString;
     }
@@ -116,7 +119,7 @@ public class FileCache extends CloudService {
             HttpResponseHandler responseHandler) throws Exception {
 
         String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID();
-        Log.v("Filecache asyncStore()", "uri = " + uri);
+        LOG.finest("uri = " + uri);
 
         AsyncHttpPut storeRequest = new AsyncHttpPut(sign(uri + "?expires_in="
                 + secondsUntilExipred), getHttpClient());
@@ -156,7 +159,7 @@ public class FileCache extends CloudService {
     // }
 
     public void asyncFetch(String uri, StreamableContent sink, HttpResponseHandler responseHandler) {
-        Log.v("Filecache asyncFetch()", "uri = " + uri);
+        LOG.finest("uri = " + uri);
         AsyncHttpGet fetchRequest = new AsyncHttpGet(uri, getHttpClient());
         fetchRequest.registerResponseHandler(responseHandler);
         fetchRequest.setStreamableContent(sink);
