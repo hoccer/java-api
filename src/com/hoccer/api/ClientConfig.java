@@ -21,15 +21,15 @@ import org.json.JSONObject;
 
 public class ClientConfig {
 
-    private static String mLinccerUri;
-    private static String mFileCacheUri;
-    private final String  mApplicationName;
-    private final UUID    mClientId;
-    private final String  mClientName;
+    protected static String mLinccerUri;
+    protected static String mFileCacheUri;
+    private final String    mApplicationName;
+    private final UUID      mClientId;
+    private final String    mClientName;
 
-    private String        mApiKey;
-    private String        mSharedSecret;
-    private String        mPublicKey;
+    private String          mApiKey;
+    private String          mSharedSecret;
+    private String          mPublicKey;
 
     static {
         useSandboxServers();
