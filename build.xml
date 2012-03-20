@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="java-api" default="build">
+  
+  <!-- Properties ========================================================== -->
+  
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="bin"/>
+  <property name="build.jar.file" value="bin/java-api.jar"/>
+  
+  
+  <!-- Paths ========================================================== -->
+
+  <fileset dir="libs" id="build.jars">
+    <include name="httpclient-4.0.3.jar"/>
+    <include name="httpcore-4.0.1.jar"/>
+    <include name="json-org.jar"/>
+  </fileset>
+  
+  <fileset dir="libs" id="test.jars">
+    <include name="httpclient-4.0.3.jar"/>
+    <include name="httpcore-4.0.1.jar"/>
+    <include name="json-org.jar"/>
+  </fileset>
+  
+  
+  <!-- Targets ========================================================== -->
+  
+  <target name="build" depends="clean, compile, package"/>
+  
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <mkdir dir="${build.dir}"/>
+  </target>
+  
+  <target name="compile" description="Compile the java source.">
+    <javac encoding="ascii" target="1.6" debug="true" extdirs=""
+        srcdir="${src.dir}" destdir="${build.dir}">
+      <classpath>
+        <fileset refid="build.jars"/>
+      </classpath>
+    </javac>
+  </target>
+  
+  <target name="package">
+  	<jar destfile="${build.jar.file}">
+  	    <fileset dir="${build.dir}">
+            <include name="**/*"/>
+        </fileset>
+    </jar>
+  </target>
+  
+</project>
