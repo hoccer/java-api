@@ -34,442 +34,486 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.hoccer.data.Base64;
+import com.hoccer.util.HoccerLoggers;
 
 public class Linccer extends CloudService {
 
-    // Constants ---------------------------------------------------------
-
-    private static final String LOG_TAG                       = Linccer.class.getSimpleName();
-
-    private static final Logger LOG                           = Logger.getLogger(LOG_TAG);
-
-    private Environment         mEnvironment                  = new Environment();
-    private EnvironmentStatus   mEnvironmentStatus;
-    private boolean             mAutoSubmitEnvironmentChanges = true;
-
-    private HttpGet             mPeekRequest                  = null;
-    protected volatile boolean  mPeekStopped                  = false;
-    private Object              mPeekLock                     = new Object();
-
-    public Linccer(ClientConfig config) {
-        super(config);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        disconnect();
-        super.finalize();
-    }
-
-    public void disconnect() throws UpdateException {
-        HttpResponse response;
-        try {
-            String uri = mConfig.getClientUri() + "/environment";
-            HttpDelete request = new HttpDelete(sign(uri));
-            response = getHttpClient().execute(request);
-        } catch (Exception e) {
-            throw new UpdateException("could not update gps measurement for "
-                    + mConfig.getClientUri() + " because of " + e);
-        }
-
-        if (response.getStatusLine().getStatusCode() != 200) {
-            throw new UpdateException(
-                    "could not delete environment because server responded with status "
-                            + response.getStatusLine().getStatusCode());
-        }
-    }
-
-    private void onEnvironmentChanged(Environment environment) throws UpdateException,
-            ClientProtocolException, IOException {
-        mEnvironment = environment;
-
-        if (mAutoSubmitEnvironmentChanges) {
-            submitEnvironment();
-        }
-    }
-
-    public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
-        HttpResponse response;
-        long startTime = 0;
-        try {
-            String uri = mConfig.getClientUri() + "/environment";
-            HttpPut request = new HttpPut(sign(uri));
-            request.setEntity(new StringEntity(mEnvironment.toJson().toString(), HTTP.UTF_8));
-            startTime = System.currentTimeMillis();
-            LOG.finest("submit environment uri = " + uri);
-            LOG.finest("submit environment = " + mEnvironment.toJson().toString());
-            response = getHttpClient().execute(request);
-        } catch (JSONException e) {
-            mEnvironmentStatus = null;
-            throw new UpdateException("could not update gps measurement for "
-                    + mConfig.getClientUri() + " because of " + e);
-        } catch (UnsupportedEncodingException e) {
-            mEnvironmentStatus = null;
-            throw new UpdateException("could not update gps measurement for "
-                    + mConfig.getClientUri() + " because of " + e);
-        }
-
-        if (response.getStatusLine().getStatusCode() != 201) {
-            try {
-                mEnvironmentStatus = null;
-                throw new UpdateException(
-                        "could not update environment because server responded with "
-                                + response.getStatusLine().getStatusCode() + ": "
-                                + convertResponseToString(response));
-            } catch (ParseException e) {
-            } catch (IOException e) {
-            }
-            throw new UpdateException("could not update environment because server responded with "
-                    + response.getStatusLine().getStatusCode() + " and an unparsable body");
-        }
-
-        try {
-            mEnvironmentStatus = new EnvironmentStatus(convertResponseToJsonObject(response));
-        } catch (Exception e) {
-            mEnvironmentStatus = null;
-            throw new UpdateException("could not update environment because server responded with "
-                    + response.getStatusLine().getStatusCode() + " and an ill formed body: "
-                    + e.getMessage());
-        }
-        int latency = (int) (System.currentTimeMillis() - startTime);
-
-        mEnvironment.setNetworkLatency(latency);
-    }
-
-    /**
-     * checks network latency in milliseconds writes it to the environment
-     */
-    // public int measureNetworkLatency() {
-    // String uri = mConfig.getClientUri();
-    // HttpHead request = new HttpHead(sign(uri));
-    // long startTime = System.currentTimeMillis();
-    // try {
-    // HttpResponse response = getHttpClient().execute(request);
-    // if (response == null || response.getStatusLine().getStatusCode() != 200) {
-    // return -1;
-    // }
-    // } catch (ClientProtocolException e) {
-    // return -2;
-    // } catch (IOException e) {
-    // return -3;
-    // } catch (Exception e) {
-    // return -4;
-    // }
-    //
-    // int latency = (int) (System.currentTimeMillis() - startTime);
-    //
-    // mEnvironment.setNetworkLatency(latency);
-    //
-    // return latency;
-    // }
-
-    public void onGpsChanged(double latitude, double longitude, int accuracy)
-            throws UpdateException, ClientProtocolException, IOException {
-        onGpsChanged(latitude, longitude, accuracy, new Date());
-    }
-
-    public void onGpsChanged(double latitude, double longitude, int accuracy, Date date)
-            throws UpdateException, ClientProtocolException, IOException {
-        mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, date);
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public void onGpsChanged(double latitude, double longitude, int accuracy, long time)
-            throws UpdateException, ClientProtocolException, IOException {
-        onGpsChanged(latitude, longitude, accuracy, new Date(time));
-    }
-
-    public void onNetworkChanged(double latitude, double longitude, int accuracy)
-            throws UpdateException, ClientProtocolException, IOException {
-        onNetworkChanged(latitude, longitude, accuracy, new Date());
-    }
-
-    public void onNetworkChanged(double latitude, double longitude, int accuracy, Date date)
-            throws UpdateException, ClientProtocolException, IOException {
-        mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, date);
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public void onNetworkChanged(double latitude, double longitude, int accuracy, long time)
-            throws UpdateException, ClientProtocolException, IOException {
-        onNetworkChanged(latitude, longitude, accuracy, new Date(time));
-    }
-
-    public void onWifiChanged(List<String> bssids) throws UpdateException, ClientProtocolException,
-            IOException {
-        mEnvironment.setWifiMeasurement(bssids, new Date());
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public void onClientNameChanged(String newClientName) throws UpdateException,
-            ClientProtocolException, IOException {
-        mEnvironment.setClientName(newClientName);
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public void onPublicKeyChanged(String newPublicKey) throws UpdateException,
-            ClientProtocolException, IOException {
-        mEnvironment.setPublicKey(newPublicKey);
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public String getClientName() {
-        return mEnvironment.getClientName();
-    }
-
-    public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,
-            IOException {
-        onWifiChanged(Arrays.asList(bssids));
-    }
-
-    public void onSelectedClientsChanged(ArrayList<String> selectedClients) throws UpdateException,
-            ClientProtocolException, IOException {
-        mEnvironment.setSelectedClients(selectedClients);
-        onEnvironmentChanged(mEnvironment);
-    }
-
-    public JSONObject share(String mode, JSONObject payload) throws BadModeException,
-            ClientActionException, CollidingActionsException {
-        return share(mode, "", payload);
-    }
-
-    public JSONObject share(String mode, String options, JSONObject payload)
-            throws BadModeException, ClientActionException, CollidingActionsException {
-
-        mode = mapMode(mode);
-        int statusCode;
-        try {
-            do {
-                String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
-                HttpPut request = new HttpPut(sign(uri));
-                request.setEntity(new StringEntity(payload.toString(), HTTP.UTF_8));
-                HttpResponse response = getHttpClient().execute(request);
-
-                statusCode = response.getStatusLine().getStatusCode();
-                switch (statusCode) {
-                    case 204:
-                        return null;
-                    case 200:
-                        return (JSONObject) convertResponseToJsonArray(response).get(0);
-                    case 409:
-                        throw new CollidingActionsException("The constrains of '" + mode
-                                + "' were violated. Try again.");
-                    default:
-                        // handled at the end of the method
-                }
-            } while (statusCode == 504);
-
-        } catch (JSONException e) {
-            throw new ClientActionException("Data Error. Could not share.", e);
-        } catch (ClientProtocolException e) {
-            throw new ClientActionException("HTTP Error. Could not share data.", e);
-        } catch (IOException e) {
-            throw new ClientActionException("Network Error. Could not share data.", e);
-        } catch (ParseException e) {
-            throw new ClientActionException("Parsing failed. Could not share data.", e);
-        } catch (UpdateException e) {
-            throw new ClientActionException("Update failed. Could not share data. ", e);
-        }
-
-        throw new ClientActionException("Server Error " + statusCode + ". Could not share data.");
-
-    }
-
-    public JSONObject receive(String mode) throws BadModeException, ClientActionException,
-            CollidingActionsException {
-        return receive(mode, "");
-    }
-
-    public JSONObject receive(String mode, String options) throws BadModeException,
-            ClientActionException, CollidingActionsException {
-
-        mode = mapMode(mode);
-        int statusCode;
-
-        try {
-            do {
-                String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
-                HttpGet request = new HttpGet(sign(uri));
-                HttpResponse response = getHttpClient().execute(request);
-
-                statusCode = response.getStatusLine().getStatusCode();
-                switch (statusCode) {
-                    case 204:
-                        return null;
-                    case 200:
-                        return convertResponseToJsonArray(response).getJSONObject(0);
-                    case 409:
-                        throw new CollidingActionsException("The constrains of '" + mode
-                                + "' were violated. Try again.");
-                    default:
-                        // handled at the end of the method
-                }
-            } while (statusCode == 504);
-
-        } catch (JSONException e) {
-            throw new ClientActionException("Data Error. Could not receive.", e);
-        } catch (ClientProtocolException e) {
-            throw new ClientActionException("HTTP Error. Could not receive data.", e);
-        } catch (IOException e) {
-            throw new ClientActionException("Network Error. Could not receive data.", e);
-        } catch (ParseException e) {
-            throw new ClientActionException("Parsing failed. Could not receive data.", e);
-        } catch (UpdateException e) {
-            throw new ClientActionException("Update failed. Could not receive data. ", e);
-        }
-
-        throw new ClientActionException("Server Error " + statusCode + ". Could not receive data.");
-    }
-
-    public void abortPeek() {
-        if (mPeekStopped == true) {
-            return;
-        }
-        mPeekStopped = true;
-        synchronized (mPeekLock) {
-            if (mPeekRequest != null)
-                mPeekRequest.abort();
-        }
-    }
-
-    public JSONObject peek(String groupID) throws ClientActionException {
-
-        int statusCode;
-
-        mPeekStopped = false;
-        try {
-            do {
-                String uri = mConfig.getClientUri() + "/peek"; // https://<server>/v3/clients/<uuid>
-                if (groupID != null) {
-                    uri += "?group_id=" + groupID;
-                }
-                // uri = sign(uri);
-
-                LOG.finest("peeking uri = " + uri);
-
-                HttpGet request = new HttpGet(uri);
-                if (mPeekStopped == true)
-                    return null;
-
-                synchronized (mPeekLock) {
-                    mPeekRequest = request;
-                }
-                HttpResponse response = getHttpClient().execute(request);
-
-                statusCode = response.getStatusLine().getStatusCode();
-                String body = convertResponseToString(response);
-                switch (statusCode) {
-                    case 200:
-                        LOG.finest("peek response = " + body);
-                        JSONObject json = null;
-                        try {
-                            json = new JSONObject(body);
-                        } catch (Exception e) {
-                            throw new ParseException("could not parse the json '" + body + "'");
-                        }
-
-                        return json;
-                        // return convertResponseToJsonObject(response);
-                    default:
-                        // handled at the end of the method
-                }
-            } while (statusCode == 504);
-
-            // } catch (JSONException e) {
-            // throw new ClientActionException("JSON Data Format Error. Could not peek.", e);
-        } catch (ClientProtocolException e) {
-            throw new ClientActionException("HTTP Error. Could not peek data.", e);
-        } catch (IOException e) {
-            LOG.finest("peek IOException, what=" + e.getMessage());
-            // e.printStackTrace();
-            if (mPeekStopped) {
-                throw new ClientActionException("Peek aborted.", e);
-            }
-            throw new ClientActionException("Network Error. Could not peek data.", e);
-        } catch (ParseException e) {
-            throw new ClientActionException("Parsing failed. Could not peek data.", e);
-            // } catch (UpdateException e) {
-            // throw new ClientActionException("Update failed. Could not peek data. ", e);
-        }
-
-        throw new ClientActionException("Server Error " + statusCode + ". Could not peek.");
-    }
-
-    public byte[] getPublicKey(String hash) throws ClientActionException {
-
-        int statusCode;
-
-        mPeekStopped = false;
-        try {
-            do {
-                String uri = mConfig.getClientUri() + "/" + hash + "/publickey"; // https://<server>/v3/clients/<uuid>/<hash>/publickey
-
-                // uri = sign(uri);
-
-                LOG.finest("getPublicKey uri = " + uri);
-
-                HttpGet request = new HttpGet(uri);
-
-                HttpResponse response = getHttpClient().execute(request);
-
-                statusCode = response.getStatusLine().getStatusCode();
-                String body = convertResponseToString(response);
-                switch (statusCode) {
-                    case 200:
-                        LOG.finest("getPublicKey response = " + body);
-                        JSONObject json = null;
-                        String theKeyString = null;
-                        try {
-                            json = new JSONObject(body);
-                            theKeyString = json.getString("pubkey");
-                        } catch (Exception e) {
-                            throw new ParseException("could not parse the json '" + body + "'");
-                        }
-                        byte[] key = Base64.decode(theKeyString);
-                        return key;
-                    default:
-                        // handled at the end of the method
-                }
-            } while (statusCode == 504);
-
-        } catch (ClientProtocolException e) {
-            throw new ClientActionException("HTTP Error. Could not get public key.", e);
-        } catch (IOException e) {
-            LOG.finest("getPublicKey IOException, what=" + e.getMessage());
-            // e.printStackTrace();
-            throw new ClientActionException("Network Error. Could not getPublicKey.", e);
-        } catch (ParseException e) {
-            throw new ClientActionException("Parsing failed. Could not getPublicKey.", e);
-        }
-
-        throw new ClientActionException("Server Error " + statusCode + ". Could not getPublicKey.");
-    }
-
-    public String getUri() {
-        return mConfig.getClientUri();
-    }
-
-    public EnvironmentStatus getEnvironmentStatus() {
-        return mEnvironmentStatus;
-    }
-
-    private String mapMode(String mode) throws BadModeException {
-        if (mode.equals("1:1") || mode.equals("one-to-one")) {
-            return "one-to-one";
-        } else if (mode.equals("1:n") || mode.equals("one-to-many")) {
-            return "one-to-many";
-        } else if (mode.equals("n:n") || mode.equals("many-to-many")) {
-            return "many-to-many";
-        }
-
-        throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
-    }
-
-    public boolean autoSubmitEnvironmentChanges() {
-        return mAutoSubmitEnvironmentChanges;
-    }
-
-    public void autoSubmitEnvironmentChanges(boolean flag) {
-        mAutoSubmitEnvironmentChanges = flag;
-    }
+	// Constants ---------------------------------------------------------
+
+	private static final String LOG_TAG = Linccer.class.getSimpleName();
+	private static final Logger LOG = HoccerLoggers.getLogger(LOG_TAG);
+
+	private Environment mEnvironment = new Environment();
+	private EnvironmentStatus mEnvironmentStatus;
+	private boolean mAutoSubmitEnvironmentChanges = true;
+
+	private HttpGet mPeekRequest = null;
+	protected volatile boolean mPeekStopped = false;
+	private Object mPeekLock = new Object();
+
+	public Linccer(ClientConfig config) {
+		super(config);
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		disconnect();
+		super.finalize();
+	}
+
+	public void disconnect() throws UpdateException {
+		HttpResponse response;
+		try {
+			String uri = mConfig.getClientUri() + "/environment";
+			HttpDelete request = new HttpDelete(sign(uri));
+			response = getHttpClient().execute(request);
+		} catch (Exception e) {
+			throw new UpdateException("could not update gps measurement for "
+					+ mConfig.getClientUri() + " because of " + e);
+		}
+
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new UpdateException(
+					"could not delete environment because server responded with status "
+							+ response.getStatusLine().getStatusCode());
+		}
+	}
+
+	private void onEnvironmentChanged(Environment environment)
+			throws UpdateException, ClientProtocolException, IOException {
+		mEnvironment = environment;
+
+		if (mAutoSubmitEnvironmentChanges) {
+			submitEnvironment();
+		}
+	}
+
+	public void submitEnvironment() throws UpdateException,
+			ClientProtocolException, IOException {
+		HttpResponse response;
+		long startTime = 0;
+		try {
+			String uri = mConfig.getClientUri() + "/environment";
+			HttpPut request = new HttpPut(sign(uri));
+			request.setEntity(new StringEntity(
+					mEnvironment.toJson().toString(), HTTP.UTF_8));
+			startTime = System.currentTimeMillis();
+			LOG.finest("submit environment uri = " + uri);
+			LOG.finest("submit environment = "
+					+ mEnvironment.toJson().toString());
+			response = getHttpClient().execute(request);
+		} catch (JSONException e) {
+			mEnvironmentStatus = null;
+			throw new UpdateException("could not update gps measurement for "
+					+ mConfig.getClientUri() + " because of " + e);
+		} catch (UnsupportedEncodingException e) {
+			mEnvironmentStatus = null;
+			throw new UpdateException("could not update gps measurement for "
+					+ mConfig.getClientUri() + " because of " + e);
+		}
+
+		if (response.getStatusLine().getStatusCode() != 201) {
+			try {
+				mEnvironmentStatus = null;
+				throw new UpdateException(
+						"could not update environment because server responded with "
+								+ response.getStatusLine().getStatusCode()
+								+ ": " + convertResponseToString(response));
+			} catch (ParseException e) {
+			} catch (IOException e) {
+			}
+			throw new UpdateException(
+					"could not update environment because server responded with "
+							+ response.getStatusLine().getStatusCode()
+							+ " and an unparsable body");
+		}
+
+		try {
+			mEnvironmentStatus = new EnvironmentStatus(
+					convertResponseToJsonObject(response));
+		} catch (Exception e) {
+			mEnvironmentStatus = null;
+			throw new UpdateException(
+					"could not update environment because server responded with "
+							+ response.getStatusLine().getStatusCode()
+							+ " and an ill formed body: " + e.getMessage());
+		}
+		int latency = (int) (System.currentTimeMillis() - startTime);
+
+		mEnvironment.setNetworkLatency(latency);
+	}
+
+	/**
+	 * checks network latency in milliseconds writes it to the environment
+	 */
+	// public int measureNetworkLatency() {
+	// String uri = mConfig.getClientUri();
+	// HttpHead request = new HttpHead(sign(uri));
+	// long startTime = System.currentTimeMillis();
+	// try {
+	// HttpResponse response = getHttpClient().execute(request);
+	// if (response == null || response.getStatusLine().getStatusCode() != 200)
+	// {
+	// return -1;
+	// }
+	// } catch (ClientProtocolException e) {
+	// return -2;
+	// } catch (IOException e) {
+	// return -3;
+	// } catch (Exception e) {
+	// return -4;
+	// }
+	//
+	// int latency = (int) (System.currentTimeMillis() - startTime);
+	//
+	// mEnvironment.setNetworkLatency(latency);
+	//
+	// return latency;
+	// }
+
+	public void onGpsChanged(double latitude, double longitude, int accuracy)
+			throws UpdateException, ClientProtocolException, IOException {
+		onGpsChanged(latitude, longitude, accuracy, new Date());
+	}
+
+	public void onGpsChanged(double latitude, double longitude, int accuracy,
+			Date date) throws UpdateException, ClientProtocolException,
+			IOException {
+		mEnvironment.setGpsMeasurement(latitude, longitude, accuracy, date);
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public void onGpsChanged(double latitude, double longitude, int accuracy,
+			long time) throws UpdateException, ClientProtocolException,
+			IOException {
+		onGpsChanged(latitude, longitude, accuracy, new Date(time));
+	}
+
+	public void onNetworkChanged(double latitude, double longitude, int accuracy)
+			throws UpdateException, ClientProtocolException, IOException {
+		onNetworkChanged(latitude, longitude, accuracy, new Date());
+	}
+
+	public void onNetworkChanged(double latitude, double longitude,
+			int accuracy, Date date) throws UpdateException,
+			ClientProtocolException, IOException {
+		mEnvironment.setNetworkMeasurement(latitude, longitude, accuracy, date);
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public void onNetworkChanged(double latitude, double longitude,
+			int accuracy, long time) throws UpdateException,
+			ClientProtocolException, IOException {
+		onNetworkChanged(latitude, longitude, accuracy, new Date(time));
+	}
+
+	public void onWifiChanged(List<String> bssids) throws UpdateException,
+			ClientProtocolException, IOException {
+		mEnvironment.setWifiMeasurement(bssids, new Date());
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public void onClientNameChanged(String newClientName)
+			throws UpdateException, ClientProtocolException, IOException {
+		mEnvironment.setClientName(newClientName);
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public void onPublicKeyChanged(String newPublicKey) throws UpdateException,
+			ClientProtocolException, IOException {
+		mEnvironment.setPublicKey(newPublicKey);
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public String getClientName() {
+		return mEnvironment.getClientName();
+	}
+
+	public void onWifiChanged(String[] bssids) throws UpdateException,
+			ClientProtocolException, IOException {
+		onWifiChanged(Arrays.asList(bssids));
+	}
+
+	public void onSelectedClientsChanged(ArrayList<String> selectedClients)
+			throws UpdateException, ClientProtocolException, IOException {
+		mEnvironment.setSelectedClients(selectedClients);
+		onEnvironmentChanged(mEnvironment);
+	}
+
+	public JSONObject share(String mode, JSONObject payload)
+			throws BadModeException, ClientActionException,
+			CollidingActionsException {
+		return share(mode, "", payload);
+	}
+
+	public JSONObject share(String mode, String options, JSONObject payload)
+			throws BadModeException, ClientActionException,
+			CollidingActionsException {
+
+		mode = mapMode(mode);
+		int statusCode;
+		try {
+			do {
+				String uri = mConfig.getClientUri() + "/action/" + mode + "?"
+						+ options;
+				HttpPut request = new HttpPut(sign(uri));
+				request.setEntity(new StringEntity(payload.toString(),
+						HTTP.UTF_8));
+				HttpResponse response = getHttpClient().execute(request);
+
+				statusCode = response.getStatusLine().getStatusCode();
+				switch (statusCode) {
+				case 204:
+					return null;
+				case 200:
+					return (JSONObject) convertResponseToJsonArray(response)
+							.get(0);
+				case 409:
+					throw new CollidingActionsException("The constrains of '"
+							+ mode + "' were violated. Try again.");
+				default:
+					// handled at the end of the method
+				}
+			} while (statusCode == 504);
+
+		} catch (JSONException e) {
+			throw new ClientActionException("Data Error. Could not share.", e);
+		} catch (ClientProtocolException e) {
+			throw new ClientActionException(
+					"HTTP Error. Could not share data.", e);
+		} catch (IOException e) {
+			throw new ClientActionException(
+					"Network Error. Could not share data.", e);
+		} catch (ParseException e) {
+			throw new ClientActionException(
+					"Parsing failed. Could not share data.", e);
+		} catch (UpdateException e) {
+			throw new ClientActionException(
+					"Update failed. Could not share data. ", e);
+		}
+
+		throw new ClientActionException("Server Error " + statusCode
+				+ ". Could not share data.");
+
+	}
+
+	public JSONObject receive(String mode) throws BadModeException,
+			ClientActionException, CollidingActionsException {
+		return receive(mode, "");
+	}
+
+	public JSONObject receive(String mode, String options)
+			throws BadModeException, ClientActionException,
+			CollidingActionsException {
+
+		mode = mapMode(mode);
+		int statusCode;
+
+		try {
+			do {
+				String uri = mConfig.getClientUri() + "/action/" + mode + "?"
+						+ options;
+				HttpGet request = new HttpGet(sign(uri));
+				HttpResponse response = getHttpClient().execute(request);
+
+				statusCode = response.getStatusLine().getStatusCode();
+				switch (statusCode) {
+				case 204:
+					return null;
+				case 200:
+					return convertResponseToJsonArray(response)
+							.getJSONObject(0);
+				case 409:
+					throw new CollidingActionsException("The constrains of '"
+							+ mode + "' were violated. Try again.");
+				default:
+					// handled at the end of the method
+				}
+			} while (statusCode == 504);
+
+		} catch (JSONException e) {
+			throw new ClientActionException("Data Error. Could not receive.", e);
+		} catch (ClientProtocolException e) {
+			throw new ClientActionException(
+					"HTTP Error. Could not receive data.", e);
+		} catch (IOException e) {
+			throw new ClientActionException(
+					"Network Error. Could not receive data.", e);
+		} catch (ParseException e) {
+			throw new ClientActionException(
+					"Parsing failed. Could not receive data.", e);
+		} catch (UpdateException e) {
+			throw new ClientActionException(
+					"Update failed. Could not receive data. ", e);
+		}
+
+		throw new ClientActionException("Server Error " + statusCode
+				+ ". Could not receive data.");
+	}
+
+	public void abortPeek() {
+		if (mPeekStopped == true) {
+			return;
+		}
+		mPeekStopped = true;
+		synchronized (mPeekLock) {
+			if (mPeekRequest != null)
+				mPeekRequest.abort();
+		}
+	}
+
+	public JSONObject peek(String groupID) throws ClientActionException {
+
+		int statusCode;
+
+		mPeekStopped = false;
+		try {
+			do {
+				String uri = mConfig.getClientUri() + "/peek"; // https://<server>/v3/clients/<uuid>
+				if (groupID != null) {
+					uri += "?group_id=" + groupID;
+				}
+				// uri = sign(uri);
+
+				LOG.finest("peeking uri = " + uri);
+
+				HttpGet request = new HttpGet(uri);
+				if (mPeekStopped == true)
+					return null;
+
+				synchronized (mPeekLock) {
+					mPeekRequest = request;
+				}
+				HttpResponse response = getHttpClient().execute(request);
+
+				statusCode = response.getStatusLine().getStatusCode();
+				String body = convertResponseToString(response);
+				switch (statusCode) {
+				case 200:
+					LOG.finest("peek response = " + body);
+					JSONObject json = null;
+					try {
+						json = new JSONObject(body);
+					} catch (Exception e) {
+						throw new ParseException("could not parse the json '"
+								+ body + "'");
+					}
+
+					return json;
+					// return convertResponseToJsonObject(response);
+				default:
+					// handled at the end of the method
+				}
+			} while (statusCode == 504);
+
+			// } catch (JSONException e) {
+			// throw new
+			// ClientActionException("JSON Data Format Error. Could not peek.",
+			// e);
+		} catch (ClientProtocolException e) {
+			throw new ClientActionException("HTTP Error. Could not peek data.",
+					e);
+		} catch (IOException e) {
+			LOG.finest("peek IOException, what=" + e.getMessage());
+			// e.printStackTrace();
+			if (mPeekStopped) {
+				throw new ClientActionException("Peek aborted.", e);
+			}
+			throw new ClientActionException(
+					"Network Error. Could not peek data.", e);
+		} catch (ParseException e) {
+			throw new ClientActionException(
+					"Parsing failed. Could not peek data.", e);
+			// } catch (UpdateException e) {
+			// throw new
+			// ClientActionException("Update failed. Could not peek data. ", e);
+		}
+
+		throw new ClientActionException("Server Error " + statusCode
+				+ ". Could not peek.");
+	}
+
+	public byte[] getPublicKey(String hash) throws ClientActionException {
+
+		int statusCode;
+
+		mPeekStopped = false;
+		try {
+			do {
+				String uri = mConfig.getClientUri() + "/" + hash + "/publickey"; // https://<server>/v3/clients/<uuid>/<hash>/publickey
+
+				// uri = sign(uri);
+
+				LOG.finest("getPublicKey uri = " + uri);
+
+				HttpGet request = new HttpGet(uri);
+
+				HttpResponse response = getHttpClient().execute(request);
+
+				statusCode = response.getStatusLine().getStatusCode();
+				String body = convertResponseToString(response);
+				switch (statusCode) {
+				case 200:
+					LOG.finest("getPublicKey response = " + body);
+					JSONObject json = null;
+					String theKeyString = null;
+					try {
+						json = new JSONObject(body);
+						theKeyString = json.getString("pubkey");
+					} catch (Exception e) {
+						throw new ParseException("could not parse the json '"
+								+ body + "'");
+					}
+					byte[] key = Base64.decode(theKeyString);
+					return key;
+				default:
+					// handled at the end of the method
+				}
+			} while (statusCode == 504);
+
+		} catch (ClientProtocolException e) {
+			throw new ClientActionException(
+					"HTTP Error. Could not get public key.", e);
+		} catch (IOException e) {
+			LOG.finest("getPublicKey IOException, what=" + e.getMessage());
+			// e.printStackTrace();
+			throw new ClientActionException(
+					"Network Error. Could not getPublicKey.", e);
+		} catch (ParseException e) {
+			throw new ClientActionException(
+					"Parsing failed. Could not getPublicKey.", e);
+		}
+
+		throw new ClientActionException("Server Error " + statusCode
+				+ ". Could not getPublicKey.");
+	}
+
+	public String getUri() {
+		return mConfig.getClientUri();
+	}
+
+	public EnvironmentStatus getEnvironmentStatus() {
+		return mEnvironmentStatus;
+	}
+
+	private String mapMode(String mode) throws BadModeException {
+		if (mode.equals("1:1") || mode.equals("one-to-one")) {
+			return "one-to-one";
+		} else if (mode.equals("1:n") || mode.equals("one-to-many")) {
+			return "one-to-many";
+		} else if (mode.equals("n:n") || mode.equals("many-to-many")) {
+			return "many-to-many";
+		}
+
+		throw new BadModeException("the provided mode name '" + mode
+				+ "' could not be mapped");
+	}
+
+	public boolean autoSubmitEnvironmentChanges() {
+		return mAutoSubmitEnvironmentChanges;
+	}
+
+	public void autoSubmitEnvironmentChanges(boolean flag) {
+		mAutoSubmitEnvironmentChanges = flag;
+	}
 }
