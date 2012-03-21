@@ -26,7 +26,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Linccer Java-API. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package com.artcom.y60.http;
+package com.hoccer.tools;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -38,8 +38,6 @@ import java.util.Map;
 import org.apache.http.HttpResponse;
 
 import com.hoccer.http.AsyncHttpTestCase;
-import com.hoccer.tools.HttpClientException;
-import com.hoccer.tools.HttpHelper;
 
 public class HttpHelperTest extends AsyncHttpTestCase {
 
