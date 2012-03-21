@@ -34,7 +34,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.containsString;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -75,7 +74,7 @@ public class TestFileCache {
         content.setFilename("data.png");
         content.setContentType("image/png");
         byte[] data = { 23, 42, 23 };
-        content.openOutputStream().write(data);
+        content.openNewOutputStream().write(data);
 
         String locationUri = filecache.store(content, 2);
         assertThat(locationUri, containsString("https://filecache"));
@@ -96,8 +95,8 @@ public class TestFileCache {
         blockUntilRequestIsDone(storeRequest);
 
         assertThat(storeRequest.getStatusCode(), is(equalTo(201)));
-        assertThat(storeRequest.getBodyAsString(), containsString(uri
-                .substring(0, uri.indexOf('?'))));
+        assertThat(storeRequest.getBodyAsString(),
+                containsString(uri.substring(0, uri.indexOf('?'))));
     }
 
     protected void blockUntilRequestIsDone(final AsyncHttpRequest pRequest) throws Exception {
@@ -257,7 +256,7 @@ public class TestFileCache {
                     }
                 });
 
-        assertThat(sink.openOutputStream().toString(), is(equalTo(source.openOutputStream()
+        assertThat(sink.openNewOutputStream().toString(), is(equalTo(source.openNewOutputStream()
                 .toString())));
         assertThat(sink.getContentType(), is(equalTo("text/plain")));
     }
@@ -286,7 +285,7 @@ public class TestFileCache {
         filecache.cancel(uri);
     }
 
-    private GenericStreamableContent getLargeDataObject(int size) throws IOException {
+    private GenericStreamableContent getLargeDataObject(int size) throws Exception {
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/plain");
         StringBuffer content = new StringBuffer();
@@ -294,7 +293,7 @@ public class TestFileCache {
             content.append('a');
         }
 
-        data.openOutputStream().write(content.toString().getBytes(), 0,
+        data.openNewOutputStream().write(content.toString().getBytes(), 0,
                 content.toString().getBytes().length);
         return data;
     }

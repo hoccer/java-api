@@ -90,7 +90,7 @@ public class TestAsyncHttpGet extends AsyncHttpTestCase {
         blockUntilRequestIsDone(mRequest);
 
         long time = mRequest.getDownloadTime();
-        long size = mRequest.getBodyAsStreamableContent().getStreamLength();
+        long size = mRequest.getBodyAsStreamableContent().getNewStreamLength();
     }
 
     public void testGettingResultWithoutPerformingTheRequest() throws Exception {
@@ -204,12 +204,12 @@ public class TestAsyncHttpGet extends AsyncHttpTestCase {
     }
 
     public void testGettingImageFromWeb() throws Exception {
-        String uri = "http://artcom.de/templates/artcom/css/images/artcom_rgb_screen_193x22.png";
+        String uri = "http://hoccer.com/wp-content/themes/hoccer_2012/images/hoccer.logo.png";
         byte[] expectedData = HttpHelper.getAsByteArray(uri);
         mRequest = new AsyncHttpGet(uri);
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
-        InputStream downloadedData = mRequest.getBodyAsStreamableContent().openInputStream();
+        InputStream downloadedData = mRequest.getBodyAsStreamableContent().openNewInputStream();
         TestHelper.assertInputStreamEquals("Downloaded should be equal", new ByteArrayInputStream(
                 expectedData), downloadedData);
     }

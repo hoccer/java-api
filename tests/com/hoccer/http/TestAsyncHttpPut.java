@@ -94,7 +94,7 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
         data.setContentType("text/xml");
         byte[] content = "testmango".getBytes();
 
-        data.openOutputStream().write(content, 0, content.length);
+        data.openNewOutputStream().write(content, 0, content.length);
 
         mRequest.setBody(data);
         mRequest.start();
@@ -108,8 +108,8 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
                 "the putted data should be returned with basic mime type by the mocked server",
                 "text/plain", mRequest.getBodyAsStreamableContent().getContentType());
 
-        assertEquals("the putted data should be retrievable via http GET", "testmango", HttpHelper
-                .getAsString(uri));
+        assertEquals("the putted data should be retrievable via http GET", "testmango",
+                HttpHelper.getAsString(uri));
     }
 
     public void testPuttingStringAsMultipart() throws Exception {
@@ -128,14 +128,14 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
                 "test data string as stream", mRequest.getBodyAsString());
 
         TestHelper.assertIncludes("the putted mime type should be passed to the server",
-                NanoHTTPD.MIME_MULTIPART, getServer().getLastRequest().header
-                        .getProperty("content-type"));
+                NanoHTTPD.MIME_MULTIPART,
+                getServer().getLastRequest().header.getProperty("content-type"));
 
         String mulitpartString = HttpHelper.getAsString(uri);
-        assertTrue("putted data should contain mulitpart border string", mulitpartString
-                .contains(MultipartHttpEntity.BORDER));
-        assertTrue("putted data should contain content-type informations", mulitpartString
-                .contains("Content-Type: text/plain"));
+        assertTrue("putted data should contain mulitpart border string",
+                mulitpartString.contains(MultipartHttpEntity.BORDER));
+        assertTrue("putted data should contain content-type informations",
+                mulitpartString.contains("Content-Type: text/plain"));
 
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
@@ -147,7 +147,7 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
         GenericStreamableContent data = new GenericStreamableContent();
         data.setContentType("text/xml");
         byte[] content = "test data string as stream".getBytes();
-        data.openOutputStream().write(content, 0, content.length);
+        data.openNewOutputStream().write(content, 0, content.length);
 
         multipart.addPart("unit test data", data);
 
@@ -161,10 +161,10 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
                 "test data string as stream", mRequest.getBodyAsString());
 
         String mulitpartString = HttpHelper.getAsString(uri);
-        assertTrue("putted data should contain mulitpart border string", mulitpartString
-                .contains(MultipartHttpEntity.BORDER));
-        assertTrue("putted data should contain content-type informations", mulitpartString
-                .contains("Content-Type: text/xml"));
+        assertTrue("putted data should contain mulitpart border string",
+                mulitpartString.contains(MultipartHttpEntity.BORDER));
+        assertTrue("putted data should contain content-type informations",
+                mulitpartString.contains("Content-Type: text/xml"));
 
         assertMultipartDataEquals("test data string as stream", mulitpartString);
     }
@@ -188,7 +188,7 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
 
         byte[] content = new byte[10000];
 
-        data.openOutputStream().write(content, 0, content.length);
+        data.openNewOutputStream().write(content, 0, content.length);
 
         mRequest.setBody(data);
 
@@ -233,7 +233,7 @@ public class TestAsyncHttpPut extends AsyncHttpTestCase {
 
         byte[] content = new byte[10000];
 
-        data.openOutputStream().write(content, 0, content.length);
+        data.openNewOutputStream().write(content, 0, content.length);
         mRequest.setBody(data);
 
         mRequest.registerResponseHandler(new ProgressResponseHandler() {

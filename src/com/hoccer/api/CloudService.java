@@ -88,7 +88,7 @@ public class CloudService {
 
     protected JSONObject convertResponseToJsonObject(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
-        String body = convertResponseToString(response);
+        String body = convertResponseToString(response, false);
 
         JSONObject json = null;
         try {
@@ -102,13 +102,14 @@ public class CloudService {
 
     protected JSONArray convertResponseToJsonArray(HttpResponse response) throws ParseException,
             IOException, JSONException, UpdateException {
-        String body = convertResponseToString(response);
+        String body = convertResponseToString(response, false);
         return new JSONArray(body);
     }
 
-    protected String convertResponseToString(HttpResponse response) throws IOException {
+    protected String convertResponseToString(HttpResponse response, boolean pIgnoreStatus)
+            throws IOException {
         int statuscode = response.getStatusLine().getStatusCode();
-        if (statuscode != 200 && statuscode != 201) {
+        if (statuscode != 200 && statuscode != 201 && !pIgnoreStatus) {
             throw new ParseException("server respond with "
                     + response.getStatusLine().getStatusCode()
                     + ": "

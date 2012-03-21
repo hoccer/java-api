@@ -39,158 +39,157 @@ import com.hoccer.util.HoccerLoggers;
 
 public class FileCache extends CloudService {
 
-	private static final String LOG_TAG = FileCache.class.getSimpleName();
-	private static final Logger LOG = HoccerLoggers.getLogger(LOG_TAG);
+    private static final String                     LOG_TAG          = FileCache.class
+                                                                             .getSimpleName();
+    private static final Logger                     LOG              = HoccerLoggers
+                                                                             .getLogger(LOG_TAG);
 
-	private final HashMap<String, AsyncHttpRequest> mOngoingRequests = new HashMap<String, AsyncHttpRequest>();
+    private final HashMap<String, AsyncHttpRequest> mOngoingRequests = new HashMap<String, AsyncHttpRequest>();
 
-	public FileCache(ClientConfig config) {
-		super(config);
-	}
+    public FileCache(ClientConfig config) {
+        super(config);
+    }
 
-	public HashMap<String, AsyncHttpRequest> getOngoingRequests() {
+    public HashMap<String, AsyncHttpRequest> getOngoingRequests() {
 
-		synchronized (mOngoingRequests) {
-			for (String uri : mOngoingRequests.keySet()) {
-				if (mOngoingRequests.get(uri).isTaskCompleted()) {
-					mOngoingRequests.remove(uri);
-				}
-			}
-		}
+        synchronized (mOngoingRequests) {
+            for (String uri : mOngoingRequests.keySet()) {
+                if (mOngoingRequests.get(uri).isTaskCompleted()) {
+                    mOngoingRequests.remove(uri);
+                }
+            }
+        }
 
-		return mOngoingRequests;
-	}
+        return mOngoingRequests;
+    }
 
-	public String store(StreamableContent data, int secondsUntilExipred)
-			throws ClientProtocolException, IOException, Exception {
+    public String store(StreamableContent data, int secondsUntilExipred)
+            throws ClientProtocolException, IOException, Exception {
 
-		String url = ClientConfig.getFileCacheBaseUri() + "/"
-				+ UUID.randomUUID() + "/?expires_in=" + secondsUntilExipred;
-		LOG.finest("put uri = " + url);
-		HttpPut request = new HttpPut(sign(url));
+        String url = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID() + "/?expires_in="
+                + secondsUntilExipred;
+        LOG.finest("put uri = " + url);
+        HttpPut request = new HttpPut(sign(url));
 
-		InputStreamEntity entity = new InputStreamEntity(
-				data.openNewInputStream(), data.getNewStreamLength());
-		request.addHeader("Content-Disposition", " attachment; filename=\""
-				+ data.getFilename() + "\"");
-		entity.setContentType(data.getContentType());
-		request.setEntity(entity);
-		request.addHeader("Content-Type", data.getContentType());
+        InputStreamEntity entity = new InputStreamEntity(data.openNewInputStream(),
+                data.getNewStreamLength());
+        request.addHeader("Content-Disposition", " attachment; filename=\"" + data.getFilename()
+                + "\"");
+        entity.setContentType(data.getContentType());
+        request.setEntity(entity);
+        request.addHeader("Content-Type", data.getContentType());
 
-		HttpResponse response = getHttpClient().execute(request);
+        HttpResponse response = getHttpClient().execute(request);
 
-		String responseString = convertResponseToString(response);
-		LOG.finest("response = " + responseString);
+        String responseString = convertResponseToString(response, false);
+        LOG.finest("response = " + responseString);
 
-		return responseString;
-	}
+        return responseString;
+    }
 
-	public void fetch(String locationUri, StreamableContent data)
-			throws ClientProtocolException, IOException, Exception {
-		HttpGet request = new HttpGet(locationUri);
-		HttpResponse response = getHttpClient().execute(request);
+    public void fetch(String locationUri, StreamableContent data) throws ClientProtocolException,
+            IOException, Exception {
+        HttpGet request = new HttpGet(locationUri);
+        HttpResponse response = getHttpClient().execute(request);
 
-		int statuscode = response.getStatusLine().getStatusCode();
-		if (statuscode != 200) {
-			throw new HttpResponseException(statuscode,
-					"Unexpected status code " + statuscode
-							+ " while requesting " + locationUri);
-		}
+        int statuscode = response.getStatusLine().getStatusCode();
+        if (statuscode != 200) {
+            throw new HttpResponseException(statuscode, "Unexpected status code " + statuscode
+                    + " while requesting " + locationUri);
+        }
 
-		InputStream is = response.getEntity().getContent();
-		OutputStream storageStream = data.openNewOutputStream();
-		byte[] buffer = new byte[0xFFFF];
-		int len;
-		while ((len = is.read(buffer)) != -1) {
-			storageStream.write(buffer, 0, len);
-		}
+        InputStream is = response.getEntity().getContent();
+        OutputStream storageStream = data.openNewOutputStream();
+        byte[] buffer = new byte[0xFFFF];
+        int len;
+        while ((len = is.read(buffer)) != -1) {
+            storageStream.write(buffer, 0, len);
+        }
 
-		if (data instanceof GenericStreamableContent) {
-			Header[] headers = response.getAllHeaders();
-			HashMap<String, String> headermap = new HashMap<String, String>();
-			for (int i = 0; i < headers.length; i++) {
-				headermap.put(headers[i].getName(), headers[i].getValue());
-			}
-			AsyncHttpRequest.setTypeAndFilename(
-					(GenericStreamableContent) data, headermap, locationUri);
-		}
-	}
+        if (data instanceof GenericStreamableContent) {
+            Header[] headers = response.getAllHeaders();
+            HashMap<String, String> headermap = new HashMap<String, String>();
+            for (int i = 0; i < headers.length; i++) {
+                headermap.put(headers[i].getName(), headers[i].getValue());
+            }
+            AsyncHttpRequest.setTypeAndFilename((GenericStreamableContent) data, headermap,
+                    locationUri);
+        }
+    }
 
-	public String asyncStore(StreamableContent data, int secondsUntilExipred,
-			HttpResponseHandler responseHandler) throws Exception {
+    public String asyncStore(StreamableContent data, int secondsUntilExipred,
+            HttpResponseHandler responseHandler) throws Exception {
 
-		String uri = ClientConfig.getFileCacheBaseUri() + "/"
-				+ UUID.randomUUID();
-		LOG.finest("uri = " + uri);
+        String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID();
+        LOG.finest("uri = " + uri);
 
-		AsyncHttpPut storeRequest = new AsyncHttpPut(sign(uri + "?expires_in="
-				+ secondsUntilExipred), getHttpClient());
+        AsyncHttpPut storeRequest = new AsyncHttpPut(sign(uri + "?expires_in="
+                + secondsUntilExipred), getHttpClient());
 
-		if (responseHandler != null) {
-			storeRequest.registerResponseHandler(responseHandler);
-		}
-		storeRequest.setBody(data);
-		storeRequest.start();
-		synchronized (mOngoingRequests) {
-			mOngoingRequests.put(uri, storeRequest);
-		}
+        if (responseHandler != null) {
+            storeRequest.registerResponseHandler(responseHandler);
+        }
+        storeRequest.setBody(data);
+        storeRequest.start();
+        synchronized (mOngoingRequests) {
+            mOngoingRequests.put(uri, storeRequest);
+        }
 
-		return uri;
-	}
+        return uri;
+    }
 
-	// public String asyncStore(StreamableContent data, int secondsUntilExipred,
-	// HttpResponseHandler responseHandler) throws IOException {
-	//
-	// String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID()
-	// + "?expires_in="
-	// + secondsUntilExipred;
-	// uri = sign(uri);
-	// Log.v("Filecache store()", "put uri = " + uri);
-	//
-	// AsyncHttpPut storeRequest = new AsyncHttpPut(uri, getHttpClient());
-	//
-	// if (responseHandler != null) {
-	// storeRequest.registerResponseHandler(responseHandler);
-	// }
-	// storeRequest.setBody(data);
-	// storeRequest.start();
-	// synchronized (mOngoingRequests) {
-	// mOngoingRequests.put(uri, storeRequest);
-	// }
-	//
-	// return uri;
-	// }
+    // public String asyncStore(StreamableContent data, int secondsUntilExipred,
+    // HttpResponseHandler responseHandler) throws IOException {
+    //
+    // String uri = ClientConfig.getFileCacheBaseUri() + "/" + UUID.randomUUID()
+    // + "?expires_in="
+    // + secondsUntilExipred;
+    // uri = sign(uri);
+    // Log.v("Filecache store()", "put uri = " + uri);
+    //
+    // AsyncHttpPut storeRequest = new AsyncHttpPut(uri, getHttpClient());
+    //
+    // if (responseHandler != null) {
+    // storeRequest.registerResponseHandler(responseHandler);
+    // }
+    // storeRequest.setBody(data);
+    // storeRequest.start();
+    // synchronized (mOngoingRequests) {
+    // mOngoingRequests.put(uri, storeRequest);
+    // }
+    //
+    // return uri;
+    // }
 
-	public void asyncFetch(String uri, StreamableContent sink,
-			HttpResponseHandler responseHandler) {
-		LOG.finest("uri = " + uri);
-		AsyncHttpGet fetchRequest = new AsyncHttpGet(uri, getHttpClient());
-		fetchRequest.registerResponseHandler(responseHandler);
-		fetchRequest.setStreamableContent(sink);
-		fetchRequest.start();
-		synchronized (mOngoingRequests) {
-			mOngoingRequests.put(uri, fetchRequest);
-		}
-	}
+    public void asyncFetch(String uri, StreamableContent sink, HttpResponseHandler responseHandler) {
+        LOG.finest("uri = " + uri);
+        AsyncHttpGet fetchRequest = new AsyncHttpGet(uri, getHttpClient());
+        fetchRequest.registerResponseHandler(responseHandler);
+        fetchRequest.setStreamableContent(sink);
+        fetchRequest.start();
+        synchronized (mOngoingRequests) {
+            mOngoingRequests.put(uri, fetchRequest);
+        }
+    }
 
-	public void cancel(String uri) {
-		synchronized (mOngoingRequests) {
-			AsyncHttpRequest request = mOngoingRequests.remove(uri);
-			if (request != null) {
-				request.interrupt();
-			}
-		}
-	}
+    public void cancel(String uri) {
+        synchronized (mOngoingRequests) {
+            AsyncHttpRequest request = mOngoingRequests.remove(uri);
+            if (request != null) {
+                request.interrupt();
+            }
+        }
+    }
 
-	public boolean isOngoing(String uri) {
-		synchronized (mOngoingRequests) {
-			return mOngoingRequests.get(uri) == null ? false : true;
-		}
-	}
+    public boolean isOngoing(String uri) {
+        synchronized (mOngoingRequests) {
+            return mOngoingRequests.get(uri) == null ? false : true;
+        }
+    }
 
-	public boolean hasOngoingRequests() {
-		synchronized (mOngoingRequests) {
-			return mOngoingRequests.size() != 0;
-		}
-	}
+    public boolean hasOngoingRequests() {
+        synchronized (mOngoingRequests) {
+            return mOngoingRequests.size() != 0;
+        }
+    }
 }
