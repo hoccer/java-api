@@ -43,6 +43,8 @@ public class TestLinccerHandling {
 
     @Before
     public void setUp() {
+
+        ClientConfig.useExperimentalServers();
     }
 
     private ClientConfig createNewDefaultDescription() {

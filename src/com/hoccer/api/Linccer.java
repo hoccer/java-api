@@ -91,8 +91,8 @@ public class Linccer extends CloudService {
     public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
         HttpResponse response;
         long startTime = 0;
+        String uri = mConfig.getClientUri() + "/environment";
         try {
-            String uri = mConfig.getClientUri() + "/environment";
             HttpPut request = new HttpPut(sign(uri));
             request.setEntity(new StringEntity(mEnvironment.toJson().toString(), HTTP.UTF_8));
             startTime = System.currentTimeMillis();
@@ -112,14 +112,14 @@ public class Linccer extends CloudService {
         if (response.getStatusLine().getStatusCode() != 201) {
             try {
                 mEnvironmentStatus = null;
-                throw new UpdateException(
-                        "could not update environment because server responded with "
-                                + response.getStatusLine().getStatusCode() + ": "
-                                + convertResponseToString(response, true));
+                throw new UpdateException("could not update environment because server " + uri
+                        + " responded with " + response.getStatusLine().getStatusCode() + ": "
+                        + convertResponseToString(response, true));
             } catch (ParseException e) {
             } catch (IOException e) {
             }
-            throw new UpdateException("could not update environment because server responded with "
+            throw new UpdateException("could not update environment because server " + uri
+                    + " responded with "
                     + response.getStatusLine().getStatusCode() + " and an unparsable body");
         }
 

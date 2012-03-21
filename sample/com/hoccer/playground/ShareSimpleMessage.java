@@ -41,7 +41,7 @@ public class ShareSimpleMessage {
 
         try {
             ClientConfig config = new ClientConfig("Playground Linccer");
-            config.useBetaServers();
+            config.useExperimentalServers();
             final Linccer linccer = new Linccer(config);
             linccer.onGpsChanged(52.5157780325, 13.409039925, 1000);
 

@@ -53,6 +53,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TestRESTfulApi {
@@ -71,11 +72,19 @@ public class TestRESTfulApi {
         mHttpClient = new DefaultHttpClient(cm, httpParams);
     }
 
+    @Before
+    public void setUp() {
+
+        ClientConfig.useExperimentalServers();
+    }
+
     @Test
     public void testPostingNonexistentClientId() throws Exception {
 
-        HttpPost request = new HttpPost(ClientConfig.getLinccerBaseUri() + "clients/"
-                + UUID.randomUUID().toString() + "/environment");
+        String uri = ClientConfig.getLinccerBaseUri() + "clients/" + UUID.randomUUID().toString()
+                + "/environment";
+
+        HttpPost request = new HttpPost(uri);
         request.setEntity(new StringEntity("{}"));
         HttpResponse response = mHttpClient.execute(request);
         assertEquals("should get error for bad operation on client uri", 404, response

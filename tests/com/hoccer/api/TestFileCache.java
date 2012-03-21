@@ -37,6 +37,7 @@ import static org.junit.matchers.JUnitMatchers.containsString;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.hoccer.data.GenericStreamableContent;
@@ -50,6 +51,12 @@ import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
 public class TestFileCache {
+
+    @Before
+    public void setUp() {
+
+        ClientConfig.useExperimentalServers();
+    }
 
     @Test
     public void storeTextInFileCache() throws Exception {
@@ -197,7 +204,7 @@ public class TestFileCache {
 
         String uri = filecache.asyncStore(data, 10, handler);
 
-        TestHelper.blockUntilTrue("request should have been aborted by now", 3000,
+        TestHelper.blockUntilTrue("request should have been aborted by now", 6000,
                 new TestHelper.Condition() {
 
                     @Override
@@ -244,8 +251,8 @@ public class TestFileCache {
                 });
 
         assertTrue("should not have fully received the data", fetchHandler.receiveProgress < 70);
-        assertTrue("should still be uploading data", storeHandler.sendProgress > 10
-                && storeHandler.sendProgress < 95);
+        assertTrue("should have started uploading", storeHandler.sendProgress > 10);
+        assertTrue("should not have finished uploading", storeHandler.sendProgress < 95);
 
         TestHelper.blockUntilTrue("request should have been successful by now", 10000,
                 new TestHelper.Condition() {

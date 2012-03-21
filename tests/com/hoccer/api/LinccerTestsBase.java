@@ -37,7 +37,8 @@ import org.json.JSONObject;
 public class LinccerTestsBase {
 
     public LinccerTestsBase() {
-        super();
+
+        ClientConfig.useExperimentalServers();
     }
 
     protected ClientConfig createDescription() {
