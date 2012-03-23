@@ -14,7 +14,6 @@
  ******************************************************************************/
 package com.hoccer.api;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,7 @@ public class Environment {
     private WifiMeasurement     mWifiMeasurement;
     private int                 mNetworkLatency;
     private String              mClientName;
-    private ArrayList<String>   mSelectedClients;
+    private List<String>        mSelectedClients;
     private String              mPublicKey;
 
     /**
@@ -68,7 +67,7 @@ public class Environment {
         return mPublicKey;
     }
 
-    public void setSelectedClients(ArrayList<String> selectedClients) {
+    public void setSelectedClients(List<String> selectedClients) {
         mSelectedClients = selectedClients;
     }
 
