@@ -32,7 +32,7 @@ public class ClientConfig {
     private String          mPublicKey;
 
     static {
-        useSandboxServers();
+        useDevelopmentServers();
     }
 
     public ClientConfig(String applicatioName) {
@@ -68,26 +68,24 @@ public class ClientConfig {
         mPublicKey = publicKey;
     }
 
-    public static void useBetaServers() {
-        mLinccerUri = "http://linccer-beta.hoccer.com/v3";
-        mFileCacheUri = "http://filecache-beta.hoccer.com/v3";
-    }
-
-    public static void useSandboxServers() {
-        mLinccerUri = "https://linccer-sandbox.hoccer.com/v3";
-        mFileCacheUri = "https://filecache-sandbox.hoccer.com/v3";
-    }
-
     public static void useProductionServers() {
         mLinccerUri = "https://linccer.hoccer.com/v3";
         mFileCacheUri = "https://filecache.hoccer.com/v3";
     }
-
+    
     public static void useExperimentalServers() {
-        // mLinccerUri = "https://linccer-experimental.hoccer.com/v3";
-        // mFileCacheUri = "https://filecache-experimental.hoccer.com/v3";
-        mLinccerUri = "http://testing-linccer.hoccer.com/v3";
-        mFileCacheUri = "http://testing-filecache.hoccer.com/v3";
+        mLinccerUri = "https://linccer-experimental.hoccer.com/v3";
+        mFileCacheUri = "https://filecache-experimental.hoccer.com/v3";
+    }
+    
+    public static void useDevelopmentServers() {
+        mLinccerUri = "https://linccer-development.hoccer.com/v3";
+        mFileCacheUri = "https://filecache-development.hoccer.com/v3";
+    }
+
+    public static void useTestingServers() {
+        mLinccerUri = "http://linccer-testing.hoccer.com/v3";
+        mFileCacheUri = "http://filecache-testing.hoccer.com/v3";
     }
 
     public static void useSpecialServers(String ip, String port) {
