@@ -1,0 +1,17 @@
+Testsuite: com.hoccer.api.EnvironmentTest
+Tests run: 10, Failures: 0, Errors: 0, Time elapsed: 5,658 sec
+------------- Standard Error -----------------
+04.04.2012 13:35:06 com.hoccer.util.HoccerLoggers getLogger
+INFO: getLogger Linccer
+------------- ---------------- ---------------
+
+Testcase: gpsTest took 0,899 sec
+Testcase: lonlyGpsTest took 0,253 sec
+Testcase: gpsNotMatchingTest took 0,462 sec
+Testcase: networkTest took 0,462 sec
+Testcase: networkNotMatchingTest took 0,263 sec
+Testcase: wifiTest took 0,457 sec
+Testcase: wifiWithShortendBssidsTest took 0,464 sec
+Testcase: wifiWithUpperLowerCaseBssidsTest took 1,594 sec
+Testcase: wifiNotMatchingTest took 0,455 sec
+Testcase: gpsQualityTest took 0,347 sec

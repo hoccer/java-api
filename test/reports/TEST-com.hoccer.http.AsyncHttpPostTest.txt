@@ -1,0 +1,15 @@
+Testsuite: com.hoccer.http.AsyncHttpPostTest
+Tests run: 12, Failures: 0, Errors: 0, Time elapsed: 9,219 sec
+
+Testcase: testUriOfSolvableRequest took 0,707 sec
+Testcase: testUriOf404Request took 0,702 sec
+Testcase: testExecution took 1,099 sec
+Testcase: testEmptyPost took 0,711 sec
+Testcase: testPostWithStringBody took 0,702 sec
+Testcase: testPostWithLongStringBody took 0,709 sec
+Testcase: testPostWithUrlEncodedParametersAsHashMap took 0,711 sec
+Testcase: testGettingBodyWithoutPerformingTheRequest took 0,687 sec
+Testcase: testGettingNoifiedAbooutSuccessViaResponseHandler took 1,099 sec
+Testcase: testGettingNoifiedAbooutFailureViaResponseHandler took 0,711 sec
+Testcase: testCustomHttpClientToSupressRedirectionAfterPost took 0,699 sec
+Testcase: testDummy took 0,681 sec

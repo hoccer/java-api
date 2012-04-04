@@ -1,79 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="java-api" default="build">
+<project name="java-api" default="dist">
   
   <!-- Properties ========================================================== -->
   
-  <property name="src.dir" value="src"/>
-  <property name="src.test.dir" value="tests"/>
+  <property name="test.base.dir" value="test"/>
   
-  <property name="build.dir" value="bin"/>
-  <property name="build.test.dir" value="${build.dir}/tests"/>
-  <property name="build.jar.file" value="bin/java-api.jar"/>
+  <property name="dist.src.dir" value="src"/>
+  <property name="dist.build.dir" value="bin"/>
+  <property name="dist.build.jar.file" value="bin/java-api.jar"/>
   
-  <property name="report.test.dir" value="test-reports"/>
-  
+  <property name="test.src.dir" value="${test.base.dir}/src"/>
+  <property name="test.build.dir" value="${test.base.dir}/build"/>
+  <property name="test.build.jar.file" value="${test.base.dir}/build/java-api-tests.jar"/>
+  <property name="test.report.dir" value="${test.base.dir}/reports"/>
   
   <!-- Paths ========================================================== -->
   
-  <fileset dir="libs" id="build.libs">
-    <include name="httpclient-4.0.3.jar"/>
-    <include name="httpcore-4.0.1.jar"/>
-    <include name="json-org.jar"/>
-  </fileset>
-  
-  <classpath id="build.classpath">
-    <fileset refid="build.libs"/>
-  </classpath>
-  
-  <classpath id="test.classpath">
-    <fileset refid="build.libs"/>
-    <fileset>
-        <include name="${build.jar.file}"/>
+  <path id="dist.build.path">
+    <fileset dir="libs">
+      <include name="*.jar"/>
     </fileset>
-  </classpath>
+  </path>
   
-  <fileset />
+  <path id="test.build.path">
+    <path refid="dist.build.path"/>
+    <fileset dir=".">
+      <include name="${dist.build.jar.file}"/>
+    </fileset>
+    <fileset dir="${test.base.dir}/libs">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <path id="test.run.path">
+    <path refid="test.build.path"/>
+    <fileset dir=".">
+      <include name="${test.build.jar.file}"/>
+    </fileset>
+  </path>
+  
   <!-- Targets ========================================================== -->
   
-  <target name="build" depends="clean, compile, package"/>
+  <target name="dist" depends="clean-dist, compile-dist, package-dist"/>
   
-  <target name="clean">
-    <delete dir="${build.dir}"/>
-    <mkdir dir="${build.dir}"/>
+  <target name="clean-dist">
+    <delete dir="${dist.build.dir}"/>
+    <mkdir dir="${dist.build.dir}"/>
   </target>
   
-  <target name="compile" description="Compile the java source.">
+  <target name="compile-dist" description="Compile the java source.">
     <javac encoding="ascii" target="1.6" debug="true" extdirs=""
-        srcdir="${src.dir}" destdir="${build.dir}">
-      <classpath refid="build.classpath"/>
+        srcdir="${dist.src.dir}" destdir="${dist.build.dir}">
+      <classpath>
+        <path refid="dist.build.path"/>
+      </classpath>
     </javac>
   </target>
   
-  <target name="package">
-  	<jar destfile="${build.jar.file}">
-  	    <fileset dir="${build.dir}">
+  <target name="package-dist">
+  	<jar destfile="${dist.build.jar.file}">
+  	    <fileset dir="${dist.build.dir}">
             <include name="**/*"/>
         </fileset>
     </jar>
   </target>
   
   <target name="clean-test">
-    <delete dir="${build.test.dir}"/>
-    <mkdir dir="${build.test.dir}"/>
-    <delete dir="${report.test.dir}"/>
-    <mkdir dir="${report.test.dir}"/>
+    <delete dir="${test.build.dir}"/>
+    <mkdir dir="${test.build.dir}"/>
+    <delete dir="${test.report.dir}"/>
+    <mkdir dir="${test.report.dir}"/>
   </target>
   
   <target name="compile-test">
-    <javac encoding="ascii" target="1.6" debug="true" extdirs="" srcdir="${src.test.dir}" destdir="${build.test.dir}">
-      <classpath refid="test.classpath"/>
+    <javac encoding="ascii" target="1.6" debug="true" extdirs="" srcdir="${test.src.dir}" destdir="${test.build.dir}">
+      <classpath>
+        <path refid="test.build.path"/>
+      </classpath>
     </javac>
   </target>
   
-  <target name="test" depends="build, clean-test, compile-test">
-    <junit>
-      <batchtest todir="${report.test.dir}">
-        <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
+  <target name="package-test">
+    <jar destfile="${test.build.jar.file}">
+      <fileset dir="${test.build.dir}">
+        <include name="**/*"/>
+      </fileset>
+    </jar>
+  </target>
+  
+  <target name="test" depends="dist, clean-test, compile-test, package-test">
+    <junit haltonfailure="yes">
+      <classpath refid="test.run.path"/>
+      <batchtest todir="${test.report.dir}">
+        <formatter type="plain"/>
+        <fileset dir="${test.build.dir}" includes="**/*Test.class"/>
       </batchtest>
     </junit>
   </target>

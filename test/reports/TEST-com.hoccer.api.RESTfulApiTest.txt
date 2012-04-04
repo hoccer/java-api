@@ -1,0 +1,7 @@
+Testsuite: com.hoccer.api.RESTfulApiTest
+Tests run: 4, Failures: 0, Errors: 0, Time elapsed: 0,565 sec
+
+Testcase: testPostingNonexistentClientId took 0,08 sec
+Testcase: testSigningOffNonexistingClient took 0,077 sec
+Testcase: testSigningOffJustCreatedClient took 0,269 sec
+Testcase: lonlyReceive took 0,138 sec

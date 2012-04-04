@@ -47,6 +47,7 @@ public class LinccingTest extends LinccerTestsBase {
 
     @Test(timeout = 20000)
     public void oneToOneSuccsess() throws Exception {
+
         final Linccer linccerA = new Linccer(createDescription());
         Linccer linccerB = new Linccer(createDescription());
 

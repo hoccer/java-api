@@ -1,0 +1,10 @@
+Testsuite: com.hoccer.api.LinccerHandlingTest
+Tests run: 7, Failures: 0, Errors: 0, Time elapsed: 0,256 sec
+
+Testcase: creatingNewLinccer took 0 sec
+Testcase: creatingMultipleLinccers took 0,001 sec
+Testcase: usingKnownLinccer took 0,001 sec
+Testcase: sendingGpsData took 0,087 sec
+Testcase: sharingWithoutEnvironment took 0,086 sec
+Testcase: sharingWithUnmappableMode took 0,001 sec
+Testcase: receivingWithoutEnvironment took 0,077 sec

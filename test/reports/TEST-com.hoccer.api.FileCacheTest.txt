@@ -1,0 +1,19 @@
+Testsuite: com.hoccer.api.FileCacheTest
+Tests run: 8, Failures: 0, Errors: 0, Time elapsed: 3,327 sec
+------------- Standard Error -----------------
+04.04.2012 13:35:12 com.hoccer.util.HoccerLoggers getLogger
+INFO: getLogger FileCache
+04.04.2012 13:35:12 com.hoccer.util.HoccerLoggers getLogger
+INFO: getLogger GenericStreamableContent
+04.04.2012 13:35:12 com.hoccer.util.HoccerLoggers getLogger
+INFO: getLogger CryptoHelper
+------------- ---------------- ---------------
+
+Testcase: storeTextInFileCache took 0,165 sec
+Testcase: storeBinaryDataInFileCache took 0,073 sec
+Testcase: plainAsyncStoringOfText took 0,09 sec
+Testcase: asyncStoringOfTextViaFileCache took 0,165 sec
+Testcase: asyncFetchingOfTextViaFileCache took 0,16 sec
+Testcase: storingLargerAmountOfData took 2,292 sec
+Testcase: cachelStoringWhileUploading took 0,228 sec
+Testcase: ongoingRequestHandling took 0,148 sec

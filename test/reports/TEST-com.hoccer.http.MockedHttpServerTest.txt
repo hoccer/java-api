@@ -1,0 +1,18 @@
+Testsuite: com.hoccer.http.MockedHttpServerTest
+Tests run: 15, Failures: 0, Errors: 0, Time elapsed: 11,858 sec
+
+Testcase: testEmptyPost took 0,682 sec
+Testcase: testStartingAndStoppingTheServer took 1,204 sec
+Testcase: testHttpGet took 0,696 sec
+Testcase: test404HttpGet took 0,684 sec
+Testcase: testDelayedHttpGet took 1,686 sec
+Testcase: testHttpPostWithParametersInBody took 0,684 sec
+Testcase: testHttpPostWithParametersInUrl took 0,69 sec
+Testcase: testHttpPostWithStringDataInBody took 0,681 sec
+Testcase: testEmptyHttpPost took 0,684 sec
+Testcase: test404HttpPost took 0,681 sec
+Testcase: testHttpPut took 0,688 sec
+Testcase: testHttpPutToRoot took 0,686 sec
+Testcase: testPuttingUnknownMimeTypedData took 0,689 sec
+Testcase: testPuttingXmlMimeTypedData took 0,705 sec
+Testcase: testDummy took 0,717 sec

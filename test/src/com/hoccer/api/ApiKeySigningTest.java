@@ -34,6 +34,8 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
+import com.hoccer.api.ApiSigningTools;
+
 public class ApiKeySigningTest {
 
     public final static String demoKey    = "e101e890ea97012d6b6f00163e001ab0";

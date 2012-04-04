@@ -1,0 +1,17 @@
+Testsuite: com.hoccer.http.AsyncHttpPutTest
+Tests run: 8, Failures: 0, Errors: 0, Time elapsed: 5,884 sec
+------------- Standard Error -----------------
+04.04.2012 13:35:59 org.apache.http.impl.client.DefaultRequestDirector execute
+INFO: I/O exception (java.net.SocketException) caught when processing request: Socket closed
+04.04.2012 13:35:59 org.apache.http.impl.client.DefaultRequestDirector execute
+INFO: Retrying request
+------------- ---------------- ---------------
+
+Testcase: testExecution took 0,893 sec
+Testcase: testPuttingStringData took 0,733 sec
+Testcase: testPuttingStreamableContent took 0,74 sec
+Testcase: testPuttingStringAsMultipart took 0,717 sec
+Testcase: testPuttingXmlAsMultipart took 0,705 sec
+Testcase: testUpAndDownloadingProgress took 0,71 sec
+Testcase: testAbortingUpload took 0,705 sec
+Testcase: testDummy took 0,681 sec

@@ -1,0 +1,9 @@
+Testsuite: com.hoccer.tools.HttpHelperTest
+Tests run: 6, Failures: 0, Errors: 0, Time elapsed: 4,306 sec
+
+Testcase: test404 took 0,752 sec
+Testcase: testSimpleUrlEncoding took 0,723 sec
+Testcase: testUrlEncodingAHashMap took 0,702 sec
+Testcase: testUrlEncodingTheValuesOfAHashMap took 0,702 sec
+Testcase: testParsingSomeUrls took 0,716 sec
+Testcase: testDummy took 0,71 sec

@@ -65,6 +65,7 @@ public class FileCacheTest {
 
     @Test
     public void storeTextInFileCache() throws Exception {
+
         FileCache filecache = new FileCache(new ClientConfig("File Cache Unit Test"));
 
         String uri = filecache.store(new StreamableString("hello world"), 100);

@@ -1,0 +1,18 @@
+Testsuite: com.hoccer.http.AsyncHttpGetTest
+Tests run: 15, Failures: 0, Errors: 0, Time elapsed: 11,06 sec
+
+Testcase: testCreating took 0,777 sec
+Testcase: testGettingResultFromRequestObject took 0,71 sec
+Testcase: testGettingRoundTripTime took 0,723 sec
+Testcase: testComputingDownloadSpeed took 0,805 sec
+Testcase: testGettingResultWithoutPerformingTheRequest took 0,684 sec
+Testcase: testGettingNoifiedAboutSuccessViaResponseHandler took 0,796 sec
+Testcase: testGettingNoifiedAboutFailureViaResponseHandler took 0,701 sec
+Testcase: testDefaultUserAgentStringInRequest took 0,704 sec
+Testcase: testDefaultUserAgentStringInRequestWithCustomHttpClient took 0,712 sec
+Testcase: testOwnUserAgentStringInRequestWithCustomHttpClient took 0,718 sec
+Testcase: testCustomHttpClientWithDefaultParams took 0,702 sec
+Testcase: testUriOfSolvableRequest took 0,71 sec
+Testcase: testUriOf404Request took 0,706 sec
+Testcase: testGettingImageFromWeb took 0,927 sec
+Testcase: testDummy took 0,68 sec

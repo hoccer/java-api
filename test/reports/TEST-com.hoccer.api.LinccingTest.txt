@@ -1,0 +1,9 @@
+Testsuite: com.hoccer.api.LinccingTest
+Tests run: 6, Failures: 0, Errors: 0, Time elapsed: 18,322 sec
+
+Testcase: oneToOneSuccsess took 0,555 sec
+Testcase: oneToOneSuccsessWithThreeClients took 7,105 sec
+Testcase: oneToOneReceiveCollision took 0,733 sec
+Testcase: oneToOneShareCollision took 0,738 sec
+Testcase: oneToManySuccess took 0,653 sec
+Testcase: oneToManyWithWaitingOption took 8,536 sec
