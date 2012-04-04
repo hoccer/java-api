@@ -37,9 +37,8 @@ import org.apache.http.params.BasicHttpParams;
 import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
-public class TestAsyncHttpGet extends AsyncHttpTestCase {
+public class AsyncHttpGetTest extends AsyncHttpTestCase {
 
-    private static final String LOG_TAG = "TestAsyncHttpGet";
     AsyncHttpGet                mRequest;
 
     private void blockUntilNormalHttpGetResponse() throws Exception {

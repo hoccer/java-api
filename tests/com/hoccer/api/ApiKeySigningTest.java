@@ -34,7 +34,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class TestApiKeySigning {
+public class ApiKeySigningTest {
 
     public final static String demoKey    = "e101e890ea97012d6b6f00163e001ab0";
     public final static String demoSecret = "JofbFD6w6xtNYdaDgp4KOXf/k/s=";

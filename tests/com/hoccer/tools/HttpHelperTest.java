@@ -35,18 +35,14 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-
 import com.hoccer.http.AsyncHttpTestCase;
 
 public class HttpHelperTest extends AsyncHttpTestCase {
 
-    private static final String LOG_TAG = "HttpHelperTest";
-
     public void test404() throws Exception {
 
         try {
-            HttpResponse response = HttpHelper.get(getServer().getUri() + "/not-existing");
+            HttpHelper.get(getServer().getUri() + "/not-existing");
             fail("expected a 404 exception!");
         } catch (HttpClientException ex) {
             assertEquals("expected a 404 exception", 404, ex.getStatusCode());

@@ -39,7 +39,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestLinccerHandling {
+public class LinccerHandlingTest {
 
     @Before
     public void setUp() {

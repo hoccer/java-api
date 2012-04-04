@@ -50,7 +50,7 @@ import com.hoccer.tools.HttpClientException;
 import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.TestHelper;
 
-public class TestFileCache {
+public class FileCacheTest {
 
     // Constants ---------------------------------------------------------
 
@@ -98,7 +98,7 @@ public class TestFileCache {
                 + "?expires_in=10000";
 
         AsyncHttpPut storeRequest = new AsyncHttpPut(ApiSigningTools.sign(uri,
-                TestApiKeySigning.demoKey, TestApiKeySigning.demoSecret));
+                ApiKeySigningTest.demoKey, ApiKeySigningTest.demoSecret));
         storeRequest.setBody(new StreamableString("hello world"));
         storeRequest.start();
 

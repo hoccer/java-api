@@ -35,7 +35,7 @@ import com.hoccer.tools.HttpHelper;
 import com.hoccer.tools.HttpServerException;
 import com.hoccer.tools.TestHelper;
 
-public class TestMockedHttpServer extends AsyncHttpTestCase {
+public class MockedHttpServerTest extends AsyncHttpTestCase {
 
     public void testStartingAndStoppingTheServer() throws Exception {
         NanoHTTPD server = new NanoHTTPD(6066);

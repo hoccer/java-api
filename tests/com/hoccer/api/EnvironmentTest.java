@@ -40,7 +40,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-public class TestEnvironment extends LinccerTestsBase {
+public class EnvironmentTest extends LinccerTestsBase {
 
     @Test(timeout = 4000)
     public void gpsTest() throws Exception {

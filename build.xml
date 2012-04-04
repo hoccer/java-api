@@ -4,25 +4,35 @@
   <!-- Properties ========================================================== -->
   
   <property name="src.dir" value="src"/>
+  <property name="src.test.dir" value="tests"/>
+  
   <property name="build.dir" value="bin"/>
+  <property name="build.test.dir" value="${build.dir}/tests"/>
   <property name="build.jar.file" value="bin/java-api.jar"/>
+  
+  <property name="report.test.dir" value="test-reports"/>
   
   
   <!-- Paths ========================================================== -->
-
-  <fileset dir="libs" id="build.jars">
+  
+  <fileset dir="libs" id="build.libs">
     <include name="httpclient-4.0.3.jar"/>
     <include name="httpcore-4.0.1.jar"/>
     <include name="json-org.jar"/>
   </fileset>
   
-  <fileset dir="libs" id="test.jars">
-    <include name="httpclient-4.0.3.jar"/>
-    <include name="httpcore-4.0.1.jar"/>
-    <include name="json-org.jar"/>
-  </fileset>
+  <classpath id="build.classpath">
+    <fileset refid="build.libs"/>
+  </classpath>
   
+  <classpath id="test.classpath">
+    <fileset refid="build.libs"/>
+    <fileset>
+        <include name="${build.jar.file}"/>
+    </fileset>
+  </classpath>
   
+  <fileset />
   <!-- Targets ========================================================== -->
   
   <target name="build" depends="clean, compile, package"/>
@@ -35,9 +45,7 @@
   <target name="compile" description="Compile the java source.">
     <javac encoding="ascii" target="1.6" debug="true" extdirs=""
         srcdir="${src.dir}" destdir="${build.dir}">
-      <classpath>
-        <fileset refid="build.jars"/>
-      </classpath>
+      <classpath refid="build.classpath"/>
     </javac>
   </target>
   
@@ -47,6 +55,27 @@
             <include name="**/*"/>
         </fileset>
     </jar>
+  </target>
+  
+  <target name="clean-test">
+    <delete dir="${build.test.dir}"/>
+    <mkdir dir="${build.test.dir}"/>
+    <delete dir="${report.test.dir}"/>
+    <mkdir dir="${report.test.dir}"/>
+  </target>
+  
+  <target name="compile-test">
+    <javac encoding="ascii" target="1.6" debug="true" extdirs="" srcdir="${src.test.dir}" destdir="${build.test.dir}">
+      <classpath refid="test.classpath"/>
+    </javac>
+  </target>
+  
+  <target name="test" depends="build, clean-test, compile-test">
+    <junit>
+      <batchtest todir="${report.test.dir}">
+        <fileset dir="${build.test.dir}" includes="**/*Test.class"/>
+      </batchtest>
+    </junit>
   </target>
   
 </project>

@@ -56,11 +56,11 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestRESTfulApi {
+public class RESTfulApiTest {
 
     DefaultHttpClient mHttpClient;
 
-    public TestRESTfulApi() {
+    public RESTfulApiTest() {
         BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 3000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 100);
@@ -149,8 +149,8 @@ public class TestRESTfulApi {
 
     private void publishPosition(String uri) throws UnsupportedEncodingException, IOException,
             ClientProtocolException {
-        HttpPut envUpdate = new HttpPut(ApiSigningTools.sign(uri, TestApiKeySigning.demoKey,
-                TestApiKeySigning.demoSecret));
+        HttpPut envUpdate = new HttpPut(ApiSigningTools.sign(uri, ApiKeySigningTest.demoKey,
+                ApiKeySigningTest.demoSecret));
         envUpdate.setEntity(new StringEntity("{\"gps\": {\"longitude\": " + latitude++
                 + ", \"latitude\": 50, \"accuracy\": 100} }"));
         HttpResponse response = mHttpClient.execute(envUpdate);

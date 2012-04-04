@@ -38,10 +38,8 @@ import org.apache.http.params.HttpParams;
 
 import com.hoccer.tools.TestHelper;
 
-public class TestAsyncHttpPost extends AsyncHttpTestCase {
+public class AsyncHttpPostTest extends AsyncHttpTestCase {
 
-    @SuppressWarnings("unused")
-    private static final String LOG_TAG = "TestAsyncHttpPost";
     AsyncHttpPost               mRequest;
 
     public void testExecution() throws Exception {

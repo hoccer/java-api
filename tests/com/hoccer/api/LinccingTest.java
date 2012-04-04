@@ -37,7 +37,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestLinccing extends LinccerTestsBase {
+public class LinccingTest extends LinccerTestsBase {
 
     @Before
     public void setUp() throws Exception {
