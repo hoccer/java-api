@@ -84,8 +84,10 @@ public class ClientConfig {
     }
 
     public static void useExperimentalServers() {
-        mLinccerUri = "https://linccer-experimental.hoccer.com/v3";
-        mFileCacheUri = "https://filecache-experimental.hoccer.com/v3";
+        // mLinccerUri = "https://linccer-experimental.hoccer.com/v3";
+        // mFileCacheUri = "https://filecache-experimental.hoccer.com/v3";
+        mLinccerUri = "http://testing-linccer.hoccer.com/v3";
+        mFileCacheUri = "http://testing-filecache.hoccer.com/v3";
     }
 
     public static void useSpecialServers(String ip, String port) {

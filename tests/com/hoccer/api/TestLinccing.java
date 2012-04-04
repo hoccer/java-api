@@ -41,7 +41,7 @@ public class TestLinccing extends LinccerTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        Thread.sleep(100); // TODO does this prevent flakyness...
+        Thread.sleep(100); // WORKSFORNOW does this prevent flakyness...
         ClientConfig.useExperimentalServers();
     }
 
