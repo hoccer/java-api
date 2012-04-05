@@ -122,10 +122,10 @@ public class CloudService {
             throw new ParseException("http body was empty");
         }
         long len = entity.getContentLength();
+
         if (len > 2048) {
-            throw new ParseException(
-                    "http body is to big and must be streamed (max is 2048, but was " + len
-                            + " byte)");
+
+            throw new ParseException("http body is to big and must be streamed (max is 2048, but was " + len + " byte)");
         }
 
         String body = EntityUtils.toString(entity, HTTP.UTF_8);

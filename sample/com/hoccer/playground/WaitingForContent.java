@@ -49,8 +49,7 @@ public class WaitingForContent {
                 JSONObject payload = linccer.receive("1:n", "waiting=true");
                 System.out.println("received " + payload);
             } catch (ClientActionException e) {
-                System.out.println("Error while receiving: " + e + " caused by "
-                        + e.getCausingError());
+                System.out.println("Error while receiving: " + e + " caused by " + e.getCause());
             } catch (Exception e) {
                 System.out.println("Error while receiving: " + e);
             }
