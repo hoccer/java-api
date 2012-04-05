@@ -39,7 +39,7 @@ public class WaitingForContent {
     public static void main(String[] args) throws Exception {
 
         ClientConfig config = new ClientConfig("Playground Linccer");
-        config.useBetaServers();
+        config.useTestingServers();
         final Linccer linccer = new Linccer(config);
         new Thread(new EnvironmentUpdater(linccer)).start();
         Thread.sleep(300);
