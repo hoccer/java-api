@@ -44,7 +44,7 @@ public class LinccerHandlingTest {
     @Before
     public void setUp() {
 
-        ClientConfig.useExperimentalServers();
+        ClientConfig.useTestingServers();
     }
 
     private ClientConfig createNewDefaultDescription() {

@@ -75,7 +75,7 @@ public class RESTfulApiTest {
     @Before
     public void setUp() {
 
-        ClientConfig.useExperimentalServers();
+        ClientConfig.useTestingServers();
     }
 
     @Test

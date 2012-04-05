@@ -41,8 +41,7 @@ public class LinccingTest extends LinccerTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        Thread.sleep(100); // WORKSFORNOW does this prevent flakyness...
-        ClientConfig.useExperimentalServers();
+        ClientConfig.useTestingServers();
     }
 
     @Test(timeout = 20000)

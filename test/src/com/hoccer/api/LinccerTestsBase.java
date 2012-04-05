@@ -38,7 +38,7 @@ public class LinccerTestsBase {
 
     public LinccerTestsBase() {
 
-        ClientConfig.useExperimentalServers();
+        ClientConfig.useTestingServers();
     }
 
     protected ClientConfig createDescription() {
