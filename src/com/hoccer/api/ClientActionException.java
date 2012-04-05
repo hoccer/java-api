@@ -31,18 +31,20 @@ package com.hoccer.api;
 public class ClientActionException extends Exception {
 
     private static final long serialVersionUID = -8513254386842627480L;
-    private Throwable         mCausingError;
 
-    public ClientActionException(String details) {
-        super(details);
+    public ClientActionException(String pArg0, Throwable pArg1) {
+
+        super(pArg0, pArg1);
     }
 
-    public ClientActionException(String details, Throwable cause) {
-        super(details);
-        mCausingError = cause;
+    public ClientActionException(String pArg0) {
+
+        super(pArg0);
     }
 
-    public Throwable getCausingError() {
-        return mCausingError;
+    public ClientActionException(Throwable pArg0) {
+
+        super(pArg0);
     }
+
 }
