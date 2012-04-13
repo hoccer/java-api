@@ -54,8 +54,7 @@ public class FileCacheTest {
 
     // Constants ---------------------------------------------------------
 
-    // TODO change to https url once the file cache is back on https
-    private static final String FILE_CACHE_URL_PREFIX = "http://filecache-testing.hoccer.com/v3/";
+    private static final String FILE_CACHE_URL_PREFIX = "https://filecache-testing.hoccer.com/v3/";
 
     @Before
     public void setUp() {

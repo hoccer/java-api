@@ -84,8 +84,8 @@ public class ClientConfig {
     }
 
     public static void useTestingServers() {
-        mLinccerUri = "http://linccer-testing.hoccer.com/v3";
-        mFileCacheUri = "http://filecache-testing.hoccer.com/v3";
+        mLinccerUri = "https://linccer-testing.hoccer.com/v3";
+        mFileCacheUri = "https://filecache-testing.hoccer.com/v3";
     }
 
     public static void useSpecialServers(String ip, String port) {
