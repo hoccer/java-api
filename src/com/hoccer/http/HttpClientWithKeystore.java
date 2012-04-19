@@ -1,10 +1,8 @@
 package com.hoccer.http;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import org.apache.http.conn.ClientConnectionManager;
@@ -13,7 +11,7 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 
 import com.hoccer.util.HoccerLoggers;
@@ -34,25 +32,60 @@ public class HttpClientWithKeystore extends DefaultHttpClient {
 
     // Static Variables --------------------------------------------------
 
-    private static SSLSocketFactory sSocketFactory = null;
+    private static SchemeRegistry sRegistry;
 
     // Static Methods ----------------------------------------------------
 
-    public static synchronized void initializeSsl(KeyStore pKeyStore, String pKeyStorePass, KeyStore pTrustStore)
+    public static synchronized void initializeSsl(KeyStore pTrustStore)
             throws GeneralSecurityException {
 
         LOG.fine("initializeSsl");
-        sSocketFactory = new SSLSocketFactory(pKeyStore, pKeyStorePass, pTrustStore) {
 
-            @Override
-            public Socket connectSocket(Socket pSock, String pHost, int pPort, InetAddress pLocalAddress,
-                    int pLocalPort, HttpParams pParams) throws IOException {
+        LOG.finest("aliases:");
+        Enumeration<String> aliases = pTrustStore.aliases();
+        while (aliases.hasMoreElements()) {
 
-                LOG.fine("connect socket");
-                return super.connectSocket(pSock, pHost, pPort, pLocalAddress, pLocalPort, pParams);
-            }
-        };
-        sSocketFactory.setHostnameVerifier(SSLSocketFactory.STRICT_HOSTNAME_VERIFIER);
+            LOG.finest(" - " + aliases.nextElement());
+        }
+
+        LOG.finest("creating socket factory");
+        SSLSocketFactory socketFactory = new SSLSocketFactory(pTrustStore);
+        // {
+        //
+        // @Override
+        // public Socket connectSocket(Socket pSock, String pHost, int pPort, InetAddress pLocalAddress,
+        // int pLocalPort, HttpParams pParams) throws IOException {
+        //
+        // LOG.fine("connect socket");
+        // return super.connectSocket(pSock, pHost, pPort, pLocalAddress, pLocalPort, pParams);
+        // }
+        //
+        // @Override
+        // public Socket createSocket() throws IOException {
+        //
+        // LOG.fine("create socket #1");
+        // return super.createSocket();
+        // }
+        //
+        // @Override
+        // public Socket createSocket(Socket pSocket, String pHost, int pPort, boolean pAutoClose) throws IOException,
+        // UnknownHostException {
+        //
+        // LOG.fine("create socket #2");
+        // return super.createSocket(pSocket, pHost, pPort, pAutoClose);
+        // }
+        // };
+        socketFactory.setHostnameVerifier(SSLSocketFactory.STRICT_HOSTNAME_VERIFIER);
+
+        sRegistry = new SchemeRegistry();
+        sRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        sRegistry.register(new Scheme("https", socketFactory, 443));
+        sRegistry.register(new Scheme("http", socketFactory, 443)); // appears to be necessary...whatever...
+    }
+
+    public static SchemeRegistry getSchemeRegistry() {
+
+        return sRegistry;
     }
 
     // Constructors ------------------------------------------------------
@@ -79,7 +112,7 @@ public class HttpClientWithKeystore extends DefaultHttpClient {
 
         LOG.finer("createClientConnectionManager");
 
-        if (sSocketFactory == null) {
+        if (sRegistry == null) {
 
             LOG.finer("using default connection manager");
             // no certificate - revert to default implementation
@@ -87,14 +120,8 @@ public class HttpClientWithKeystore extends DefaultHttpClient {
         }
 
         LOG.finer("using connection manager with SSL socket factory");
-
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        registry.register(new Scheme("https", sSocketFactory, 443));
-
-        return new SingleClientConnManager(getParams(), registry);
+        return new ThreadSafeClientConnManager(getParams(), sRegistry);
     }
-
 
 
 }

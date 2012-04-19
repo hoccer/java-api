@@ -24,10 +24,6 @@ import org.apache.http.ParseException;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
 import org.apache.http.conn.params.ConnPerRouteBean;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -78,16 +74,17 @@ public class CloudService {
     }
 
     protected void setupHttpClient() {
+
+        LOG.info("setting up http client");
+
         BasicHttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setSoTimeout(httpParams, 70 * 1000);
         HttpConnectionParams.setConnectionTimeout(httpParams, 10 * 1000);
         ConnManagerParams.setMaxTotalConnections(httpParams, 200);
         ConnPerRoute connPerRoute = new ConnPerRouteBean(400);
         ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
-        SchemeRegistry schemeRegistry = new SchemeRegistry();
-        schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
+        ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams,
+                HttpClientWithKeystore.getSchemeRegistry());
         HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
         HttpProtocolParams.setContentCharset(httpParams, "utf-8");
         mHttpClient = new HttpClientWithKeystore(cm, httpParams);
