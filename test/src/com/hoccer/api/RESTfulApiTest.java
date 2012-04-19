@@ -56,6 +56,8 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.hoccer.http.HttpClientWithKeystore;
+
 public class RESTfulApiTest {
 
     DefaultHttpClient mHttpClient;
@@ -69,7 +71,7 @@ public class RESTfulApiTest {
         schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
         ClientConnectionManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
-        mHttpClient = new DefaultHttpClient(cm, httpParams);
+        mHttpClient = new HttpClientWithKeystore(cm, httpParams);
     }
 
     @Before

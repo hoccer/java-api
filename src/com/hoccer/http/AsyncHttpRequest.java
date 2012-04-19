@@ -56,7 +56,7 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
         mRequest = createRequest(pUrl);
 
         HttpParams httpParams = new BasicHttpParams();
-        setHttpClient(new DefaultHttpClient(httpParams));
+        setHttpClient(new HttpClientWithKeystore(httpParams));
     }
 
     public AsyncHttpRequest(String pUrl, DefaultHttpClient pHttpClient) {

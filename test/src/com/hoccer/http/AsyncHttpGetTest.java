@@ -154,7 +154,7 @@ public class AsyncHttpGetTest extends AsyncHttpTestCase {
     }
 
     public void testDefaultUserAgentStringInRequestWithCustomHttpClient() throws Exception {
-        mRequest = new AsyncHttpGet(getServer().getUri(), new DefaultHttpClient());
+        mRequest = new AsyncHttpGet(getServer().getUri(), new HttpClientWithKeystore());
         mRequest.start();
         blockUntilRequestIsDone(mRequest);
         assertEquals("User-Agent string in HTTP header", "Hoccer Java API", getServer()
@@ -162,7 +162,7 @@ public class AsyncHttpGetTest extends AsyncHttpTestCase {
     }
 
     public void testOwnUserAgentStringInRequestWithCustomHttpClient() throws Exception {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
+        DefaultHttpClient httpClient = new HttpClientWithKeystore();
         httpClient.getParams().setParameter("http.useragent", "Y60/0.1 HTTP Unit Test");
 
         mRequest = new AsyncHttpGet(getServer().getUri(), httpClient);
@@ -173,7 +173,7 @@ public class AsyncHttpGetTest extends AsyncHttpTestCase {
     }
 
     public void testCustomHttpClientWithDefaultParams() throws Exception {
-        DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
+        DefaultHttpClient httpClient = new HttpClientWithKeystore(new BasicHttpParams());
         mRequest = new AsyncHttpGet(getServer().getUri(), httpClient);
         mRequest.start();
         blockUntilNormalHttpGetResponse();

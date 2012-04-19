@@ -42,9 +42,9 @@ import junit.framework.AssertionFailedError;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.hoccer.http.AsyncHttpGet;
+import com.hoccer.http.HttpClientWithKeystore;
 
 public class TestHelper {
 
@@ -116,7 +116,7 @@ public class TestHelper {
 
     public static void blockUntilResourceAvailable(String pFailMessage, final String pUrl,
             int pTimeout) throws Exception {
-        final HttpClient client = new DefaultHttpClient();
+        final HttpClient client = new HttpClientWithKeystore();
 
         blockUntilTrue(pFailMessage, pTimeout, new TestHelper.Condition() {
             @Override

@@ -177,7 +177,7 @@ public class AsyncHttpPostTest extends AsyncHttpTestCase {
     public void testCustomHttpClientToSupressRedirectionAfterPost() throws Exception {
         HttpParams httpParams = new BasicHttpParams();
         HttpClientParams.setRedirecting(httpParams, false);
-        DefaultHttpClient httpClient = new DefaultHttpClient(httpParams);
+        DefaultHttpClient httpClient = new HttpClientWithKeystore(httpParams);
         mRequest = new AsyncHttpPost(getServer().getUri(), httpClient);
         mRequest.start();
         blockUntilRequestIsDone(mRequest);

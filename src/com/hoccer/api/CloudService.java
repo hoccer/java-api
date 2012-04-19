@@ -15,6 +15,7 @@
 package com.hoccer.api;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -28,7 +29,6 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
@@ -40,13 +40,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.hoccer.http.HttpClientWithKeystore;
+import com.hoccer.util.HoccerLoggers;
+
 public class CloudService {
 
-    private DefaultHttpClient    mHttpClient;
+    private static final String LOG_TAG = CloudService.class.getSimpleName();
+
+    private static final Logger LOG = HoccerLoggers.getLogger(LOG_TAG);
+
+    private HttpClientWithKeystore mHttpClient;
     protected final ClientConfig mConfig;
 
     public CloudService(ClientConfig config) {
         mConfig = config;
+
+        LOG.fine("initializing " + toString());
+
         setupHttpClient();
 
         /*
@@ -80,7 +90,7 @@ public class CloudService {
         ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
         HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
         HttpProtocolParams.setContentCharset(httpParams, "utf-8");
-        mHttpClient = new DefaultHttpClient(cm, httpParams);
+        mHttpClient = new HttpClientWithKeystore(cm, httpParams);
         mHttpClient.getParams().setParameter("http.useragent", mConfig.getApplicationName());
         mHttpClient.getParams().setBooleanParameter(CoreProtocolPNames.USE_EXPECT_CONTINUE, false);
         mHttpClient.setReuseStrategy(new NoConnectionReuseStrategy());
@@ -132,7 +142,7 @@ public class CloudService {
         return body;
     }
 
-    protected DefaultHttpClient getHttpClient() {
+    protected HttpClientWithKeystore getHttpClient() {
         return mHttpClient;
     }
 

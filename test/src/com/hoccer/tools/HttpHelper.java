@@ -66,6 +66,7 @@ import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.hoccer.http.HttpClientWithKeystore;
 import com.sun.jndi.toolkit.url.Uri;
 
 public class HttpHelper {
@@ -421,7 +422,7 @@ public class HttpHelper {
         HttpConnectionParams.setSoTimeout(httpParams, pConnectionTimeout);
         HttpClientParams.setRedirecting(httpParams, true);
 
-        DefaultHttpClient httpclient = new DefaultHttpClient(httpParams);
+        DefaultHttpClient httpclient = new HttpClientWithKeystore(httpParams);
 
         // Log redirects
         httpclient.setRedirectHandler(new DefaultRedirectHandler() {
@@ -458,7 +459,7 @@ public class HttpHelper {
         if (!pRedirect) {
             HttpClientParams.setRedirecting(httpParams, false);
         }
-        DefaultHttpClient httpclient = new DefaultHttpClient(httpParams);
+        DefaultHttpClient httpclient = new HttpClientWithKeystore(httpParams);
 
         // Log redirects
         httpclient.setRedirectHandler(new DefaultRedirectHandler() {
