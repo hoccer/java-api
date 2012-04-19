@@ -11,7 +11,6 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 
 import com.hoccer.util.HoccerLoggers;
@@ -36,7 +35,8 @@ public class HttpClientWithKeystore extends DefaultHttpClient {
 
     // Static Methods ----------------------------------------------------
 
-    public static synchronized void initializeSsl(KeyStore pTrustStore)
+    /* currently not used */
+    private static synchronized void initializeSsl(KeyStore pTrustStore)
             throws GeneralSecurityException {
 
         LOG.fine("initializeSsl");
@@ -107,21 +107,21 @@ public class HttpClientWithKeystore extends DefaultHttpClient {
 
     // Protected Instance Methods ----------------------------------------
 
-    @Override
-    protected ClientConnectionManager createClientConnectionManager() {
-
-        LOG.finer("createClientConnectionManager");
-
-        if (sRegistry == null) {
-
-            LOG.finer("using default connection manager");
-            // no certificate - revert to default implementation
-            return super.createClientConnectionManager();
-        }
-
-        LOG.finer("using connection manager with SSL socket factory");
-        return new ThreadSafeClientConnManager(getParams(), sRegistry);
-    }
-
-
+    // @Override
+    // protected ClientConnectionManager createClientConnectionManager() {
+    //
+    // LOG.finer("createClientConnectionManager");
+    //
+    // if (sRegistry == null) {
+    //
+    // LOG.finer("using default connection manager");
+    // // no certificate - revert to default implementation
+    // return super.createClientConnectionManager();
+    // }
+    //
+    // LOG.finer("using connection manager with SSL socket factory");
+    // return new ThreadSafeClientConnManager(getParams(), sRegistry);
+    // }
+    //
+    //
 }
