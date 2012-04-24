@@ -67,6 +67,18 @@ public class HoccerLoggers {
 	}
 
 	/**
+	 * Get logger for a particular class.
+	 *
+	 * Convenience wrapper around getLogger(String).
+	 *
+	 * @param pClass
+	 * @return
+	 */
+	public static Logger getLogger(Class<?> pClass) {
+		return getLogger(pClass.getSimpleName());
+	}
+
+	/**
 	 * Add a handler globally to all the loggers used by Hoccer.
 	 * 
 	 * @param pHandler
