@@ -223,9 +223,9 @@ public final class HoccerClient {
 		mSubmitThread.shutdown();
 		mSubmitThread = null;
 
-		LOG.info("Removing peers");
-		mPeersByPublicId.clear();
-
+		LOG.info("Executing shutdown actions");
+		shutdownActions();
+		
 		LOG.info("Client has stopped");
 		mState = STATE_READY;
 	}
@@ -394,6 +394,23 @@ public final class HoccerClient {
 				l.peerUpdated(peer);
 			}
 		}
+	}
+	
+	private void shutdownActions() {
+		// call listeners to remove all peers
+		Iterator<HoccerPeer> peers;
+		peers = mPeersByPublicId.values().iterator();
+		while(peers.hasNext()) {
+			HoccerPeer peer = peers.next();
+			Enumeration<PeerListener> listeners;
+			listeners = mPeerListeners.elements();
+			while(listeners.hasMoreElements()) {
+				PeerListener listener = listeners.nextElement();
+				listener.peerRemoved(peer);
+			}
+		}
+		// clear the peer database
+		mPeersByPublicId.clear();
 	}
 
 	protected synchronized void submitStatus() {
