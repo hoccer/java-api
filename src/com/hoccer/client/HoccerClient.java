@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.hoccer.api.ClientConfig;
+import com.hoccer.api.FileCache;
 import com.hoccer.api.Linccer;
 import com.hoccer.api.UpdateException;
 import com.hoccer.util.HoccerLoggers;
@@ -31,20 +32,30 @@ public final class HoccerClient {
 	private static final int STATE_READY       = 1;
 	private static final int STATE_RUNNING     = 2;
 
+	/** Current client state */
 	private int mState;
 
+	/** Display name of the client */
+	private String mName;
+	
+	/** Service URL and API key configuration */
 	private ClientConfig mConfig;
-
-	private Linccer mLinker;
-
-	private Peeker mPeekThread;
-	private Submitter mSubmitThread;
-
-	private Vector<PeerListener> mPeerListeners;
-
+	
+	/** Table of currently known peers */
 	private HashMap<String, HoccerPeer> mPeersByPublicId;
 
-	private String mName;
+	/** Linker service used by this client */
+	private Linccer mLinker;
+	/** Filecache service used by this client */
+	private FileCache mFilecache;
+
+	/** Peeker for this client */
+	private Peeker mPeekThread;
+	/** Submitter for this client */
+	private Submitter mSubmitThread;
+
+	/** Peer data listeners */
+	private Vector<PeerListener> mPeerListeners;
 
 	/**
 	 * Default constructor
@@ -162,6 +173,8 @@ public final class HoccerClient {
 		
 		mLinker = new Linccer(mConfig);
 		mLinker.autoSubmitEnvironmentChanges(false);
+		
+		mFilecache = new FileCache(mConfig);
 
 		if(mName == null) {
 			mName = "<" + pConfig.getApplicationName() + ">";
