@@ -42,6 +42,8 @@ public class Linccer extends CloudService {
     private static final String LOG_TAG                       = Linccer.class.getSimpleName();
     private static final Logger LOG                           = HoccerLoggers.getLogger(LOG_TAG);
 
+    long mLatency = 250;
+    
     private Environment         mEnvironment                  = new Environment();
     private EnvironmentStatus   mEnvironmentStatus;
     private boolean             mAutoSubmitEnvironmentChanges = true;
@@ -54,6 +56,20 @@ public class Linccer extends CloudService {
         super(config);
     }
 
+    public JSONObject getEnvironment() {
+    	try {
+			return mEnvironment.toJson();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+    }
+    
+    public long getLatency() {
+    	return mLatency;
+    }
+    
     @Override
     protected void finalize() throws Throwable {
         disconnect();
@@ -87,21 +103,28 @@ public class Linccer extends CloudService {
         }
     }
 
-    public void submitEnvironment() throws UpdateException, ClientProtocolException, IOException {
+    public void submitEnvironment()
+    		throws UpdateException, ClientProtocolException, IOException {
+    	try {
+    		submitEnvironment(mEnvironment.toJson());
+    	} catch (JSONException e) {
+    		mEnvironmentStatus = null;
+    		throw new UpdateException("could not update environment because of " + e);
+    	}
+    }
+    
+    public void submitEnvironment(JSONObject environment)
+    		throws UpdateException, ClientProtocolException, IOException {
         HttpResponse response;
         long startTime = 0;
         String uri = mConfig.getClientUri() + "/environment";
         try {
             HttpPut request = new HttpPut(sign(uri));
-            request.setEntity(new StringEntity(mEnvironment.toJson().toString(), HTTP.UTF_8));
+            request.setEntity(new StringEntity(environment.toString(), HTTP.UTF_8));
             startTime = System.currentTimeMillis();
             LOG.finest("submit environment uri = " + uri);
-            LOG.finest("submit environment = " + mEnvironment.toJson().toString());
+            LOG.finest("submit environment = " + environment.toString());
             response = getHttpClient().execute(request);
-        } catch (JSONException e) {
-            mEnvironmentStatus = null;
-            throw new UpdateException("could not update gps measurement for "
-                    + mConfig.getClientUri() + " because of " + e);
         } catch (UnsupportedEncodingException e) {
             mEnvironmentStatus = null;
             throw new UpdateException("could not update gps measurement for "
@@ -132,6 +155,7 @@ public class Linccer extends CloudService {
         }
         int latency = (int) (System.currentTimeMillis() - startTime);
 
+        mLatency = latency;
         mEnvironment.setNetworkLatency(latency);
     }
 
