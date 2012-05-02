@@ -1,6 +1,5 @@
 package com.hoccer.client;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,15 +7,15 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.hoccer.api.ClientConfig;
-import com.hoccer.api.FileCache;
 import com.hoccer.api.Linccer;
-import com.hoccer.api.UpdateException;
+import com.hoccer.client.action.Action;
+import com.hoccer.client.environment.EnvironmentManager;
+import com.hoccer.client.environment.EnvironmentProvider;
 import com.hoccer.util.HoccerLoggers;
 
 /**
@@ -37,22 +36,25 @@ public final class HoccerClient {
 
 	/** Display name of the client */
 	private String mName;
-	
+
 	/** Service URL and API key configuration */
 	private ClientConfig mConfig;
-	
+
 	/** Table of currently known peers */
 	private HashMap<String, HoccerPeer> mPeersByPublicId;
 
 	/** Linker service used by this client */
 	private Linccer mLinker;
-	/** Filecache service used by this client */
-	private FileCache mFilecache;
 
+	/** Performer for this client */
+	private Performer mPerformThread;
 	/** Peeker for this client */
 	private Peeker mPeekThread;
 	/** Submitter for this client */
 	private Submitter mSubmitThread;
+
+	/** Environment manager for this client */
+	private EnvironmentManager mEnvironmentManager;
 
 	/** Peer data listeners */
 	private Vector<PeerListener> mPeerListeners;
@@ -86,15 +88,20 @@ public final class HoccerClient {
 		return mLinker;
 	}
 
-	/**
-	 * Retrieve the current name of the client
-	 * 
-	 * May return null before configure().
-	 * 
-	 * @return name or null
-	 */
-	public String getName() {
+	protected EnvironmentManager getEnvironmentManager() {
+		return mEnvironmentManager;
+	}
+	
+	protected Submitter getSubmitter() {
+		return mSubmitThread;
+	}
+
+	public String getClientName() {
 		return mName;
+	}
+
+	public String getClientId() {
+		return mConfig.getClientId().toString();
 	}
 
 	/**
@@ -104,24 +111,11 @@ public final class HoccerClient {
 	 * 
 	 * @param pName
 	 */
-	public synchronized void setName(String pName) {
+	public synchronized void setClientName(String pName) {
 		mName = pName;
-		if(mLinker != null) {
-			try {
-				mLinker.onClientNameChanged(pName);
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UpdateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		triggerSubmitter();
 	}
-	
+
 	/**
 	 * Return a list of all currently known peers
 	 * @return list of peers
@@ -130,32 +124,13 @@ public final class HoccerClient {
 		return new Vector<HoccerPeer>(mPeersByPublicId.values());
 	}
 
-	/**
-	 * Update the GPS location
-	 * 
-	 * XXX this is a hack, it should be replaced with an environment data provider
-	 * 
-	 * @param latitude
-	 * @param longitude
-	 * @param accuracy
-	 */
-	public synchronized void setLocation(double latitude, double longitude, int accuracy) {
+	public synchronized JSONObject getEnvJSON() {
 		if(mLinker != null) {
-			try {
-				mLinker.onGpsChanged(latitude, longitude, accuracy);
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UpdateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			return mEnvironmentManager.buildEnvironment();
 		}
+		return null;
 	}
-	
+
 	/**
 	 * Configure the client to use the given client config
 	 * 
@@ -170,22 +145,14 @@ public final class HoccerClient {
 		LOG.info("Configuring client");
 
 		mConfig = pConfig;
-		
+
+		mEnvironmentManager = new EnvironmentManager(this);
+
 		mLinker = new Linccer(mConfig);
 		mLinker.autoSubmitEnvironmentChanges(false);
-		
-		mFilecache = new FileCache(mConfig);
 
 		if(mName == null) {
 			mName = "<" + pConfig.getApplicationName() + ">";
-		}
-
-		try {
-			mLinker.onClientNameChanged(mName);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (UpdateException e) {
-			e.printStackTrace();
 		}
 
 		mState = STATE_READY;
@@ -208,13 +175,18 @@ public final class HoccerClient {
 
 		mState = STATE_RUNNING;
 
+		LOG.info("Starting submitter");
+		mSubmitThread = new Submitter(this);
+		mSubmitThread.start();
+		
 		LOG.info("Starting peeker");
 		mPeekThread = new Peeker(this);
 		mPeekThread.start();
 
-		LOG.info("Starting submitter");
-		mSubmitThread = new Submitter(this);
-		mSubmitThread.start();
+		LOG.info("Starting performer");
+		mPerformThread = new Performer(this);
+		mPerformThread.start();
+
 	}
 
 	/**
@@ -228,6 +200,10 @@ public final class HoccerClient {
 
 		LOG.info("Stopping client");
 
+		LOG.info("Shutting down performer");
+		mPerformThread.shutdown();
+		mPerformThread = null;
+		
 		LOG.info("Shutting down peeker");
 		mPeekThread.shutdown();
 		mPeekThread = null;
@@ -238,9 +214,20 @@ public final class HoccerClient {
 
 		LOG.info("Executing shutdown actions");
 		shutdownActions();
-		
+
 		LOG.info("Client has stopped");
 		mState = STATE_READY;
+	}
+	
+	public synchronized void perform(Action pAction) {
+		mPerformThread.submitAction(pAction);
+	}
+
+	/**
+	 * Register the given environment provider
+	 */
+	public void registerEnvironmentProvider(EnvironmentProvider pProvider) {
+		mEnvironmentManager.registerEnvironmentProvider(pProvider);
 	}
 
 	/**
@@ -267,7 +254,7 @@ public final class HoccerClient {
 	public synchronized void unregisterPeerListener(PeerListener pListener) {
 		mPeerListeners.remove(pListener);
 	}
-	
+
 	/**
 	 * Callback from peeker
 	 * 
@@ -342,7 +329,7 @@ public final class HoccerClient {
 		// execute add/remove/keep callbacks
 		peekActions(peersAdded, peersRemoved, peersKept);
 	}
-	
+
 	/**
 	 * Internal method for dispatching actions for a peek response
 	 * 
@@ -366,7 +353,7 @@ public final class HoccerClient {
 
 			// add peer to client table
 			mPeersByPublicId.put(peer.getPublicId(), peer);
-			
+
 			// call listeners
 			listeners = mPeerListeners.elements();
 			while(listeners.hasMoreElements()) {
@@ -384,7 +371,7 @@ public final class HoccerClient {
 
 			// remove peer from client table
 			mPeersByPublicId.remove(peer.getPublicId());
-			
+
 			// call listeners
 			listeners = mPeerListeners.elements();
 			while(listeners.hasMoreElements()) {
@@ -399,7 +386,7 @@ public final class HoccerClient {
 			HoccerPeer peer = peers.nextElement();
 
 			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
-			
+
 			// call listeners
 			listeners = mPeerListeners.elements();
 			while(listeners.hasMoreElements()) {
@@ -408,7 +395,10 @@ public final class HoccerClient {
 			}
 		}
 	}
-	
+
+	/**
+	 * Internal method for actions performed on shutdown
+	 */
 	private void shutdownActions() {
 		// call listeners to remove all peers
 		Iterator<HoccerPeer> peers;
@@ -426,7 +416,10 @@ public final class HoccerClient {
 		mPeersByPublicId.clear();
 	}
 
-	protected synchronized void submitStatus() {
+	public synchronized void triggerSubmitter() {
+		if(mSubmitThread != null) {
+			mSubmitThread.trigger();
+		}
 	}
-	
+
 }

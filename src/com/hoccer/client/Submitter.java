@@ -6,9 +6,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.json.JSONObject;
 
 import com.hoccer.api.Linccer;
 import com.hoccer.api.UpdateException;
+import com.hoccer.client.environment.EnvironmentManager;
 import com.hoccer.util.HoccerLoggers;
 
 /**
@@ -47,6 +49,8 @@ final class Submitter extends Thread {
 
 	/** Linker service used for submission */
 	Linccer      mLinker;
+	
+	EnvironmentManager mEnvironmentManager;
 
 	/**
 	 * Time of earliest allowable resubmission
@@ -65,6 +69,7 @@ final class Submitter extends Thread {
 		mShutdown = false;
 		mClient = pClient;
 		mLinker = pClient.getLinker();
+		mEnvironmentManager = pClient.getEnvironmentManager();
 	}
 
 	/**
@@ -117,8 +122,20 @@ final class Submitter extends Thread {
 				break;
 			}
 			
+			// construct the environment to be sent
+			JSONObject environment = mEnvironmentManager.buildEnvironment();
+			
+			// abort when shutting down
+			if(mShutdown) {
+				break;
+			}
+			
 			// submit the environment
-			boolean success = submitEnvironment();
+			boolean success = false;
+			if(environment != null) {
+				success = submitEnvironment(environment);
+				mEnvironmentManager.updateLatency(mLinker.getLatency());
+			}
 			
 			// abort when shutting down
 			if(mShutdown) {
@@ -134,23 +151,17 @@ final class Submitter extends Thread {
 			}
 		};
 
-		// retract/delete environment from server
-		LOG.info("Retracting environment");
-		try {
-			mLinker.disconnect();
-		} catch (UpdateException e) {
-			e.printStackTrace();
-		}
+		retractEnvironment();
 
 		LOG.info("Submitter stopped");
 	}
 
-	private boolean submitEnvironment() {
+	private boolean submitEnvironment(JSONObject environment) {
 		boolean success = false;
 		LOG.info("Submitting environment");
 		try {
 			// perform the submission itself
-			mLinker.submitEnvironment();
+			mLinker.submitEnvironment(environment);
 
 			// mark iteration as success
 			success = true;
@@ -170,6 +181,16 @@ final class Submitter extends Thread {
 			e.printStackTrace();
 		}
 		return success;
+	}
+	
+	private void retractEnvironment() {
+		// retract/delete environment from server
+		LOG.info("Retracting environment");
+		try {
+			mLinker.disconnect();
+		} catch (UpdateException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void waitForNotBefore() {
