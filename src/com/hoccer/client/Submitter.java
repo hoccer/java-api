@@ -1,15 +1,18 @@
 package com.hoccer.client;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
 
-import com.hoccer.api.Linccer;
-import com.hoccer.api.UpdateException;
+import com.hoccer.api.ApiSigningTools;
+import com.hoccer.api.ClientConfig;
 import com.hoccer.client.environment.EnvironmentManager;
 import com.hoccer.util.HoccerLoggers;
 
@@ -22,8 +25,14 @@ import com.hoccer.util.HoccerLoggers;
  * @author ingo
  *
  */
-final class Submitter extends Thread {
+final class Submitter extends ClientThread {
 
+	// XXX move elsewhere
+    protected String sign(String url) {
+        return ApiSigningTools.sign(url, mConfig.getApiKey(), mConfig.getSharedSecret());
+    }
+	
+	
 	private static final Logger LOG = HoccerLoggers.getLogger(Submitter.class);
 
 	/** Minimum time to wait between submissions */
@@ -41,21 +50,20 @@ final class Submitter extends Thread {
 	/** Random extra delay before autosubmission after success */
 	private static final int AUTOSUBMIT_RANDOM_DELAY = 5000;
 
-	/** Shutdown flag for threaded run loop */
-	boolean mShutdown;
-
 	/** Back-reference to client */
 	HoccerClient mClient;
-
-	/** Linker service used for submission */
-	Linccer      mLinker;
 	
+	ClientConfig mConfig;
+
 	EnvironmentManager mEnvironmentManager;
 
 	/**
 	 * Time of earliest allowable resubmission
 	 */
 	Date mNotBefore;
+	
+	long mLastLatency;
+	JSONObject mLastStatus;
 
 	/**
 	 * Default constructor
@@ -65,10 +73,9 @@ final class Submitter extends Thread {
 	 * @param pClient
 	 */
 	public Submitter(HoccerClient pClient) {
-		LOG.setLevel(Level.FINE);
-		mShutdown = false;
+		super(pClient.getHttpClient(), LOG);
 		mClient = pClient;
-		mLinker = pClient.getLinker();
+		mConfig = pClient.getConfig();
 		mEnvironmentManager = pClient.getEnvironmentManager();
 	}
 
@@ -89,10 +96,8 @@ final class Submitter extends Thread {
 	 * The client environment will be retracted/deleted during shutdown.
 	 */
 	public void shutdown() {
-		// set shutdown flag
-		mShutdown = true;
-		// interrupt operations
-		this.interrupt();
+		// abort operations
+		abortThread();
 		// loop until joined
 		boolean joined = false;
 		while(!joined) {
@@ -113,44 +118,44 @@ final class Submitter extends Thread {
 		mNotBefore = new Date();
 
 		// submit the environment repeatedly
-		while(!mShutdown) {
+		while(true) {
 			// obey the not-before time
 			waitForNotBefore();
-			
+
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
-			
+
 			// construct the environment to be sent
 			JSONObject environment = mEnvironmentManager.buildEnvironment();
-			
+
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
-			
+
 			// submit the environment
 			boolean success = false;
 			if(environment != null) {
 				success = submitEnvironment(environment);
-				mEnvironmentManager.updateLatency(mLinker.getLatency());
+				mEnvironmentManager.updateLatency(mLastLatency);
 			}
-			
+
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
-			
+
 			// wait for next submission cycle
 			waitForNextCycle(success);
-			
+
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
 		};
-
+		
 		retractEnvironment();
 
 		LOG.info("Submitter stopped");
@@ -158,49 +163,98 @@ final class Submitter extends Thread {
 
 	private boolean submitEnvironment(JSONObject environment) {
 		boolean success = false;
-		LOG.info("Submitting environment");
-		try {
-			// perform the submission itself
-			mLinker.submitEnvironment(environment);
+		LOG.fine("Submitting environment");
 
-			// mark iteration as success
-			success = true;
+		// perform the request
+		success = submitEnvironmentRequest(environment);
 
-			// compute not-before time
-			Date now = new Date();
-			mNotBefore = new Date(now.getTime() + RESUBMIT_DELAY);
-			LOG.fine("Next submission not before " + RESUBMIT_DELAY + " msecs pass");
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UpdateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// compute new not-before time
+		Date now = new Date();
+		mNotBefore = new Date(now.getTime() + RESUBMIT_DELAY);
+		LOG.fine("Next submission not before " + RESUBMIT_DELAY + " msecs pass");
+
 		return success;
 	}
-	
+
+	private boolean submitEnvironmentRequest(JSONObject environment) {
+		String uri = mConfig.getClientUri() + "/environment";
+		
+		long startTime, endTime;
+
+		LOG.fine("Submitting to " + uri);
+		
+		// compose the request
+		HttpPut request = new HttpPut(sign(uri));
+		HttpResponse response = null;
+		
+		// serialize and encode the environment
+		try {
+			request.setEntity(new StringEntity(environment.toString(), "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// should not happen
+			e.printStackTrace();
+		}
+		
+		// perform the request
+		startTime = System.currentTimeMillis();
+		response = executeRequest(request);
+		endTime = System.currentTimeMillis();
+		
+		// deal with the response
+		if(response != null) {
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			LOG.fine("Submission returned code " + statusCode);
+			
+			// we only accept CREATED responses as success
+			if(statusCode == HttpStatus.SC_CREATED) {
+				JSONObject status = responseToJSON(response);
+				
+				// returned status must be valid
+				if(status != null) {					
+					LOG.fine("Submission status " + status.toString());
+
+					// update status and last latency
+					mLastStatus = status;
+					mLastLatency = endTime - startTime;
+					
+					// submission succeeded
+					return true;
+				}
+			} else {
+				LOG.warning("Submission returned unknown status code " + statusCode);
+			}
+		}
+		
+		// submission failed in all other cases
+		return false;
+	}
+
 	private void retractEnvironment() {
 		// retract/delete environment from server
 		LOG.info("Retracting environment");
-		try {
-			mLinker.disconnect();
-		} catch (UpdateException e) {
-			e.printStackTrace();
+		
+		// compose URI
+		String uri = mConfig.getClientUri() + "/environment";
+
+		// sign URI and compose request
+		HttpDelete request = new HttpDelete(sign(uri));
+		
+		// execute request, ignore results
+		if(executeRequest(request) == null) {
+			LOG.warning("Failed to retract environment");
 		}
 	}
 
 	private void waitForNotBefore() {
 		Date now = new Date();
+		// loop until earliest possible time reached
 		while(now.before(mNotBefore)) {
 			// compute new delay
 			now = new Date();
 			double delay = mNotBefore.getTime() - now.getTime();
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
 			// log about it
@@ -216,6 +270,7 @@ final class Submitter extends Thread {
 
 	private void waitForNextCycle(boolean cycleWasSuccessful) {
 		double waitingTime;
+		// determine how long to wait depending on success
 		if(cycleWasSuccessful) {
 			waitingTime = AUTOSUBMIT_FIXED_DELAY + (AUTOSUBMIT_RANDOM_DELAY * Math.random());
 			LOG.fine("Submission succeeded, next submission in " + waitingTime + " msecs");
@@ -223,11 +278,12 @@ final class Submitter extends Thread {
 			waitingTime = BACKOFF_FIXED_DELAY + (BACKOFF_RANDOM_DELAY * Math.random());
 			LOG.warning("Submission failed, backing off for " + waitingTime + " msecs"); 
 		}
-		// XXX better handling for trigger()
+		// sleep, allowing trigger() to interrupt
 		try {
 			Thread.sleep(Math.round(waitingTime));
 		} catch (InterruptedException e) {
 			// ignore and continue
+			// this means that we got triggered
 		}
 	}
 
