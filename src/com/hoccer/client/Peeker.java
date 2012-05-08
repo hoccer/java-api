@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -168,7 +167,7 @@ class Peeker extends ClientThread {
 		while(true) {
 			LOG.fine("Peeking with URI " + uri);
 
-			HttpRequestBase request = new HttpGet(uri);
+			HttpGet request = new HttpGet(uri);
 
 			HttpResponse response = executeRequest(request);
 			
