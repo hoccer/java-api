@@ -1,7 +1,6 @@
 package com.hoccer.client;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
@@ -20,12 +19,12 @@ public class ClientThread extends Thread {
 
 	private final Logger LOG;
 
-	HttpClient mClient;
+	private HttpClient mClient;
 
-	boolean mShutdown;
+	private boolean mShutdown;
 
-	Object mRequestLock;
-	HttpRequestBase mRequest;
+	private Object mRequestLock;
+	private HttpRequestBase mRequest;
 
 	public ClientThread(HttpClient pClient, Logger pLogger) {
 		LOG = pLogger;
