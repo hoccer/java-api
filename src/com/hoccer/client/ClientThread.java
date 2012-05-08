@@ -70,9 +70,11 @@ public class ClientThread extends Thread {
 	protected HttpRequest abortRequest() {
 		HttpRequestBase abortedRequest = null;
 		synchronized(mRequestLock) {
-			abortedRequest = mRequest;
-			abortedRequest.abort();
-			mRequest = null;
+			if(mRequest != null) {
+				abortedRequest = mRequest;
+				abortedRequest.abort();
+				mRequest = null;
+			}
 		}
 		return abortedRequest;
 	}
