@@ -92,6 +92,10 @@ public final class HoccerClient {
 		return mLinker;
 	}
 	
+	protected ClientConfig getConfig() {
+		return mConfig;
+	}
+	
 	protected HttpClient getHttpClient() {
 		return mHttp.getClient();
 	}

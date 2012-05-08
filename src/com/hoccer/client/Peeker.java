@@ -2,11 +2,14 @@ package com.hoccer.client;
 
 import java.util.logging.Logger;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.hoccer.api.ClientActionException;
-import com.hoccer.api.Linccer;
+import com.hoccer.api.ClientConfig;
 import com.hoccer.util.HoccerLoggers;
 
 /**
@@ -16,7 +19,7 @@ import com.hoccer.util.HoccerLoggers;
  * 
  * @author ingo
  */
-class Peeker extends Thread {
+class Peeker extends ClientThread {
 
 	static final Logger LOG = HoccerLoggers.getLogger(Peeker.class);
 
@@ -29,8 +32,8 @@ class Peeker extends Thread {
 	/** Back-reference to client instance */
 	HoccerClient mClient;
 
-	/** Linker service for operations */
-	Linccer mLinker;
+	/** */
+	ClientConfig mConfig;
 
 	/**
 	 * Creates a peeker thread
@@ -40,9 +43,10 @@ class Peeker extends Thread {
 	 * @param pClient to report back to
 	 */
 	public Peeker(HoccerClient pClient) {
+		super(pClient.getHttpClient(), LOG);
 		mShutdown = false;
 		mClient = pClient;
-		mLinker = pClient.getLinker();
+		mConfig = pClient.getConfig();
 	}
 
 	/**
@@ -51,11 +55,8 @@ class Peeker extends Thread {
 	 * Blocks until peeker has joined.
 	 */
 	public void shutdown() {
-		// set shutdown flag
-		mShutdown = true;
-		// interrupt current operation
-		this.interrupt();
-		mLinker.abortPeek();
+		// initiate abort
+		this.abortThread();
 		// wait for thread to finish
 		boolean joined = false;
 		while(!joined) {
@@ -83,10 +84,10 @@ class Peeker extends Thread {
 			peekResult = peek();
 
 			// abort when shutting down
-			if(mShutdown) {
+			if(checkAbort()) {
 				break;
 			}
-			
+
 			// if peeking failed
 			if(peekResult == null) {
 				// then back off before next peek
@@ -117,18 +118,19 @@ class Peeker extends Thread {
 		}
 
 		// block in peek operation 
-		try {
-			result = mLinker.peek(mLastGroupId);
-		} catch (ClientActionException e) {
-			mLastGroupId = null;
-			e.printStackTrace();
-		}
+		result = peekRequest(mLastGroupId);
 
-		// if we have a result then remember group id
-		if(result != null) {
+		// if we have a result then remember the group
+		// id for the next peek. on failure, we forget
+		// the group id.
+		if(result == null) {
+			mLastGroupId = null;
+		} else {
 			try {
 				if(result.has("group_id")) {
 					mLastGroupId = result.getString("group_id");
+				} else {
+					mLastGroupId = null;
 				}
 			} catch (JSONException e) {
 				mLastGroupId = null;
@@ -153,6 +155,43 @@ class Peeker extends Thread {
 			Thread.sleep(Math.round(backOffTime));
 		} catch (InterruptedException e) {
 			// ignore and continue
+		}
+	}
+
+	private JSONObject peekRequest(String lastGroupId) {
+		String uri = mConfig.getClientUri() + "/peek";
+
+		if(lastGroupId != null) {
+			uri += "?group_id=" + lastGroupId;
+		}
+
+		while(true) {
+			LOG.fine("Peeking with URI " + uri);
+
+			HttpRequestBase request = new HttpGet(uri);
+
+			HttpResponse response = executeRequest(request);
+			
+			// return on failure
+			if(response == null) {
+				return null;
+			}
+
+			// get the status code
+			int statusCode = response.getStatusLine().getStatusCode();
+
+			// when we got a result then return it
+			if(statusCode == HttpStatus.SC_OK) {
+				return responseToJSON(response);
+			}
+
+			// if we timed out then retry immediately
+			if(statusCode == HttpStatus.SC_GATEWAY_TIMEOUT) {
+				continue;
+			}
+
+			// fail when getting anything else
+			return null;
 		}
 	}
 
