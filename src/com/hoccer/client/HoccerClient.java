@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import org.apache.http.client.HttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +46,9 @@ public final class HoccerClient {
 
 	/** Linker service used by this client */
 	private Linccer mLinker;
+	
+	/** HTTP client magic */
+	private HoccerHttp mHttp;
 
 	/** Performer for this client */
 	private Performer mPerformThread;
@@ -86,6 +90,10 @@ public final class HoccerClient {
 	 */
 	protected Linccer getLinker() {
 		return mLinker;
+	}
+	
+	protected HttpClient getHttpClient() {
+		return mHttp.getClient();
 	}
 
 	protected EnvironmentManager getEnvironmentManager() {
@@ -150,6 +158,8 @@ public final class HoccerClient {
 
 		mLinker = new Linccer(mConfig);
 		mLinker.autoSubmitEnvironmentChanges(false);
+		
+		mHttp = new HoccerHttp();
 
 		if(mName == null) {
 			mName = "<" + pConfig.getApplicationName() + ">";
