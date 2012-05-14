@@ -4,7 +4,9 @@
   <artifactId>hoccer-java-api</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Hoccer Java API</name>
-  
+
+  <packaging>jar</packaging>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
