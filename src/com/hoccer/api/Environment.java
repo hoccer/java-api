@@ -24,6 +24,14 @@ import org.json.JSONObject;
 
 public class Environment {
 
+    // Constants ---------------------------------------------------------
+
+    private static final String MDNS = "mdns";
+    private static final String OWN_ID = "own_id";
+    private static final String SEEN_IDS = "seen_ids";
+
+    // Instance Fields ---------------------------------------------------
+
     private LocationMeasurement mGpsMeasurement;
     private LocationMeasurement mNetworkMeasurement;
     private WifiMeasurement     mWifiMeasurement;
@@ -31,6 +39,10 @@ public class Environment {
     private String              mClientName;
     private List<String>        mSelectedClients;
     private String              mPublicKey;
+    private Collection<String> mSeenMdnsIds;
+    private String mOwnMdnsId;
+
+    // Public Instance Methods -------------------------------------------
 
     /**
      * Save location which is obtained from the gps unit.
@@ -71,6 +83,15 @@ public class Environment {
         mSelectedClients = selectedClients;
     }
 
+    public void setSeenMdnsIds(Collection<String> pSeenIds) {
+        mSeenMdnsIds = pSeenIds;
+    }
+
+    public void setOwnMdnsId(String pId) {
+
+        mOwnMdnsId = pId;
+    }
+
     public JSONObject toJson() throws JSONException {
         JSONObject environment = new JSONObject();
         if (mGpsMeasurement != null) {
@@ -93,6 +114,22 @@ public class Environment {
         }
         if (mPublicKey != null && mPublicKey.length() > 0) {
             environment.put("pubkey", mPublicKey);
+        }
+        if (mOwnMdnsId != null) {
+
+            JSONObject mdnsJson = new JSONObject();
+            mdnsJson.put(OWN_ID, mOwnMdnsId);
+
+            if (mSeenMdnsIds == null) {
+
+                mdnsJson.put(SEEN_IDS, new JSONArray());
+
+            } else {
+
+                mdnsJson.put(SEEN_IDS, new JSONArray(mSeenMdnsIds));
+            }
+
+            environment.put(MDNS, mdnsJson);
         }
         return environment;
     }
