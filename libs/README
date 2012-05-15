@@ -1,0 +1,6 @@
+
+These JARs are not used by Maven-based builds of the API.
+
+They are intended for the Android API, which imports the
+Java API as a submodule instead of including it as a JAR.
+
