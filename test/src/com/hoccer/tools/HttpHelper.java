@@ -67,7 +67,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.hoccer.http.HttpClientWithKeystore;
-import com.sun.jndi.toolkit.url.Uri;
 
 public class HttpHelper {
 
@@ -198,22 +197,10 @@ public class HttpHelper {
         }
     }
 
-    @Deprecated
-    public static String getAsString(Uri uri) throws IOException, HttpClientException,
-            HttpServerException {
-        return getAsString(uri.toString());
-    }
-
     public static String getAsString(String uri) throws IOException, HttpClientException,
             HttpServerException {
         HttpEntity result = getAsHttpEntity(uri);
         return extractBodyAsString(result);
-    }
-
-    @Deprecated
-    public static byte[] getAsByteArray(Uri uri) throws IllegalStateException, IOException,
-            HttpClientException, HttpServerException {
-        return getAsByteArray(uri.toString());
     }
 
     public static byte[] getAsByteArray(String uri) throws IllegalStateException, IOException,
