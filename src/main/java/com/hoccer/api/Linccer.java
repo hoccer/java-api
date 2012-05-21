@@ -17,6 +17,7 @@ package com.hoccer.api;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -42,6 +43,8 @@ public class Linccer extends CloudService {
     private static final String LOG_TAG                       = Linccer.class.getSimpleName();
     private static final Logger LOG                           = HoccerLoggers.getLogger(LOG_TAG);
 
+    // Instance Fields ---------------------------------------------------
+
     long mLatency = 250;
     
     private Environment         mEnvironment                  = new Environment();
@@ -52,9 +55,14 @@ public class Linccer extends CloudService {
     protected volatile boolean  mPeekStopped                  = false;
     private Object              mPeekLock                     = new Object();
 
+    // Constructors ------------------------------------------------------
+
     public Linccer(ClientConfig config) {
+
         super(config);
     }
+
+    // Public Instance Methods -------------------------------------------
 
     public JSONObject getEnvironment() {
     	try {
@@ -70,12 +78,6 @@ public class Linccer extends CloudService {
     	return mLatency;
     }
     
-    @Override
-    protected void finalize() throws Throwable {
-        disconnect();
-        super.finalize();
-    }
-
     public void disconnect() throws UpdateException {
         HttpResponse response;
         try {
@@ -91,15 +93,6 @@ public class Linccer extends CloudService {
             throw new UpdateException(
                     "could not delete environment because server responded with status "
                             + response.getStatusLine().getStatusCode());
-        }
-    }
-
-    private void onEnvironmentChanged(Environment environment) throws UpdateException,
-            ClientProtocolException, IOException {
-        mEnvironment = environment;
-
-        if (mAutoSubmitEnvironmentChanges) {
-            submitEnvironment();
         }
     }
 
@@ -244,6 +237,15 @@ public class Linccer extends CloudService {
     public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,
             IOException {
         onWifiChanged(Arrays.asList(bssids));
+    }
+
+    public void onMdnsChanged(String pOwnId, Collection<String> pSeenIds) throws ClientProtocolException,
+            UpdateException,
+            IOException {
+
+        mEnvironment.setOwnMdnsId(pOwnId);
+        mEnvironment.setSeenMdnsIds(pSeenIds);
+        onEnvironmentChanged(mEnvironment);
     }
 
     public void onSelectedClientsChanged(List<String> selectedClients) throws UpdateException,
@@ -480,6 +482,24 @@ public class Linccer extends CloudService {
         return mEnvironmentStatus;
     }
 
+    public boolean autoSubmitEnvironmentChanges() {
+        return mAutoSubmitEnvironmentChanges;
+    }
+
+    public void autoSubmitEnvironmentChanges(boolean flag) {
+        mAutoSubmitEnvironmentChanges = flag;
+    }
+
+    // Protected Instance Methods ----------------------------------------
+
+    @Override
+    protected void finalize() throws Throwable {
+        disconnect();
+        super.finalize();
+    }
+
+    // Private Instance Methods ------------------------------------------
+
     private String mapMode(String mode) throws BadModeException {
         if (mode.equals("1:1") || mode.equals("one-to-one")) {
             return "one-to-one";
@@ -492,11 +512,13 @@ public class Linccer extends CloudService {
         throw new BadModeException("the provided mode name '" + mode + "' could not be mapped");
     }
 
-    public boolean autoSubmitEnvironmentChanges() {
-        return mAutoSubmitEnvironmentChanges;
+    private void onEnvironmentChanged(Environment environment) throws UpdateException, ClientProtocolException,
+            IOException {
+        mEnvironment = environment;
+
+        if (mAutoSubmitEnvironmentChanges) {
+            submitEnvironment();
+        }
     }
 
-    public void autoSubmitEnvironmentChanges(boolean flag) {
-        mAutoSubmitEnvironmentChanges = flag;
-    }
 }

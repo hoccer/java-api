@@ -128,8 +128,8 @@ public class CloudService {
             throw new ParseException("server respond with "
                     + response.getStatusLine().getStatusCode()
                     + ": "
-                    + EntityUtils.toString(response.getEntity(), response.getStatusLine()
-                            .getStatusCode() + ": <unparsable body>"));
+                    + EntityUtils.toString(response.getEntity()) + response.getStatusLine().getStatusCode()
+                    + ": <unparsable body>");
         }
 
         HttpEntity entity = response.getEntity();
