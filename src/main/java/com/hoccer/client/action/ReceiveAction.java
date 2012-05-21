@@ -7,7 +7,7 @@ import com.hoccer.api.ClientActionException;
 import com.hoccer.api.CollidingActionsException;
 import com.hoccer.api.Linccer;
 
-public class ReceiveAction extends Action {
+public class ReceiveAction extends Action<ReceiveListener> {
 
 	public ReceiveAction(Mode pMode, ReceiveListener pListener) {
 		super(Type.RECEIVE, pMode, pListener);

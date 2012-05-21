@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>hoccer</groupId>
   <artifactId>hoccer-java-api</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <name>Hoccer Java API</name>
 
   <packaging>jar</packaging>

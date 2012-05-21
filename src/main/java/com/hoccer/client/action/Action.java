@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 import com.hoccer.api.Linccer;
 import com.hoccer.util.HoccerLoggers;
 
-public abstract class Action {
+public abstract class Action<L extends ActionListener> {
 
 	static protected final Logger LOG = HoccerLoggers.getLogger(Action.class);
 	
@@ -20,9 +20,9 @@ public abstract class Action {
 	Type mType;
 	Mode mMode;
 	
-	ActionListener mListener;
+    L mListener;
 	
-	protected Action(Type pType, Mode pMode, ActionListener pListener) {
+    protected Action(Type pType, Mode pMode, L pListener) {
 		mType = pType;
 		mMode = pMode;
 		mListener = pListener;
@@ -50,4 +50,9 @@ public abstract class Action {
 		mListener.actionExpired(this);
 	}
 	
+    protected L getActionListener() {
+
+        return mListener;
+    }
+
 }

@@ -1,5 +1,5 @@
 package com.hoccer.client.action;
 
-public interface ReceiveListener extends ActionListener {
+public interface ReceiveListener extends ActionListener<ReceiveAction> {
 
 }
