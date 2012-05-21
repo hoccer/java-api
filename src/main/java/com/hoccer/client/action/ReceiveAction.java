@@ -37,6 +37,7 @@ public class ReceiveAction extends Action<ReceiveListener> {
 			onActionExpired();
 		} else {
 			LOG.info("Receive succeeded: " + result.toString());
+            getActionListener().receiveSucceeded(result, this);
 		}
 	}
 	
