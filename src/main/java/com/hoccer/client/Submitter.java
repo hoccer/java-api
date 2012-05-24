@@ -195,10 +195,9 @@ final class Submitter extends ClientThread {
 		// serialize and encode the environment
 		try {
 
-            // TESTING
-            LOG.info("Environment: " + environment.toString());
-
+            LOG.fine("Environment: " + environment.toString());
 			request.setEntity(new StringEntity(environment.toString(), "UTF-8"));
+
 		} catch (UnsupportedEncodingException e) {
 			// should not happen
 			e.printStackTrace();
@@ -236,7 +235,6 @@ final class Submitter extends ClientThread {
 
                 try {
 
-                    // TESTING
                     InputStream in = response.getEntity().getContent();
                     InputStreamReader isr = new InputStreamReader(in);
                     BufferedReader br = new BufferedReader(isr);
