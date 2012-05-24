@@ -36,12 +36,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.junit.Assert;
 
 import com.hoccer.http.AsyncHttpGet;
 import com.hoccer.http.HttpClientWithKeystore;

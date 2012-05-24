@@ -16,6 +16,7 @@ public class EnvironmentStatus {
     private final long mCreatedAt;
 
     public EnvironmentStatus(JSONObject statusResponse) throws JSONException {
+
         mQuality = statusResponse.getInt("quality");
         mDevices = statusResponse.getInt("devices");
 

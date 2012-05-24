@@ -1,5 +1,8 @@
 package com.hoccer.client;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -85,6 +88,8 @@ final class Submitter extends ClientThread {
 	 * Note that environment submission is always limited by RESUBMIT_DELAY.
 	 */
 	public void trigger() {
+
+        LOG.info("Submitter triggered");
 		this.interrupt();
 	}
 
@@ -189,6 +194,10 @@ final class Submitter extends ClientThread {
 		
 		// serialize and encode the environment
 		try {
+
+            // TESTING
+            LOG.info("Environment: " + environment.toString());
+
 			request.setEntity(new StringEntity(environment.toString(), "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			// should not happen
@@ -204,7 +213,7 @@ final class Submitter extends ClientThread {
 		if(response != null) {
 			int statusCode = response.getStatusLine().getStatusCode();
 			
-			LOG.fine("Submission returned code " + statusCode);
+            LOG.info("Submission returned code " + statusCode);
 			
 			// we only accept CREATED responses as success
 			if(statusCode == HttpStatus.SC_CREATED) {
@@ -222,7 +231,32 @@ final class Submitter extends ClientThread {
 					return true;
 				}
 			} else {
-				LOG.warning("Submission returned unknown status code " + statusCode);
+
+                String responseStr = "<couldn't read HTTP response body>";
+
+                try {
+
+                    // TESTING
+                    InputStream in = response.getEntity().getContent();
+                    InputStreamReader isr = new InputStreamReader(in);
+                    BufferedReader br = new BufferedReader(isr);
+                    StringBuilder builder = new StringBuilder();
+                    String line = null;
+
+                    while ((line = br.readLine()) != null) {
+                        builder.append(line + "\n");
+                    }
+
+                    br.close();
+
+                    responseStr = builder.toString();
+
+                } catch (Throwable t) {
+
+                    LOG.warning("While trying to read the response body: " + t.getMessage());
+                }
+
+                LOG.warning("Submission returned unknown status code " + statusCode + ", body was: " + responseStr);
 			}
 		}
 		

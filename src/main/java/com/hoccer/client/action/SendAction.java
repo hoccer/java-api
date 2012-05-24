@@ -1,5 +1,7 @@
 package com.hoccer.client.action;
 
+import java.util.logging.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,11 +10,19 @@ import com.hoccer.api.BadModeException;
 import com.hoccer.api.ClientActionException;
 import com.hoccer.api.CollidingActionsException;
 import com.hoccer.api.Linccer;
+import com.hoccer.util.HoccerLoggers;
 
+/** Implementation of an action for sending data */
 public class SendAction extends Action<SendListener> {
+
+    // Constants ---------------------------------------------------------
+
+    private static final String LOG_TAG = SendAction.class.getSimpleName();
+    private static final Logger LOG = HoccerLoggers.getLogger(LOG_TAG);
 
     // Instance Fields ---------------------------------------------------
 
+    /** The content that is to be sent (inline) */
     private String mContent;
 
     // Constructors ------------------------------------------------------
@@ -24,9 +34,11 @@ public class SendAction extends Action<SendListener> {
         mContent = pContent;
     }
 
+    // Public Instance Methods -------------------------------------------
+
+    /** Perform this send action against the given Linccer */
     @Override
     public void perform(Linccer pLinker) {
-
 
         JSONObject result = null;
 

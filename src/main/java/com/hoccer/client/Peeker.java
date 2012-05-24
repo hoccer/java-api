@@ -189,6 +189,8 @@ class Peeker extends ClientThread {
 				continue;
 			}
 
+            LOG.fine("Peeking failed with status " + statusCode);
+
 			// fail when getting anything else
 			return null;
 		}
