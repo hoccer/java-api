@@ -57,6 +57,42 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
- </dependencies>
+  </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>hoccer.archiva.releases</id>
+      <url>http://archiva.hoccer.com/archiva/repository/releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>hoccer.archiva.snapshots</id>
+      <url>http://archiva.hoccer.com/archiva/repository/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>hoccer.archiva.releases</id>
+      <name>Hoccer Public Releases</name>
+      <url>http://archiva.hoccer.com/archiva/repository/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>hoccer.archiva.snapshots</id>
+      <name>Hoccer Public Snapshots</name>
+      <url>http://archiva.hoccer.com/archiva/repository/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   
 </project>
