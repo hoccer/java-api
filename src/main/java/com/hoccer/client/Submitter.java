@@ -289,13 +289,16 @@ final class Submitter extends ClientThread {
 			if(checkAbort()) {
 				break;
 			}
-			// log about it
-			LOG.fine("Too early for resubmission, waiting " + delay + " msecs");
-			// try to sleep as long as required
-			try {
-				Thread.sleep(Math.round(delay));
-			} catch (InterruptedException e) {
-				// ignore and continue
+			// might have blocked, so re-verify delay
+			if(delay > 0.0) {
+				// log about it
+				LOG.fine("Too early for resubmission, waiting " + delay + " msecs");
+				// try to sleep as long as required
+				try {
+					Thread.sleep(Math.round(delay));
+				} catch (InterruptedException e) {
+					// ignore and continue
+				}
 			}
 		}
 	}
@@ -311,11 +314,13 @@ final class Submitter extends ClientThread {
 			LOG.warning("Submission failed, backing off for " + waitingTime + " msecs"); 
 		}
 		// sleep, allowing trigger() to interrupt
-		try {
-			Thread.sleep(Math.round(waitingTime));
-		} catch (InterruptedException e) {
-			// ignore and continue
-			// this means that we got triggered
+		if(waitingTime > 0.0) {
+			try {
+				Thread.sleep(Math.round(waitingTime));
+			} catch (InterruptedException e) {
+				// ignore and continue
+				// this means that we got triggered
+			}
 		}
 	}
 
