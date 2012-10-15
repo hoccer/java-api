@@ -229,6 +229,8 @@ public final class HoccerClient {
 		LOG.info("Executing shutdown actions");
 		shutdownActions();
 
+		mHttp.dropClient();
+		
 		LOG.info("Client has stopped");
 		mState = STATE_READY;
 	}
