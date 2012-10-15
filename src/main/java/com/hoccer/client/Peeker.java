@@ -90,11 +90,11 @@ class Peeker extends ClientThread {
 			// if peeking failed
 			if(peekResult == null) {
 				// then back off before next peek
-				LOG.warning("Peek failed");
+				LOG.fine("Peek failed, backing off");
 				backOff();
 			} else {
 				// else process the response
-				LOG.fine("Peek returned");
+				LOG.fine("Peek returned, calling listeners");
 				mClient.peekResult(peekResult);
 			}
 		}
@@ -189,7 +189,7 @@ class Peeker extends ClientThread {
 				continue;
 			}
 
-            LOG.fine("Peeking failed with status " + statusCode);
+            LOG.warning("Peeking failed with status " + statusCode);
 
 			// fail when getting anything else
 			return null;
