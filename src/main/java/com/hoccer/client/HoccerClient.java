@@ -365,7 +365,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " added");
+			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " added");
 
 			// add peer to client table
 			mPeersByPublicId.put(peer.getPublicId(), peer);
@@ -401,7 +401,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
+			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
 
 			// call listeners
 			listeners = mPeerListeners.elements();
