@@ -305,7 +305,7 @@ public final class HoccerClient {
 				JSONObject groupPeer = group.getJSONObject(i);
 
 				try {
-					HoccerPeer peer;
+					HoccerPeer peer = null;
 
 					String publicIdString = groupPeer.getString("id");	
 
@@ -315,16 +315,21 @@ public final class HoccerClient {
 						peer = mPeersByPublicId.get(publicIdString);
 						peersKept.add(peer);
 					} else {
-						// peer was unknown and will be added
-						peer = new HoccerPeer(publicIdString);
-						peersAdded.add(peer);
+						// ignore ourselves
+						if(!publicIdString.equals(mConfig.getClientId().toString())) {
+							// peer was unknown and will be added
+							peer = new HoccerPeer(publicIdString);
+							peersAdded.add(peer);
+						}
 					}
 
-					// update peer fields from group entry
-					peer.updateFromGroupEntry(groupPeer);
-
-					// remember the peer
-					peekedPeers.add(peer);
+					if(peer != null) {
+						// update peer fields from group entry
+						peer.updateFromGroupEntry(groupPeer);
+	
+						// remember the peer
+						peekedPeers.add(peer);
+					}
 				} catch (JSONException e) {
 					LOG.warning("Failed to parse peeked group entry " + groupPeer.toString());
 				}
