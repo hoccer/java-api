@@ -383,7 +383,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " removed");
+			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " removed");
 
 			// remove peer from client table
 			mPeersByPublicId.remove(peer.getPublicId());
@@ -401,7 +401,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
+			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
 
 			// call listeners
 			listeners = mPeerListeners.elements();
