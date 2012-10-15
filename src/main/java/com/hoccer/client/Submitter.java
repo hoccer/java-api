@@ -194,10 +194,8 @@ final class Submitter extends ClientThread {
 		
 		// serialize and encode the environment
 		try {
-
             LOG.fine("Environment: " + environment.toString());
 			request.setEntity(new StringEntity(environment.toString(), "UTF-8"));
-
 		} catch (UnsupportedEncodingException e) {
 			// should not happen
 			e.printStackTrace();
@@ -211,15 +209,13 @@ final class Submitter extends ClientThread {
 		// deal with the response
 		if(response != null) {
 			int statusCode = response.getStatusLine().getStatusCode();
-			
-            LOG.info("Submission returned code " + statusCode);
-			
+						
 			// we only accept CREATED responses as success
 			if(statusCode == HttpStatus.SC_CREATED) {
 				JSONObject status = responseToJSON(response);
 				
 				// returned status must be valid
-				if(status != null) {					
+				if(status != null) {
 					LOG.fine("Submission status " + status.toString());
 
 					// update status and last latency
@@ -228,6 +224,8 @@ final class Submitter extends ClientThread {
 					
 					// submission succeeded
 					return true;
+				} else {
+					LOG.warning("Submission returned invalid status");
 				}
 			} else {
 
@@ -250,7 +248,6 @@ final class Submitter extends ClientThread {
                     responseStr = builder.toString();
 
                 } catch (Throwable t) {
-
                     LOG.warning("While trying to read the response body: " + t.getMessage());
                 }
 
@@ -292,7 +289,7 @@ final class Submitter extends ClientThread {
 			// might have blocked, so re-verify delay
 			if(delay > 0.0) {
 				// log about it
-				LOG.fine("Too early for resubmission, waiting " + delay + " msecs");
+				LOG.fine("To early for resubmission, waiting " + delay + " msecs");
 				// try to sleep as long as required
 				try {
 					Thread.sleep(Math.round(delay));
