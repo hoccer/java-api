@@ -54,6 +54,9 @@ public class Linccer extends CloudService {
     private HttpGet             mPeekRequest                  = null;
     protected volatile boolean  mPeekStopped                  = false;
     private Object              mPeekLock                     = new Object();
+    
+    private HttpGet mReceiveRequest = null;
+    private boolean mReceiveStopped = true;
 
     // Constructors ------------------------------------------------------
 
@@ -94,6 +97,14 @@ public class Linccer extends CloudService {
                     "could not delete environment because server responded with status "
                             + response.getStatusLine().getStatusCode());
         }
+    }
+    
+    public void abortReceive() {
+    	if(mReceiveRequest != null) {
+    		mReceiveStopped = true;
+    		mReceiveRequest.abort();
+    		mReceiveRequest = null;
+    	}
     }
 
     public void submitEnvironment()
@@ -305,6 +316,11 @@ public class Linccer extends CloudService {
             CollidingActionsException {
         return receive(mode, "");
     }
+    
+    public JSONObject receiveWaiting(String mode) throws BadModeException, ClientActionException,
+    	CollidingActionsException {
+    	return receive(mode, "waiting=true");
+    }
 
     public JSONObject receive(String mode, String options) throws BadModeException,
             ClientActionException, CollidingActionsException {
@@ -312,10 +328,13 @@ public class Linccer extends CloudService {
         mode = mapMode(mode);
         int statusCode;
 
+        mReceiveStopped = false;
+        
         try {
             do {
                 String uri = mConfig.getClientUri() + "/action/" + mode + "?" + options;
                 HttpGet request = new HttpGet(sign(uri));
+                mReceiveRequest = request;
                 HttpResponse response = getHttpClient().execute(request);
 
                 statusCode = response.getStatusLine().getStatusCode();
