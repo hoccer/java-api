@@ -228,6 +228,12 @@ public class Linccer extends CloudService {
         mEnvironment.setWifiMeasurement(bssids, new Date());
         onEnvironmentChanged(mEnvironment);
     }
+    
+    public void onChannelChanged(String newChannel) throws UpdateException,
+    		ClientProtocolException, IOException {
+    	mEnvironment.setChannelName(newChannel);
+    	onEnvironmentChanged(mEnvironment);
+    }
 
     public void onClientNameChanged(String newClientName) throws UpdateException,
             ClientProtocolException, IOException {
@@ -243,6 +249,10 @@ public class Linccer extends CloudService {
 
     public String getClientName() {
         return mEnvironment.getClientName();
+    }
+    
+    public String getChannel() {
+        return mEnvironment.getChannelName();
     }
 
     public void onWifiChanged(String[] bssids) throws UpdateException, ClientProtocolException,

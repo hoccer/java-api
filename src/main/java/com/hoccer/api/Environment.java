@@ -32,6 +32,7 @@ public class Environment {
 
     // Instance Fields ---------------------------------------------------
 
+    private String              mChannelName;
     private LocationMeasurement mGpsMeasurement;
     private LocationMeasurement mNetworkMeasurement;
     private WifiMeasurement     mWifiMeasurement;
@@ -91,6 +92,14 @@ public class Environment {
 
         mOwnMdnsId = pId;
     }
+    
+    public void setChannelName(String channelName) {
+    	mChannelName = channelName;
+    }
+    
+    public String getChannelName() {
+    	return mChannelName;
+    }
 
     public JSONObject toJson() throws JSONException {
         JSONObject environment = new JSONObject();
@@ -114,6 +123,11 @@ public class Environment {
         }
         if (mPublicKey != null && mPublicKey.length() > 0) {
             environment.put("pubkey", mPublicKey);
+        }
+        if (mChannelName != null) {
+        	JSONObject channelObject = new JSONObject();
+        	channelObject.put("name", mChannelName);
+        	environment.put("channel", channelObject);
         }
         if (mOwnMdnsId != null) {
 
