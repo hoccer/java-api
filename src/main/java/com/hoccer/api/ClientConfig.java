@@ -56,6 +56,14 @@ public class ClientConfig {
         mApiKey = apiKey;
         mSharedSecret = sharedSecret;
     }
+    
+    public ClientConfig(String applicatioName, UUID clientId, String apiKey, String sharedSecret) {
+        mApplicationName = applicatioName;
+        mClientId = clientId;
+        mClientName = "unnamed client";
+        mApiKey = apiKey;
+        mSharedSecret = sharedSecret;
+    }
 
     public ClientConfig(String applicatioName, String apiKey, String sharedSecret, UUID clientId,
             String clientName, String publicKey) {
