@@ -1,7 +1,12 @@
 package com.hoccer.client.environment;
 
+import java.util.Date;
+import java.util.logging.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.hoccer.util.HoccerLoggers;
 
 /**
  * Base class for environment providers
@@ -15,6 +20,9 @@ import org.json.JSONObject;
  * @author ingo
  */
 public abstract class EnvironmentProvider {
+	
+	protected final static Logger LOG =
+			HoccerLoggers.getLogger(EnvironmentProvider.class);
 
 	/** Tag for provided information */
 	private final String mTag;
@@ -55,7 +63,17 @@ public abstract class EnvironmentProvider {
 	}
 	
 	/**
+	 * Returns a timestamp for provider-specific use
+	 * @return
+	 */
+	public long getTimestamp() {
+		return new Date().getTime() / 1000L;
+	}
+	
+	/**
 	 * Subclasses should call this when they have new data
+	 * 
+	 * Data will be submitted at an unspecified interval
 	 */
 	protected void dataChanged() {
 		if(mManager != null) {
@@ -69,5 +87,15 @@ public abstract class EnvironmentProvider {
 	 * @throws JSONException
 	 */
 	public abstract void updateEnvironment(JSONObject pEnvironment) throws JSONException;
+	
+	/**
+	 * Subclasses should override this to perform startup actions
+	 */
+	public void start() { }
+	
+	/**
+	 * Subclasses should override this to perform shutdown actions
+	 */
+	public void stop() { }
 	
 }

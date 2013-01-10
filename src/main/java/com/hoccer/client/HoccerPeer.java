@@ -26,4 +26,9 @@ public class HoccerPeer {
 		
 		mName = name;
 	}
+	
+	public String toString() {
+		return mPublicId + "/" + mName;
+	}
+	
 }

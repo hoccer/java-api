@@ -26,6 +26,18 @@ public class EnvironmentManager {
 		pProvider.setManager(this);
 		providerDataChanged(pProvider);
 	}
+	
+	public synchronized void start() {
+		for(EnvironmentProvider provider : mProviders) {
+			provider.start();
+		}
+	}
+	
+	public synchronized void stop() {
+		for(EnvironmentProvider provider : mProviders) {
+			provider.stop();
+		}
+	}
 
 	public synchronized JSONObject buildEnvironment() {
 		JSONObject environment = new JSONObject();
@@ -34,6 +46,12 @@ public class EnvironmentManager {
 		try {
 			environment.put("client_name", mClient.getClientName());
 			environment.put("latency", mLastLatency);
+			String channel = mClient.getChannel();
+			if(channel != null) {
+				JSONObject channelRoot = new JSONObject();
+				channelRoot.put("name", channel);
+				environment.put("channel", channelRoot);
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

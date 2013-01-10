@@ -22,6 +22,11 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
 
+/**
+ * Utility class for creating and configuring httpclient
+ * 
+ * @author ingo
+ */
 public class HoccerHttp {
 
 	/* keep connections alive for 30 seconds */

@@ -72,7 +72,7 @@ class Peeker extends ClientThread {
 	 * Peeking loop
 	 */
 	@Override
-	public void run() {
+	public void innerRun() {
 		LOG.info("Peeker started");
 
 		// until commanded to shut down

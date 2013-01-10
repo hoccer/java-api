@@ -88,8 +88,7 @@ final class Submitter extends ClientThread {
 	 * Note that environment submission is always limited by RESUBMIT_DELAY.
 	 */
 	public void trigger() {
-
-        LOG.info("Submitter triggered");
+        LOG.info("Triggering submitter");
 		this.interrupt();
 	}
 
@@ -116,7 +115,7 @@ final class Submitter extends ClientThread {
 	}
 
 	@Override
-	public void run() {
+	public void innerRun() {
 		LOG.info("Submitter started");
 
 		// make sure we submit an environment on start

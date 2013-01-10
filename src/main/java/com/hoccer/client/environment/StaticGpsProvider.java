@@ -1,7 +1,5 @@
 package com.hoccer.client.environment;
 
-import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +10,7 @@ import org.json.JSONObject;
  * 
  * @author ingo
  */
-public class StaticGPSProvider extends EnvironmentProvider {
+public class StaticGpsProvider extends EnvironmentProvider {
 
 	static final String TAG = "gps";
 	
@@ -22,8 +20,8 @@ public class StaticGPSProvider extends EnvironmentProvider {
 	double mLongitude;
 	int mAccuracy;
 	
-	public StaticGPSProvider() {
-		super("gps");
+	public StaticGpsProvider() {
+		super(TAG);
 		
 		mValid = false;
 	}
@@ -38,10 +36,6 @@ public class StaticGPSProvider extends EnvironmentProvider {
 		mValid = true;
 		
 		dataChanged();
-	}
-	
-	public double getTimestamp() {
-		return new Date().getTime() / 1000L;
 	}
 	
 	@Override

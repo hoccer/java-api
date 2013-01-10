@@ -15,7 +15,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class ClientThread extends Thread {
+/**
+ * Base class for threads in the Hoccer client
+ * 
+ * This contains logic common to all our threads,
+ * such as shutdown and abort logic as well as
+ * some JSON+HTTP utilities.
+ * 
+ * @author ingo
+ */
+public abstract class ClientThread extends Thread {
 
 	private final Logger LOG;
 
@@ -141,5 +150,18 @@ public class ClientThread extends Thread {
 
 		return result;
 	}
+	
+	@Override
+	public void run() {
+		try {
+			innerRun();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	abstract void innerRun();
 
 }

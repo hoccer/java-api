@@ -1,6 +1,5 @@
 package com.hoccer.client.environment;
 
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -22,10 +21,6 @@ public class StaticWifiProvider extends EnvironmentProvider {
 	public synchronized void updateBSSIDs(List<String> pBSSIDs) {
 		mBSSIDs = new Vector<String>(pBSSIDs);
 		dataChanged();
-	}
-	
-	public double getTimestamp() {
-		return new Date().getTime() / 1000L;
 	}
 	
 	@Override

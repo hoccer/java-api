@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.HttpClient;
@@ -37,6 +38,9 @@ public final class HoccerClient {
 
 	/** Display name of the client */
 	private String mName;
+	
+	/** Current channel, if there is one */
+	private String mChannel;
 
 	/** Service URL and API key configuration */
 	private ClientConfig mConfig;
@@ -68,14 +72,23 @@ public final class HoccerClient {
 	 * 
 	 * Initializes the client without side effects.
 	 */
-	public HoccerClient() {
+	public HoccerClient() {		
 		mName = null;
+		mChannel = null;
 
 		mState = STATE_INITIALIZED;
 
 		mPeerListeners = new Vector<PeerListener>();
 
 		mPeersByPublicId = new HashMap<String, HoccerPeer>();
+	}
+	
+	public boolean isConfigured() {
+		return mState == STATE_READY || mState == STATE_RUNNING;
+	}
+	
+	public boolean isRunning() {
+		return mState == STATE_RUNNING;
 	}
 
 	/**
@@ -112,6 +125,10 @@ public final class HoccerClient {
 		return mName;
 	}
 
+	public String getChannel() {
+		return mChannel;
+	}
+	
 	public String getClientId() {
 		return mConfig.getClientId().toString();
 	}
@@ -125,6 +142,30 @@ public final class HoccerClient {
 	 */
 	public synchronized void setClientName(String pName) {
 		mName = pName;
+		triggerSubmitter();
+	}
+	
+	/**
+	 * Enter a channel
+	 * 
+	 * Can always be called regardless of client state.
+	 * 
+	 * @param pName
+	 */
+	public synchronized void enterChannel(String pChannel) {
+		mChannel = pChannel;
+		triggerSubmitter();
+	}
+	
+	/**
+	 * Leave the current channel
+	 * 
+	 * Can always be called regardless of client state.
+	 * 
+	 * @param pName
+	 */
+	public synchronized void leaveChannel() {
+		mChannel = null;
 		triggerSubmitter();
 	}
 
@@ -178,7 +219,7 @@ public final class HoccerClient {
 	public synchronized void start() {
 		if(mState != STATE_READY) {
 			if(mState == STATE_RUNNING) {
-				LOG.warning("Client already running, ignoring request to start");
+				LOG.info("Client already running, ignoring request to start");
 			} else {
 				LOG.warning("Client not ready, ignoring request to start");
 			}
@@ -189,6 +230,9 @@ public final class HoccerClient {
 
 		mState = STATE_RUNNING;
 
+		LOG.info("Starting environment manager");
+		mEnvironmentManager.start();
+		
 		LOG.info("Starting submitter");
 		mSubmitThread = new Submitter(this);
 		mSubmitThread.start();
@@ -200,7 +244,6 @@ public final class HoccerClient {
 		LOG.info("Starting performer");
 		mPerformThread = new Performer(this);
 		mPerformThread.start();
-
 	}
 
 	/**
@@ -208,12 +251,12 @@ public final class HoccerClient {
 	 */
 	public synchronized void stop() {
 		if(mState != STATE_RUNNING) {
-			LOG.warning("Client not running, ignoring request to stop");
+			LOG.info("Client not running, ignoring request to stop");
 			return;
 		}
 
 		LOG.info("Stopping client");
-
+		
 		LOG.info("Shutting down performer");
 		mPerformThread.shutdown();
 		mPerformThread = null;
@@ -225,6 +268,9 @@ public final class HoccerClient {
 		LOG.info("Shutting down submitter");
 		mSubmitThread.shutdown();
 		mSubmitThread = null;
+		
+		LOG.info("Shutting down environment manager");
+		mEnvironmentManager.stop();
 
 		LOG.info("Executing shutdown actions");
 		shutdownActions();
@@ -370,7 +416,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " added");
+			LOG.info("Peer added: " + peer.toString());
 
 			// add peer to client table
 			mPeersByPublicId.put(peer.getPublicId(), peer);
@@ -388,7 +434,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.info("Peer " + peer.getName() + "/" + peer.getPublicId() + " removed");
+			LOG.info("Peer removed: " + peer.toString());
 
 			// remove peer from client table
 			mPeersByPublicId.remove(peer.getPublicId());
@@ -406,7 +452,7 @@ public final class HoccerClient {
 		while(peers.hasMoreElements()) {
 			HoccerPeer peer = peers.nextElement();
 
-			LOG.fine("Peer " + peer.getName() + "/" + peer.getPublicId() + " kept");
+			LOG.fine("Peer kept: " + peer.toString());
 
 			// call listeners
 			listeners = mPeerListeners.elements();
