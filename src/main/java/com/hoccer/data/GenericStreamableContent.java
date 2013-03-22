@@ -43,8 +43,8 @@ public class GenericStreamableContent implements StreamableContent {
                                                                   .getSimpleName();
     private static final Logger         LOG               = HoccerLoggers.getLogger(LOG_TAG);
 
-    String                              mFilename         = "filename.unknown";
-    String                              mContentType      = "unknown";
+    String                              mFilename         = null;
+    String                              mContentType      = null;
 
     private final ByteArrayOutputStream mDataStream       = new ByteArrayOutputStream();
 
