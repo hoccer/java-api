@@ -164,6 +164,7 @@ public class FileCache extends CloudService {
     public void asyncFetch(String uri, StreamableContent sink, HttpResponseHandler responseHandler) {
         LOG.finest("uri = " + uri);
         AsyncHttpGet fetchRequest = new AsyncHttpGet(uri, getHttpClient());
+        fetchRequest.setMaxRetries(5);
         fetchRequest.registerResponseHandler(responseHandler);
         fetchRequest.setStreamableContent(sink);
         fetchRequest.start();

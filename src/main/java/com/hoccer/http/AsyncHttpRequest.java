@@ -20,7 +20,9 @@ import java.io.OutputStream;
 import java.net.SocketException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
+import com.hoccer.util.HoccerLoggers;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
@@ -38,6 +40,8 @@ import com.hoccer.thread.ThreadedTask;
 
 public abstract class AsyncHttpRequest extends ThreadedTask {
 
+    private static final Logger LOG = HoccerLoggers.getLogger(AsyncHttpRequest.class);
+
     private static final String   LOG_TAG                  = "AsyncHttpRequest";
 
     private DefaultHttpClient     mHttpClient;
@@ -52,6 +56,9 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     private long                  mUploadTime              = 0;
     private long                  mDownloadTime            = 0;
 
+    // special feature for retrying downloads
+    private int                   mMaxRetries              = 1;
+
     public AsyncHttpRequest(String pUrl) {
         mRequest = createRequest(pUrl);
 
@@ -62,6 +69,10 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
     public AsyncHttpRequest(String pUrl, DefaultHttpClient pHttpClient) {
         mRequest = createRequest(pUrl);
         setHttpClient(pHttpClient);
+    }
+
+    public void setMaxRetries(int maxRetries) {
+        mMaxRetries = maxRetries;
     }
 
     // Only used internally to reuse code for both constructors
@@ -144,27 +155,49 @@ public abstract class AsyncHttpRequest extends ThreadedTask {
 
         setUploadProgress(1);
 
-        try {
-            long uploadStart = System.currentTimeMillis();
-            mResponse = mHttpClient.execute(mRequest);
-            mUploadTime = System.currentTimeMillis() - uploadStart;
-        } catch (ClientProtocolException e) {
-            onClientError(e);
-            return;
-        } catch (SocketException e) {
-            onClientError(e);
-            return;
-        } catch (SecurityException e) {
-            onClientError(e);
-            return;
-        } catch (IOException e) {
-            onIoError(e);
-            return;
-        }
+        int retryCount = 0;
+        while(retryCount < mMaxRetries) {
+            if(mMaxRetries > 1) {
+                LOG.info("retry " + retryCount + "/" + mMaxRetries);
+            }
+            try {
+                long uploadStart = System.currentTimeMillis();
+                mResponse = mHttpClient.execute(mRequest);
+                mUploadTime = System.currentTimeMillis() - uploadStart;
+            } catch (ClientProtocolException e) {
+                onClientError(e);
+                return;
+            } catch (SocketException e) {
+                onClientError(e);
+                return;
+            } catch (SecurityException e) {
+                onClientError(e);
+                return;
+            } catch (IOException e) {
+                onIoError(e);
+                return;
+            }
 
-        if (mResponse == null) {
-            onClientError(new NullPointerException("expected http response object is null"));
-            return;
+            if (mResponse == null) {
+                onClientError(new NullPointerException("expected http response object is null"));
+                return;
+            }
+
+            int sc = mResponse.getStatusLine().getStatusCode();
+            if(mMaxRetries > 1) {
+                LOG.info("retry status " + sc);
+            }
+            if(sc == 404 || sc == 500) {
+                retryCount++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    onClientError(e);
+                    return;
+                }
+            } else {
+                break;
+            }
         }
 
         onHttpHeaderAvailable(mResponse.getAllHeaders());
